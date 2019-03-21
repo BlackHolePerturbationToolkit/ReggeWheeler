@@ -17,7 +17,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, OptionsPattern[]] :=
       method = {"MST"};
       solFuncs = $Failed,
     {"NumericalIntegration", "rmin" -> _, "rmax" -> _},
-      method = {"NumericalIntegration", rmin, rmax} /. OptionValue[Method];
+      method = OptionValue[Method];
       solFuncs = OptionValue["BoundaryConditions"] /.
         {"In" -> ReggeWheeler`NumericalIntegration`Private`PsiIn[s, l, \[Omega], rmin, rmax],
          "Up" -> ReggeWheeler`NumericalIntegration`Private`PsiUp[s, l, \[Omega], rmin, rmax]};
