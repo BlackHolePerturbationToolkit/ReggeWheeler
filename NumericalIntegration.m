@@ -3,13 +3,15 @@ BeginPackage["ReggeWheeler`NumericalIntegration`"];
 
 Begin["`Private`"];
 
-SetAttributes[MSTRadialIn, {NumericFunction}];
+SetAttributes[PsiIn, {NumericFunction}];
 
 PsiIn[s_, l_, \[Omega]_, rmin_, rmax_] :=
  Module[{},
 ];
 
 Derivative[1][PsiIn[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r_?InexactNumberQ] :=
+ Module[{},
+];
 
 Derivative[n_Integer?Positive][PsiIn[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r0_?InexactNumberQ] :=
  Module[{d2R, Rderivs, R, r, i},
@@ -22,11 +24,16 @@ Derivative[n_Integer?Positive][PsiIn[s_Integer, l_Integer, \[Omega]_, rmin_, rma
     R[r] -> PsiIn[s, l, \[Omega]][r0], r -> r0}
 ];
 
+
+SetAttributes[PsiUp, {NumericFunction}];
+
 PsiUp[s_, l_, \[Omega]_, rmin_, rmax_] :=
  Module[{},
 ];
 
 Derivative[1][PsiUp[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r_?InexactNumberQ] :=
+ Module[{},
+];
 
 Derivative[n_Integer?Positive][PsiUp[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r0_?InexactNumberQ] :=
  Module[{d2R, Rderivs, R, r, i},
