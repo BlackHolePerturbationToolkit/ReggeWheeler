@@ -13,7 +13,7 @@ Derivative[1][PsiIn[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r_?InexactNu
 
 Derivative[n_Integer?Positive][PsiIn[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r0_?InexactNumberQ] :=
  Module[{d2R, Rderivs, R, r, i},
-  d2R = Derivative[1][R][r]) + R[r]];
+  d2R = Derivative[1][R][r] + R[r];
 
   pderivs = D[R[r_], {r_, i_}] :> D[d2R, {r, i - 2}] /; i >= 2;
   Do[Derivative[i][R][r] = Simplify[D[Derivative[i - 1][R][r], r] /. pderivs];, {i, 2, n}];
@@ -30,7 +30,7 @@ Derivative[1][PsiUp[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r_?InexactNu
 
 Derivative[n_Integer?Positive][PsiUp[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r0_?InexactNumberQ] :=
  Module[{d2R, Rderivs, R, r, i},
-  d2R = Derivative[1][R][r]) + R[r]];
+  d2R = Derivative[1][R][r] + R[r];
 
   pderivs = D[R[r_], {r_, i_}] :> D[d2R, {r, i - 2}] /; i >= 2;
   Do[Derivative[i][R][r] = Simplify[D[Derivative[i - 1][R][r], r] /. pderivs];, {i, 2, n}];
