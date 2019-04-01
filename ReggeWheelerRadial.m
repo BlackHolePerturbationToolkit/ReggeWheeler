@@ -10,7 +10,7 @@ ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], 
 
 Begin["`Private`"];
 
-Options[ReggeWheelerRadial] = {Method -> {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20};
+Options[ReggeWheelerRadial] = {Method -> {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20}, "BoundaryConditions" -> {"In","Up"}};
 
 ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, OptionsPattern[]] :=
  Module[{assoc, solFuncs, method},
