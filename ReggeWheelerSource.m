@@ -48,7 +48,7 @@ ReggeWheelerPointParticleSourceCircular[s_,l_,m_,orbit_]:=
 		ReggeWheelerPointParticleCircularAKOddJump[l,m,orbit]
 	];
 
-ReggeWheelerPointParticleAKOddJump[l_,m_,orbit_]:=
+ReggeWheelerPointParticleCircularAKOddJump[l_,m_,orbit_]:=
 	Module[{stressenergy,EC,EJ,r0,\[Omega],assoc},
 		r0=orbit["p"];
 		\[Omega]=m*Sqrt[1/r0^3];
@@ -66,8 +66,7 @@ ReggeWheelerPointParticleAKOddJump[l_,m_,orbit_]:=
 		ReggeWheelerSourceObject[assoc]
 	];
 	
-	
-ReggeWheelerPointParticleAKEvenJump[l_,m_,orbit_]:=
+ReggeWheelerPointParticleCircularAKEvenJump[l_,m_,orbit_]:=
 	Module[{n,rm2M,np6M,term1,dterm1,coeff,term2,EA,ED,EF,EH,EK,stressenergy,r0,\[Omega],assoc},
 		r0=orbit["p"];
 		\[Omega]=m*Sqrt[1/r0^3];

@@ -10,8 +10,7 @@ ConvolveSource[RF_, SO_] :=
 
 
 ConvolvePointParticleSourceCircular[RF_,SO_]:=
-	Module[{l,m,r0,PsiIn,dPsiIn,PsiUp,dPsiUp,PsiOddIn,dPsiOddIndr,PsiOddUp,dPsiOddUpdr,Wronskian,deltadPsidr,deltaPsi
-	n,np6M,denom,conjdenom,b,c,\[Omega],rm2M,ZIn,ZUp,jump},
+	Module[{l,m,r0,PsiIn,dPsiIn,PsiUp,dPsiUp,PsiOddIn,dPsiOddIndr,PsiOddUp,dPsiOddUpdr,Wronskian,deltadPsidr,deltaPsi,n,np6M,denom,conjdenom,b,c,\[Omega],rm2M,ZIn,ZUp,jump},
 		l=SO["l"];
 		m=SO["m"];
 		r0=SO["r0"];

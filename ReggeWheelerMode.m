@@ -3,7 +3,8 @@
 BeginPackage["ReggeWheeler`ReggeWheelerMode`",
   {"ReggeWheeler`ReggeWheelerSource`",
    "ReggeWheeler`ReggeWheelerRadial`",
-   "ReggeWheeler`ConvolveSource`"}
+   "ReggeWheeler`ConvolveSource`",
+   "KerrGeodesics`KerrGeoOrbit`"}
 ];
 
 ReggeWheelerModeObject::usage = "ReggeWheelerModeObject[assoc] an object which contains a Regge Wheeler mode.";
@@ -16,7 +17,7 @@ Begin["`Private`"];
 (*defined currently for circular orbits*)
 ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, k_Integer, orbit_KerrGeoOrbitFunction] :=
 	Module[{source},
-		source = ReggeWheelerPointParticleSource[l,m,orbit];
+		source = ReggeWheelerPointParticleSource[s, l, m, orbit];
 		Return[ReggeWheelerPointParticleMode[s, l, m, n, k, orbit, source]];
 	];
 
@@ -52,7 +53,6 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, k_Inte
              "Fluxes" -> Fluxes
            |>;
 
-Print["Made it here"];
   Return[ReggeWheelerModeObject[assoc]];
 ]
 
