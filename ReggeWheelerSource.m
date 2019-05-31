@@ -10,7 +10,7 @@ Begin["`Private`"];
 
 
 ReggeWheelerPointParticleSource[s_,l_,m_, orbit_] :=
- If[s==-2 && orbit["e"] == 0 && Abs[orbit["Inclination"]] == 1,
+ If[orbit["e"] == 0 && Abs[orbit["Inclination"]] == 1,
          Return[ReggeWheelerPointParticleSourceCircular[s,l,m,orbit]],
          Print["No point-particle source yet available for those parameters"];]
 

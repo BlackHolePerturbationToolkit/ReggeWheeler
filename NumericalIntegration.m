@@ -27,10 +27,12 @@ Module[{newassoc},
 				psiBC=boundaryconditions["Psi"];
 				dpsidxBC=boundaryconditions["dPsidx"];
 				xBC=boundaryconditions["xBC"];
+				
 				soln = Integrator[s,l,\[Omega],psiBC,dpsidxBC,xBC,xmax,ReggeWheelerPotential,$MachinePrecision];
+				
 				newassoc=<|
-					"Psi"->Function[y,y1[y]/.soln],
-					"dPsidr"->Function[y,y2[y]/.soln],
+					"Psi"->soln[[1,1,2]],
+					"dPsidr"->soln[[1,2,2]],
 					"xmin"->xBC,
 					"xmax"->xmax					
 					|>;
@@ -77,8 +79,8 @@ PsiUp[s_, l_, \[Omega]_, xmin_, xmax_]:=
 					xBC=boundaryconditions["xBC"];
 					soln = Integrator[s,l,\[Omega],psiBC,dpsidxBC,xBC,xmin,ReggeWheelerPotential,$MachinePrecision];
 					newassoc= <|
-						"Psi"->Function[y,y1[y]/.soln],
-						"dPsidr"->Function[y,y2[y]/.soln],
+						"Psi"->soln[[1,1,2]],
+						"dPsidr"->soln[[1,2,2]],
 						"xmin"->xmin,
 						"xmax"->xBC
 					|>
@@ -106,7 +108,7 @@ Derivative[n_Integer?Positive][PsiUp[s_Integer, l_Integer, \[Omega]_, rmin_, rma
 
 
 (*should this be in a module for y1 and y2?*)
-Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xend_,potential_,precision_]:=
+Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xend_,potential_,precision_]:=Module[{y1,y2,x},
 	NDSolve[
 		{y1'[x]==y2[x],(1-2/x)^2*y2'[x]+2(1-2/x)/x^2*y2[x]+(\[Omega]^2-potential[s,l,x])*y1[x]==0,y1[xBC]==y1BC,y2[xBC]==y2BC},
 		{y1,y2},
@@ -115,7 +117,8 @@ Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xend_,potential_,precision_]:=
 		MaxSteps->Infinity,
 		WorkingPrecision->precision,
 		InterpolationOrder->All
-	];
+		]
+	]
 
 
 (*boundary conditions for odd-parity Regge-Wheeler eqn.*)
@@ -123,7 +126,7 @@ Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xend_,potential_,precision_]:=
 (*SetAttributes[ReggeWheelerInBC, {NumericFunction}];
 SetAttributes[ReggeWheelerUpBC, {NumericFunction}];*)
 
-ReggeWheelerInBC[s_Integer,l_Integer,\[Omega]_,workingprecision_Integer]:=
+ReggeWheelerInBC[s_Integer,l_Integer,\[Omega]_,workingprecision_]:=
 	Module[{rm2M,p,ptrys,expeh,Dexpeh,done=False,delReh,Reh,rstar,drstardr,
 	nmax,Xn,n,bk,denominator,f1=0,f2=0,f3=0,last,Bkm1=1,Bkm2=0,Bkm3=0,next,psi,dpsidr,om,precision=workingprecision+10,count},
 		rm2M=4*^-2*\[Omega]^2/(l*(l+1));
@@ -186,7 +189,7 @@ ReggeWheelerInBC[s_Integer,l_Integer,\[Omega]_,workingprecision_Integer]:=
 	<|"Psi"->N[psi,precision],"dPsidx"->N[dpsidr,precision],"xBC"->N[Reh,precision]|>
 ]
 
-ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_Integer]:=
+ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
 	Module[{An=1,Anm1=0,Anm2=0,Anm3=0,Nmax=75,NNmax=1000,n,nn,rstart,rstar,drstardr,increment=0,
 	lastincrement=1*^40,S=0,lastS=0,dS=0,lastdS=0,count=0,r,rn,np,continue=True,precision=workingprecision+10,om,BCinc},
 		(*rstarstart=xmax+2*Log[xmax/2-1]+5*Pi/Abs[om];*)
@@ -242,10 +245,10 @@ ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_Integer]:=
 
 
 (*radial potentials for ODE*)
-SetAttributes[ReggeWheelerPotential,{NumericFunction}];
+(*SetAttributes[ReggeWheelerPotential,{NumericFunction}];*)
 SetAttributes[ZerilliPotential,{NumericFunction}];
 
-ReggeWheelerPotential[s_Integer,l_Integer,x_Numeric]:=(1-2/x)*(2(1-s^2)+l*(l+1)*x)/x^3;
+ReggeWheelerPotential[s_Integer,l_Integer,x_]:=(1-2/x)*(2(1-s^2)+l*(l+1)*x)/x^3;
 
 (*only for spin s=2*)
 ZerilliPotential[l_Integer,x_Numeric]:=
