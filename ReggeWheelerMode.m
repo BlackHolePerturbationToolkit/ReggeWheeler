@@ -27,7 +27,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 
 
 ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, source_ReggeWheelerSourceObject] :=
- Module[{assoc, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z, Fluxes},
+ Module[{assoc, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z, FluxH, FluxInf, Fluxes},
   (*{\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = orbit["Frequencies"];*) (*This gives Mino frequencies, need BL frequencies*)
   {\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = Values[KerrGeoFrequencies[orbit["a"], orbit["p"], orbit["e"], orbit["Inclination"]]];
   \[Omega] = m \[CapitalOmega]\[Phi] + n \[CapitalOmega]r;
@@ -38,16 +38,11 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
   Z = ReggeWheeler`ConvolveSource`Private`ConvolveSource[R, source];
   
   (*currently fluxes for circular orbit*)
-	Fluxes = If[EvenQ[l+m],
-	<|
-		"FluxInf" -> (l-1)*(l+2)/(l*(l+1))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZInf"]]^2/(4*Pi),
-		"FluxHor" -> (l-1)*(l+2)/(l*(l+1))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZHor"]]^2/(4*Pi)
-	|>,
-	<|
-		"FluxInf" -> (l*(l+1))/((l-1)*(l+2))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZInf"]]^2/(16*Pi),
-		"FluxHor" -> (l*(l+1))/((l-1)*(l+2))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZHor"]]^2/(16*Pi)
-	|>
-	];
+   FluxInf = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZInf"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZInf"]]^2/(16*Pi)];
+   FluxH   = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZHor"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZHor"]]^2/(16*Pi)];
+  
+  
+  Fluxes = <| "FluxInf" -> FluxInf, "FluxHor" -> FluxH, "FluxTotal" -> FluxH + FluxInf |>;
 
   assoc = <| "s" -> s, 
              "l" -> l,
