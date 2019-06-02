@@ -59,7 +59,7 @@ ReggeWheelerPointParticleCircularAKOddJump[l_,m_,orbit_]:=
 			"l"->l,
 			"m"->m,
 			"r0"->r0,
-			"deltaPsi"->r0^3/(r0-2)*stressenergy,
+			"deltaPsi"->r0^3/(r0-2)*EC,
 			"deltadPsidr"->-2*r0^2/(r0-2)^2*EC+r0^2/(r0-2)*EC-I*\[Omega]*r0^3/(r0-2)*EJ-3r0^2/(r0-2)*EC+r0^3/(r0-2)^2*EC,
 			"type"->"PointParticleCircular"
 		];
