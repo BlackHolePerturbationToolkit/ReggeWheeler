@@ -152,11 +152,7 @@ ReggeWheelerInBC[s_Integer,l_Integer,\[Omega]_,workingprecision_]:=
 			bk=1;
 			For[n=1, n<=nmax, n++,
 				Xn*=delReh;
-				denominator=4(n+4*I*om)*n;
-				f1=2(-12*I*om*(n-1)+l(l+1)-2n^2+5n-6)/denominator;
-				f2=(-12*I*om*(n-2)+l(l+1)-n^2+5n-6)/denominator;
-				f3=(-2(n-3)*I*om)/denominator;
-				bk=N[f1*Bkm1+f2*Bkm2+f3*Bkm3,precision];
+				bk=-(((-3+n) \[Omega] Bkm3)/(2 n (I n+4\[Omega])))+(I (l+l^2-(-2+n) (-3+n-12 I \[Omega])) Bkm2)/(4 n (I n+4 \[Omega]))-((2-l-l^2+2 n^2+s^2+12 I \[Omega]+n (-5-12 I M \[Omega])) Bkm1)/(2 n (n-4 I \[Omega]));
 				Bkm3=Bkm2;
 				Bkm2=Bkm1;
 				Bkm1=bk;
@@ -214,7 +210,7 @@ ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
 				Anm3=Anm2;
 				Anm2=Anm1;
 				Anm1=An;
-				An=N[-(4*np*(np-4)*Anm3+2*(l*(l+1)+3-(np-2)*(2np-1))*Anm2+((np-1)*np-l(l+1)-4*I*om*(np-1))*Anm1)/(2*I*om*np),precision];
+				An=N[(I(-1+np-s) (-1+np+s) Anm2)/(np \[Omega])+(I (l+l^2+np-np^2) Anm1)/(2 np \[Omega]),precision];
 			];
 			If[continue==True,
 			rstart+=BCinc;
