@@ -186,7 +186,7 @@ ReggeWheelerInBC[s_Integer,l_Integer,\[Omega]_,workingprecision_]:=
 ]
 
 ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
-	Module[{An=1,Anm1=0,Anm2=0,Anm3=0,Nmax=75,NNmax=1000,n,nn,rstart,rstar,drstardr,increment=0,
+	Module[{An=1,Anm1=0,Anm2=0,Nmax=75,NNmax=1000,n,nn,rstart,rstar,drstardr,increment=0,
 	lastincrement=1*^40,S=0,lastS=0,dS=0,lastdS=0,count=0,r,rn,np,continue=True,precision=workingprecision+10,om,BCinc},
 		(*rstarstart=xmax+2*Log[xmax/2-1]+5*Pi/Abs[om];*)
 		rstart=xmax;
@@ -207,7 +207,6 @@ ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
 				np=n+1;
 				rn=rn*r;
 				lastincrement=Abs[increment];
-				Anm3=Anm2;
 				Anm2=Anm1;
 				Anm1=An;
 				An=N[(I(-1+np-s) (-1+np+s) Anm2)/(np \[Omega])+(I (l+l^2+np-np^2) Anm1)/(2 np \[Omega]),precision];
@@ -220,7 +219,6 @@ ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
 			An=1;
 			Anm1=0;
 			Anm2=0;
-			Anm3=0;
 			increment=0;
 			lastincrement=1*^40;
 			S=0;
@@ -233,8 +231,8 @@ ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
 	If[nn>=NNmax,{Print["The UP boundary condition loop ran out of steps!"],Abort[]}];
 	rstar=rstart+2*Log[rstart/2-1];
 	drstardr = rstart/(rstart-2);
-	<|"Psi"->N[S*Exp[-I*om*rstart],precision],
-	"dPsidx"->N[(-I*om*S*drstardr+dS)*Exp[-I*om*rstart],precision],
+	<|"Psi"->N[S*Exp[-I*om*rstar],precision],
+	"dPsidx"->N[(-I*om*S*drstardr+dS)*Exp[-I*om*rstar],precision],
 	"xBC"->N[rstart,precision]|>
 ]
 
