@@ -174,7 +174,7 @@ ReggeWheelerInBC[s_Integer,l_Integer,\[Omega]_,workingprecision_]:=
 				Dexpeh=0;
 				Xn=1;
 				rm2M/=2;
-				last=1*^33
+				last=1*^33;
 				count=0;
 			];
 		];
