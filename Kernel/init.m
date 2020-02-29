@@ -1,5 +1,10 @@
 (* ::Package:: *)
 
+Block[{MST`$MasterFunction = "ReggeWheeler"},
+  Get["ReggeWheeler`MST`RenormalizedAngularMomentum`"];
+  Get["ReggeWheeler`MST`MST`"];
+];
+
 Get["ReggeWheeler`Kernel`ReggeWheeler`"];
 Get["ReggeWheeler`NumericalIntegration`"];
 Get["ReggeWheeler`ReggeWheelerRadial`"];

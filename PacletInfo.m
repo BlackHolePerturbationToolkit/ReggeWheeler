@@ -11,7 +11,9 @@ Paclet[
     { "Kernel",
       "Context" -> {
         "ReggeWheeler`",
-        "ReggeWheeler`NumericalIntegration`"
+        "ReggeWheeler`NumericalIntegration`",
+        "ReggeWheeler`MST`MST`",
+        "ReggeWheeler`MST`RenormalizedAngularMomentum`"
       }
     },
 
