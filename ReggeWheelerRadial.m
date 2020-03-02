@@ -4,7 +4,8 @@ BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
   {
     "ReggeWheeler`NumericalIntegration`",
     "ReggeWheeler`MST`RenormalizedAngularMomentum`",
-    "ReggeWheeler`MST`MST`"
+    "ReggeWheeler`MST`MST`",
+    "SpinWeightedSpheroidalHarmonics`"
   }];
 
 ReggeWheelerRadial::usage = "ReggeWheelerRadial[s, l, \[Omega]] computes solutions to the Regge Wheeler equation."
@@ -20,18 +21,20 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, OptionsPattern[]] :=
 
   Switch[OptionValue[Method],
     "MST"|{"MST", ___},
-      \[Nu] = RenormalizedAngularMomentum[s, l, m, a, \[Omega], \[Lambda], Method->"RenormalizedAngularMomentum"/.OptionValue[Method][[2;;]] ];
+
+      \[Nu] = RenormalizedAngularMomentum[s, l, m, a, \[Omega], \[Lambda](*, Method->"RenormalizedAngularMomentum"/.OptionValue[Method][[2;;]]*) ];
       method = {"MST", "RenormalizedAngularMomentum" -> \[Nu]};
       norms = ReggeWheeler`MST`MST`Private`Amplitudes[s,l,m,a,2\[Omega],\[Nu],\[Lambda]];
+
       solFuncs = OptionValue["BoundaryConditions"] /.
         {"In" -> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"]],
          "Up" -> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"]]};
       norms = norms/norms[[All, "Transmission"]];,
     {"NumericalIntegration", "rmin" -> _, "rmax" -> _},
-      method = Association[OptionValue[Method][[2;;]]];
+      method = {"NumericalIntegtration", Association[OptionValue[Method][[2;;]]]};
       solFuncs = 
-        {ReggeWheeler`NumericalIntegration`Private`PsiIn[s, l, \[Omega], method["rmin"], method["rmax"]],
-         ReggeWheeler`NumericalIntegration`Private`PsiUp[s, l, \[Omega], method["rmin"], method["rmax"]]};
+        {ReggeWheeler`NumericalIntegration`Private`PsiIn[s, l, \[Omega], method[[2]]["rmin"], method[[2]]["rmax"]],
+         ReggeWheeler`NumericalIntegration`Private`PsiUp[s, l, \[Omega], method[[2]]["rmin"], method[[2]]["rmax"]]};
   ];
 
   assoc = Association[
