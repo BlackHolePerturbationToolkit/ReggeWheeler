@@ -4,7 +4,8 @@ BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
   {
     "ReggeWheeler`NumericalIntegration`",
     "ReggeWheeler`MST`RenormalizedAngularMomentum`",
-    "ReggeWheeler`MST`MST`"
+    "ReggeWheeler`MST`MST`",
+    "SpinWeightedSpheroidalHarmonics`"
   }];
 
 ReggeWheelerRadial::usage = "ReggeWheelerRadial[s, l, \[Omega]] computes solutions to the Regge Wheeler equation."
