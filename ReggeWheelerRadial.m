@@ -34,8 +34,8 @@ SyntaxInformation[ReggeWheelerRadial] =
 
 
 Options[ReggeWheelerRadial] = {
-  Method -> {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20},
-  "BoundaryConditions" -> {"In","Up"}
+  Method -> {"MST", "RenormalizedAngularMomentum" -> "Monodromy"},
+  "BoundaryConditions" -> {"In", "Up"}
 };
 
 
