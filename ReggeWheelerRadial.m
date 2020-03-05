@@ -15,7 +15,7 @@ Begin["`Private`"];
 Options[ReggeWheelerRadial] = {Method -> {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20}, "BoundaryConditions" -> {"In","Up"}};
 
 ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, OptionsPattern[]] :=
- Module[{assoc, \[Lambda], \[Nu], solFuncs, method, norms, m = 0, a=0},
+ Module[{assocIn, assocUp, \[Lambda], \[Nu], solFuncs, method, norms, m = 0, a=0},
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
 
   Switch[OptionValue[Method],
@@ -23,18 +23,18 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, OptionsPattern[]] :=
       \[Nu] = RenormalizedAngularMomentum[s, l, m, a, \[Omega], \[Lambda], Method->"RenormalizedAngularMomentum"/.OptionValue[Method][[2;;]] ];
       method = {"MST", "RenormalizedAngularMomentum" -> \[Nu]};
       norms = ReggeWheeler`MST`MST`Private`Amplitudes[s,l,m,a,2\[Omega],\[Nu],\[Lambda]];
-      solFuncs = OptionValue["BoundaryConditions"] /.
-        {"In" -> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"]],
-         "Up" -> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"]]};
+      solFuncs =
+       <|"In" -> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"]],
+         "Up" -> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"]]|>;
       norms = norms/norms[[All, "Transmission"]];,
     {"NumericalIntegration", "rmin" -> _, "rmax" -> _},
       method = Association[OptionValue[Method][[2;;]]];
       solFuncs = 
-        {ReggeWheeler`NumericalIntegration`Private`PsiIn[s, l, \[Omega], method["rmin"], method["rmax"]],
-         ReggeWheeler`NumericalIntegration`Private`PsiUp[s, l, \[Omega], method["rmin"], method["rmax"]]};
+       <|"In" -> ReggeWheeler`NumericalIntegration`Private`PsiIn[s, l, \[Omega], method["rmin"], method["rmax"]]["Psi"],
+         "Up" -> ReggeWheeler`NumericalIntegration`Private`PsiUp[s, l, \[Omega], method["rmin"], method["rmax"]]["Psi"]|>;
   ];
 
-  assoc = Association[
+  assocIn = Association[
     "s" -> s,
     "l" -> l,
     "m" -> m,
@@ -42,40 +42,37 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, OptionsPattern[]] :=
     "Method" -> method,
     "BoundaryConditions" -> OptionValue["BoundaryConditions"],
     "Eigenvalue" -> \[Lambda],
-    "Amplitudes" -> norms,
-    "SolutionFunctions" -> solFuncs
+    "Amplitudes" -> norms["In"],
+    "RadialFunction" -> solFuncs["In"]
     ];
 
-  ReggeWheelerRadialFunction[s, l, \[Omega], assoc]
+  assocUp = Association[
+    "s" -> s,
+    "l" -> l,
+    "m" -> m,
+    "\[Omega]" -> \[Omega],
+    "Method" -> method,
+    "BoundaryConditions" -> "Up",
+    "Eigenvalue" -> \[Lambda],
+    "Amplitudes" -> norms["Up"],
+    "RadialFunction" -> solFuncs["Up"]
+    ];
+
+  <|"In" -> ReggeWheelerRadialFunction[s, l, \[Omega], assocIn],
+    "Up" -> ReggeWheelerRadialFunction[s, l, \[Omega], assocUp]|>
 ];
 
 Format[ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]] := 
   "ReggeWheelerRadialFunction["<>ToString[s]<>","<>ToString[l]<>","<>ToString[\[Omega]]<>",<<>>]";
 
-ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y:("In"|"Up")] :=
- Module[{assocNew=assoc},
-  assocNew["SolutionFunctions"] = First[Pick[assoc["SolutionFunctions"], assoc["BoundaryConditions"], y]];
-  assocNew["BoundaryConditions"] = y;
-  ReggeWheelerRadialFunction[s, l, \[Omega], assocNew]
-];
+ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y_String] /; !MemberQ[{"RadialFunction"}, y] :=
+  assoc[y];
 
-ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y_String] /; !MemberQ[{"SolutionFunctions"},y]:= assoc[y];
+ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r_?NumericQ] :=
+  assoc["RadialFunction"][r];
 
-ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r_?NumericQ] := Module[{},
-  If[
-    Head[assoc["BoundaryConditions"]] === List,
-    Return[Association[MapThread[#1 -> #2["Psi"][r] &, {assoc["BoundaryConditions"], assoc["SolutionFunctions"]}]]], 
-    Return[assoc["SolutionFunctions"]["Psi"][r]]
-  ];  
-];
-
-Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r_?NumericQ] := Module[{},
-  If[
-    Head[assoc["BoundaryConditions"]] === List,
-    Return[Association[MapThread[#1 -> #2["dPsidr"][r] &, {assoc["BoundaryConditions"], assoc["SolutionFunctions"]}]]], 
-    Return[assoc["SolutionFunctions"]["dPsidr"][r]]
-  ];  
-];
+Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r_?NumericQ] :=
+  assoc["RadialFunction"]'[r];
 
 
 End[]
