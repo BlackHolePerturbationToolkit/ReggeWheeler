@@ -8,8 +8,8 @@ BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
     "SpinWeightedSpheroidalHarmonics`"
   }];
 
-ReggeWheelerRadial::usage = "ReggeWheelerRadial[s, l, \[Omega]] computes solutions to the Regge Wheeler equation."
-ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], assoc] an object representing solutions to the Regge Wheeler equation."
+ReggeWheelerRadial::usage = "ReggeWheelerRadial[s, l, \[Omega]] computes homogeneous solutions to the Regge Wheeler equation."
+ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], assoc] is an object representing a homogeneous solution to the Regge Wheeler equation."
 
 Begin["`Private`"];
 
