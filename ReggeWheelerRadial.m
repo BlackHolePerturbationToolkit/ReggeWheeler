@@ -29,6 +29,10 @@ Begin["`Private`"];
 (*ReggeWheelerRadial*)
 
 
+SyntaxInformation[ReggeWheelerRadial] =
+ {"ArgumentsPattern" -> {_, _, _, OptionsPattern[]}};
+
+
 Options[ReggeWheelerRadial] = {
   Method -> {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20},
   "BoundaryConditions" -> {"In","Up"}
