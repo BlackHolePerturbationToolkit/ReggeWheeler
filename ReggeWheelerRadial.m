@@ -1,5 +1,13 @@
 (* ::Package:: *)
 
+(* ::Title:: *)
+(*ReggeWheeler package*)
+
+
+(* ::Section::Closed:: *)
+(*Create Package*)
+
+
 BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
   {
     "ReggeWheeler`NumericalIntegration`",
@@ -8,12 +16,24 @@ BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
     "SpinWeightedSpheroidalHarmonics`"
   }];
 
+
+(* Usage messages *)
 ReggeWheelerRadial::usage = "ReggeWheelerRadial[s, l, \[Omega]] computes homogeneous solutions to the Regge Wheeler equation."
 ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], assoc] is an object representing a homogeneous solution to the Regge Wheeler equation."
 
+
 Begin["`Private`"];
 
-Options[ReggeWheelerRadial] = {Method -> {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20}, "BoundaryConditions" -> {"In","Up"}};
+
+(* ::Section::Closed:: *)
+(*ReggeWheelerRadial*)
+
+
+Options[ReggeWheelerRadial] = {
+  Method -> {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20},
+  "BoundaryConditions" -> {"In","Up"}
+};
+
 
 ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, OptionsPattern[]] :=
  Module[{assocIn, assocUp, \[Lambda], \[Nu], solFuncs, method, norms, m = 0, a=0},
@@ -63,6 +83,11 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, OptionsPattern[]] :=
     "Up" -> ReggeWheelerRadialFunction[s, l, \[Omega], assocUp]|>
 ];
 
+
+(* ::Section::Closed:: *)
+(*ReggeWheelerRadialFunction*)
+
+
 Format[ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]] := 
   "ReggeWheelerRadialFunction["<>ToString[s]<>","<>ToString[l]<>","<>ToString[\[Omega]]<>",<<>>]";
 
@@ -74,6 +99,10 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r_?NumericQ] :=
 
 Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r_?NumericQ] :=
   assoc["RadialFunction"]'[r];
+
+
+(* ::Section::Closed:: *)
+(*End Package*)
 
 
 End[]
