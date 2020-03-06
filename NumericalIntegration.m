@@ -34,9 +34,21 @@ Psi[s_, l_, \[Omega]_, bc_][{xmin_, xmax_}] :=
   soln
 ];
 
+Psi[s_, l_, \[Omega]_, bc_][All] :=
+ Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
+  If[s==2,
+    bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
+    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], $MachinePrecision];
+    soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, $MachinePrecision][x]]];
+  ,
+    soln = Function[{x}, $Failed] (*wait for further functionality*)
+  ];
+  soln
+]
+
 
 (*should this be in a module for y1 and y2?*)
-Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xmin_, xmax_,potential_,precision_]:=Module[{y1,y2,x},
+Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xmin_?NumericQ,xmax_?NumericQ,potential_,precision_]:=Module[{y1,y2,x},
 	NDSolveValue[
 		{y1'[x]==y2[x],(1-2/x)^2*y2'[x]+2(1-2/x)/x^2*y2[x]+(\[Omega]^2-potential[s,l,x])*y1[x]==0,y1[xBC]==y1BC,y2[xBC]==y2BC},
 		y1,

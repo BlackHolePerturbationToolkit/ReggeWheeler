@@ -42,7 +42,7 @@ Options[ReggeWheelerRadialNumericalIntegration] = {
   "BoundaryConditions" -> None};
 
 
-domainQ[domain_] := MatchQ[domain, {_?NumericQ, _?NumericQ} | (_?NumericQ)];
+domainQ[domain_] := MatchQ[domain, {_?NumericQ, _?NumericQ} | (_?NumericQ) | All];
 
 
 ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
