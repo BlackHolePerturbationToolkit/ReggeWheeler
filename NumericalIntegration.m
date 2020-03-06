@@ -17,12 +17,17 @@ Psi[s_, l_, (0|0.), bc_][{xmin_, xmax_}] :=
    Function[y, PsiUpStaticOdd[s,l,y]]
  ];
 
+Psi[s_, l_, \[Omega]_, "In"][xmax_?NumericQ] := Psi[s, l, \[Omega], "In"][{Automatic, xmax}];
+Psi[s_, l_, \[Omega]_, "Up"][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up"][{xmin, Automatic}];
+
 Psi[s_, l_, \[Omega]_, bc_][{xmin_, xmax_}] :=
- Module[{bcFunc, psiBC, dpsidxBC, xBC, soln},
+ Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
   If[s==2,
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
     {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], $MachinePrecision];
-    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xmin, xmax, ReggeWheelerPotential, $MachinePrecision];
+    If[bc === "In" && xmin === Automatic, xMin = xBC, xMin = xmin];
+    If[bc === "Up" && xmax === Automatic, xMax = xBC, xMax = xmax];
+    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, $MachinePrecision];
   ,
     soln = Function[{x}, $Failed] (*wait for further functionality*)
   ];

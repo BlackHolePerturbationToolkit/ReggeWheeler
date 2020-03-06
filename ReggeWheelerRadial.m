@@ -73,7 +73,7 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
     ];
     domains = Lookup[domains, BCs, None];
   ,
-    If[Not[MatchQ[domains, {_?NumericQ, _?NumericQ}]],
+    If[Not[MatchQ[domains, {_?NumericQ, _?NumericQ} | (_?NumericQ)]],
       Message[ReggeWheelerRadial::optx, "Domain" -> domains];
       Return[$Failed];
     ];
