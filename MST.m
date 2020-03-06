@@ -475,7 +475,7 @@ Derivative[1][MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu
 
 Switch[MST`$MasterFunction,
   "ReggeWheeler",
-  d2R[s_, l_, m_, q_, \[Epsilon]_, \[Lambda]_, r_, R_] := -1/(1-2/r)2/r^2 Derivative[1][R][r]+1/(1-2/r)(l (l+1)/r^2-2(1-s^2)/r^3)R[r]-(\[Epsilon]/2)^2/(1-2/r)^2 R[r];,
+  d2R[s_, l_, m_, q_, \[Epsilon]_, \[Lambda]_, r_, R_] := -1/(1-2/r)2/r^2 Derivative[1][R][r]+1/(1-2/r)(l (l+1)/r^2+2(1-s^2)/r^3)R[r]-(\[Epsilon]/2)^2/(1-2/r)^2 R[r];,
   "Teukolsky",
   d2R[s_, l_, m_, q_, \[Epsilon]_, \[Lambda]_, r_, R_] := (-(-\[Lambda] + 2 I r s \[Epsilon] + (-2 I (-1 + r) s (-q m + (q^2 + r^2) \[Epsilon]/2) + (-q m + (q^2 + r^2) \[Epsilon]/2)^2)/(q^2 - 2 r + r^2)) R[r] - (-2 + 2 r) (1 + s) Derivative[1][R][r])/(q^2 - 2 r + r^2);,
   _, Abort[]
