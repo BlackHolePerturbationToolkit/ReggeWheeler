@@ -117,16 +117,17 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
     Return[$Failed];
   ];
 
-  (* Compute the asymptotic normalisations and rescale to get unit transmission coefficient *)
+  (* Compute the asymptotic normalisations *)
   norms = ReggeWheeler`MST`MST`Private`Amplitudes[s, l, m, a, 2\[Omega], \[Nu], \[Lambda]];
-  norms = norms/norms[[All, "Transmission"]];
 
   (* Solution functions for the specified boundary conditions *)
   solFuncs =
     BCs /. {"In" -> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"]],
             "Up" -> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"]]};
 
-  (* We only need the normalisations for the specified boundary conditions *)
+  (* Select normalisation coefficients for the specified boundary conditions and rescale
+     to give unit transmission coefficient. *)
+  norms = norms/norms[[All, "Transmission"]];
   norms = BCs /. norms;
 
   (* Function to construct a ReggeWheelerRadialFunction *)
