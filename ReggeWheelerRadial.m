@@ -42,6 +42,9 @@ Options[ReggeWheelerRadialNumericalIntegration] = {
   "BoundaryConditions" -> None};
 
 
+domainQ[domain_] := MatchQ[domain, {_?NumericQ, _?NumericQ} | (_?NumericQ)];
+
+
 ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
  Module[{\[Lambda], RWRF, BCs, norms, solFuncs, domains, m = 0, a=0},
   (* Compute the eigenvalue *)
@@ -67,13 +70,13 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
   (* Domain over which the numerical solution can be evaluated *)
   domains = OptionValue["Domain"];
   If[ListQ[BCs],
-    If[Not[MatchQ[domains, (List|Association)[Rule[_,_]..]]],
+    If[!MatchQ[domains, (List|Association)[Rule[_,_?domainQ]..]],
       Message[ReggeWheelerRadial::optx, "Domain" -> domains];
       Return[$Failed];
     ];
     domains = Lookup[domains, BCs, None];
   ,
-    If[Not[MatchQ[domains, {_?NumericQ, _?NumericQ} | (_?NumericQ)]],
+    If[!domainQ[domains],
       Message[ReggeWheelerRadial::optx, "Domain" -> domains];
       Return[$Failed];
     ];
