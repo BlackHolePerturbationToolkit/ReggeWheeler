@@ -82,7 +82,7 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
   RWRF[bc_, ns_, sf_] :=
     ReggeWheelerRadialFunction[s, l, \[Omega],
      Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
-      "Method" -> {"MST", "RenormalizedAngularMomentum" -> \[Nu]},
+      "Method" -> {"NumericalIntegration", "rmin" -> rmin, "rmax" -> rmax},
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
       "RadialFunction" -> sf
      ]
