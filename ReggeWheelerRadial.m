@@ -111,6 +111,16 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
   \[Nu] = RenormalizedAngularMomentum[s, l, m, a, \[Omega], \[Lambda], Method -> OptionValue["RenormalizedAngularMomentum"]];
 
+  (* Function to construct a ReggeWheelerRadialFunction *)
+  RWRF[bc_, ns_, sf_] :=
+    ReggeWheelerRadialFunction[s, l, \[Omega],
+     Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
+      "Method" -> {"MST", "RenormalizedAngularMomentum" -> \[Nu]},
+      "BoundaryConditions" -> bc, "Amplitudes" -> ns,
+      "RadialFunction" -> sf
+     ]
+    ];
+
   (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
   BCs = OptionValue[{ReggeWheelerRadial, ReggeWheelerRadialMST}, {opts}, "BoundaryConditions"];
   If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
@@ -123,23 +133,14 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
 
   (* Solution functions for the specified boundary conditions *)
   solFuncs =
-    BCs /. {"In" -> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"]],
-            "Up" -> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"]]};
+    <|"In" :> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"]],
+      "Up" :> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"]]|>;
+  solFuncs = Lookup[solFuncs, BCs];
 
   (* Select normalisation coefficients for the specified boundary conditions and rescale
      to give unit transmission coefficient. *)
   norms = norms/norms[[All, "Transmission"]];
-  norms = BCs /. norms;
-
-  (* Function to construct a ReggeWheelerRadialFunction *)
-  RWRF[bc_, ns_, sf_] :=
-    ReggeWheelerRadialFunction[s, l, \[Omega],
-     Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
-      "Method" -> {"MST", "RenormalizedAngularMomentum" -> \[Nu]},
-      "BoundaryConditions" -> bc, "Amplitudes" -> ns,
-      "RadialFunction" -> sf
-     ]
-    ];
+  norms = Lookup[norms, BCs];
 
   If[ListQ[BCs],
     Return[Association[MapThread[#1 -> RWRF[#1, #2, #3]&, {BCs, norms, solFuncs}]]],
