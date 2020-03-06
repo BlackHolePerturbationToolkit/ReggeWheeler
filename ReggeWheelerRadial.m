@@ -38,26 +38,23 @@ Begin["`Private`"];
 
 
 Options[ReggeWheelerRadialNumericalIntegration] = {
-  "rmin" -> None,
-  "rmax" -> None,
+  "Domain" -> None,
   "BoundaryConditions" -> None};
 
 
 ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
- Module[{\[Lambda], rmin, rmax, BCs, norms, solFuncs, RWRF, m = 0, a=0},
+ Module[{\[Lambda], RWRF, BCs, norms, solFuncs, domains, m = 0, a=0},
   (* Compute the eigenvalue *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
 
-  (* rmin and rmax *)
-  rmin = OptionValue["rmin"];
-  rmax = OptionValue["rmax"];
-  If[Not[NumericQ[rmin]],
-    Message[ReggeWheelerRadial::optx, "rmin" -> rmin];
-    Return[$Failed];
-  ];
-  If[Not[NumericQ[rmax]],
-    Message[ReggeWheelerRadial::optx, "rmax" -> rmax];
-    Return[$Failed];
+  (* Function to construct a single ReggeWheelerRadialFunction *)
+  RWRF[bc_, ns_, sf_, domain_] :=
+    ReggeWheelerRadialFunction[s, l, \[Omega],
+     Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
+      "Method" -> {"NumericalIntegration", "Domain" -> domain},
+      "BoundaryConditions" -> bc, "Amplitudes" -> ns,
+      "RadialFunction" -> sf[domain]
+     ]
   ];
   
   (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
@@ -67,30 +64,34 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
     Return[$Failed];
   ];
 
+  (* Domain over which the numerical solution can be evaluated *)
+  domains = OptionValue["Domain"];
+  If[ListQ[BCs],
+    If[Not[MatchQ[domains, (List|Association)[Rule[_,_]..]]],
+      Message[ReggeWheelerRadial::optx, "Domain" -> domains];
+      Return[$Failed];
+    ];
+    domains = Lookup[domains, BCs, None];
+  ,
+    If[Not[MatchQ[domains, {_?NumericQ, _?NumericQ}]],
+      Message[ReggeWheelerRadial::optx, "Domain" -> domains];
+      Return[$Failed];
+    ];
+  ];
+
   (* Asymptotic normalizations such that we have unit transmission coefficient *)
   norms = <|"In" -> <|"Transmission" -> 1|>, "Up" -> <|"Transmission" -> 1|>|>;
+  norms = Lookup[norms, BCs];
 
   (* Solution functions for the specified boundary conditions *)
   solFuncs =
-    BCs /. {"In" -> ReggeWheeler`NumericalIntegration`Private`PsiIn[s, l, \[Omega], rmin, rmax]["Psi"],
-            "Up" -> ReggeWheeler`NumericalIntegration`Private`PsiUp[s, l, \[Omega], rmin, rmax]["Psi"]};
-
-  (* We only need the normalisations for the specified boundary conditions *)
-  norms = BCs /. norms;
-
-  (* Function to construct a ReggeWheelerRadialFunction *)
-  RWRF[bc_, ns_, sf_] :=
-    ReggeWheelerRadialFunction[s, l, \[Omega],
-     Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
-      "Method" -> {"NumericalIntegration", "rmin" -> rmin, "rmax" -> rmax},
-      "BoundaryConditions" -> bc, "Amplitudes" -> ns,
-      "RadialFunction" -> sf
-     ]
-    ];
+   <|"In" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "In"],
+     "Up" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "Up"]|>;
+  solFuncs = Lookup[solFuncs, BCs];
 
   If[ListQ[BCs],
-    Return[Association[MapThread[#1 -> RWRF[#1, #2, #3]&, {BCs, norms, solFuncs}]]],
-    Return[RWRF[BCs, norms, solFuncs]]
+    Return[Association[MapThread[#1 -> RWRF[#1, #2, #3, #4]&, {BCs, norms, solFuncs, domains}]]],
+    Return[RWRF[BCs, norms, solFuncs, domains]]
   ];
 ];
 
