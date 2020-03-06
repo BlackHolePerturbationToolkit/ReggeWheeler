@@ -27,5 +27,6 @@ pipeline {
   }
   options {
     skipDefaultCheckout(true)
+    timeout(time: 10, unit: 'MINUTES')
   }
 }
