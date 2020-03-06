@@ -55,8 +55,8 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
       "RadialFunction" -> sf[domain]
      ]
-  ];
-  
+    ];
+
   (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
   BCs = OptionValue[{ReggeWheelerRadial, ReggeWheelerRadialNumericalIntegration}, {opts}, "BoundaryConditions"];
   If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
@@ -207,7 +207,7 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r_?NumericQ] :=
   assoc["RadialFunction"][r];
 
 Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r_?NumericQ] :=
-  assoc["RadialFunction"]'[r];
+  Derivative[n][assoc["RadialFunction"]][r];
 
 
 (* ::Section::Closed:: *)
