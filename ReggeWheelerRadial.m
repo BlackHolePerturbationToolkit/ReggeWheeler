@@ -25,6 +25,7 @@ ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], 
 
 (* Error messages *)
 ReggeWheelerRadial::optx = "Unknown options in `1`";
+ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the range of allowed values. Results may be incorrect.";
 
 
 Begin["`Private`"];
@@ -212,10 +213,23 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y_String] /; !MemberQ[{"Ra
   assoc[y];
 
 ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r_?NumericQ] :=
-  assoc["RadialFunction"][r];
+ Module[{rmin, rmax},
+  {rmin, rmax} = assoc["Domain"];
+  If[!(rmin <= r <= rmax),
+    Message[ReggeWheelerRadialFunction::dmval, r];
+  ];
+  Quiet[assoc["RadialFunction"][r], InterpolatingFunction::dmval]
+ ];
+  
 
 Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r_?NumericQ] :=
-  Derivative[n][assoc["RadialFunction"]][r];
+ Module[{rmin, rmax},
+  {rmin, rmax} = assoc["Domain"];
+  If[!(rmin <= r <= rmax),
+    Message[ReggeWheelerRadialFunction::dmval, r];
+  ];
+  Quiet[Derivative[n][assoc["RadialFunction"]][r], InterpolatingFunction::dmval]
+ ];
 
 
 (* ::Section::Closed:: *)
