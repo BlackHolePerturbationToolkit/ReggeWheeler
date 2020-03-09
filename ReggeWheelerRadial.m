@@ -25,7 +25,7 @@ ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], 
 
 (* Error messages *)
 ReggeWheelerRadial::optx = "Unknown options in `1`";
-ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the range of allowed values. Results may be incorrect.";
+ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
 
 
 Begin["`Private`"];
