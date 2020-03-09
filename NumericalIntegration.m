@@ -22,16 +22,11 @@ Psi[s_, l_, \[Omega]_, "Up"][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up"][{xmin,
 
 Psi[s_, l_, \[Omega]_, bc_][{xmin_, xmax_}] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
-  If[s==2,
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
-    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], $MachinePrecision];
+    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Precision[\[Omega]]];
     If[bc === "In" && xmin === Automatic, xMin = xBC, xMin = xmin];
     If[bc === "Up" && xmax === Automatic, xMax = xBC, xMax = xmax];
-    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, $MachinePrecision];
-  ,
-    soln = Function[{x}, $Failed] (*wait for further functionality*)
-  ];
-  soln
+    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, Precision[\[Omega]]]
 ];
 
 Psi[s_, l_, \[Omega]_, bc_][All] :=
@@ -66,114 +61,79 @@ Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xmin_?NumericQ,xmax_?NumericQ,potent
 (*SetAttributes[ReggeWheelerInBC, {NumericFunction}];
 SetAttributes[ReggeWheelerUpBC, {NumericFunction}];*)
 
-ReggeWheelerInBC[s_Integer,l_Integer,\[Omega]_,workingprecision_]:=
-	Module[{rm2M,p,ptrys,expeh,Dexpeh,done=False,delReh,Reh,rstar,drstardr,
-	nmax,Xn,n,bk,denominator,f1=0,f2=0,f3=0,last,Bkm1=1,Bkm2=0,Bkm3=0,next,psi,dpsidr,om,precision=workingprecision+10,count},
-		rm2M=4*^-2*\[Omega]^2/(l*(l+1));
-		om=-\[Omega]; (* <-- this makes the sign of the exponential positive!*)
-		p=0;
-		ptrys=6;
-		nmax=10;
-		f1=0;
-		f2=0;
-		f3=0;
-		Bkm1=1;
-		Bkm2=0;
-		Bkm3=0;
-		expeh=1;
-		Dexpeh=0;
-		Xn=1;
-		last=1*^33;
-		count=0;
-		While[!done && p<ptrys,
-			delReh=rm2M;
-			Reh=2+rm2M;
-			p++;
-			bk=1;
-			For[n=1, n<=nmax, n++,
-				Xn*=delReh;
-				bk=-(((-3+n) \[Omega] Bkm3)/(2 n (I n+4\[Omega])))+(I (l+l^2-(-2+n) (-3+n-12 I \[Omega])) Bkm2)/(4 n (I n+4 \[Omega]))-((2-l-l^2+2 n^2+s^2+12 I \[Omega]+n (-5-12 I M \[Omega])) Bkm1)/(2 n (n-4 I \[Omega]));
-				Bkm3=Bkm2;
-				Bkm2=Bkm1;
-				Bkm1=bk;
-				next=bk*Xn;
-				If[(Abs[next]>Abs[last])&&(n>5),{count+=1,If[count>3,Break[]]}];
-				If[n>6 && (RealExponent[N[(expeh+next)-expeh,precision]])<-(precision-5),{done=True,Break[]}];
-				last=next;
-				expeh+=next;
-				Dexpeh+=n*next/delReh;
-			];
-			If[done==False,
-				f1=0;
-				f2=0;
-				f3=0;
-				Bkm1=1;
-				Bkm2=0;
-				Bkm3=0;
-				expeh=1;
-				Dexpeh=0;
-				Xn=1;
-				rm2M/=2;
-				last=1*^33;
-				count=0;
-			];
-		];
-	rstar = Reh+2*Log[rm2M/(2)];
-	drstardr = Reh/rm2M;
-	psi=Exp[I*om*rstar]*expeh;
-	dpsidr=Exp[I*om*rstar]*Dexpeh+I*om*drstardr*psi;
-	{N[psi,precision], N[dpsidr,precision], N[Reh,precision]}
+f=1-2/r;
+RW[U_]:=f^2 D[\[Psi][r],{r,2}]+f D[f,r] D[\[Psi][r],r]+(\[Omega]^2-U)\[Psi][r]
+Uodd[r_]:=f/r^2 (l(l+1)+(2M(1-s^2))/r);
+
+rs[r_]:=r+2 Log[r/2-1];
+
+ReggeWheelerInBC[s1_Integer, l1_Integer, \[Omega]1_, workingprecision_]:=
+	Block[{s=s1,l=l1,i,A,a,n,\[Omega]=\[Omega]1,res,M=1,fH,err,r,rin=2+10^-5},
+A[n_]:=((-1+2 n-n^2+s^2) a[-2+n]+(1+l+l^2-2 n+2 n^2-s^2) a[-1+n])/(n (n-4 I M \[Omega]));
+
+a[-2]=0;
+a[-1]=0;
+a[0]=1;
+
+fH=1-(2M)/r;
+
+err=1;
+
+res = Exp[-I \[Omega] rs[r]];
+i=1;
+While[err > 10^-workingprecision,
+
+a[i]=A[i];
+
+res+=Exp[-I \[Omega] rs[r]]a[i]fH^i;
+
+err=Abs[RW[Uodd[r]]]/.{\[Psi][r]->res,Derivative[a_][\[Psi]][r]:>D[res,{r,a}]}/.r->rin;
+
+i++;
+
+];
+
+{res,D[res,r],rin}/.r->rin
 ]
 
-ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,workingprecision_]:=
-	Module[{An=1,Anm1=0,Anm2=0,Nmax=75,NNmax=1000,n,nn,rstart,rstar,drstardr,increment=0,
-	lastincrement=1*^40,S=0,lastS=0,dS=0,lastdS=0,count=0,r,rn,np,continue=True,precision=workingprecision+10,om,BCinc},
-		(*rstarstart=xmax+2*Log[xmax/2-1]+5*Pi/Abs[om];*)
-		rstart=10000;
-		om=-\[Omega];
-		nn=1;
-		r=rstart;
-		rn=1;
-		BCinc=10;
-		While[continue&&nn<NNmax,
-			For[n=0,n<=Nmax,n++,
-				increment=An/rn;
-				If[(Abs[increment]>Abs[lastincrement])&&(n>5),{count+=1,If[count>3,Break[]]}];
-				lastS=S;
-				lastdS=dS;
-				S=S+increment;
-				dS=dS-n*increment/r;
-				If[n>4 && (RealExponent[N[S-lastS,precision]]<-(precision-5))&&(RealExponent[N[dS-(dS-n*increment/r),precision]]<-(precision-5)),{continue=False,Break[]}];
-				np=n+1;
-				rn=rn*r;
-				lastincrement=Abs[increment];
-				Anm2=Anm1;
-				Anm1=An;
-				An=N[(I(-1+np-s) (-1+np+s) Anm2)/(np \[Omega])+(I (l+l^2+np-np^2) Anm1)/(2 np \[Omega]),precision];
-			];
-			If[continue==True,
-			rstart+=BCinc;
-			nn++;
-			r=rstart;
-			rn=1;
-			An=1;
-			Anm1=0;
-			Anm2=0;
-			increment=0;
-			lastincrement=1*^40;
-			S=0;
-			lastS=0;
-			dS=0;
-			lastdS=0;
-			count=0;
-			];
-		];
-	If[nn>=NNmax,{Print["The UP boundary condition loop ran out of steps!"],Abort[]}];
-	rstar=rstart+2*Log[rstart/2-1];
-	drstardr = rstart/(rstart-2);
-	{N[S*Exp[-I*om*rstar],precision],
-	 N[(-I*om*S*drstardr+dS)*Exp[-I*om*rstar],precision],
-	 N[rstart,precision]}
+ReggeWheelerUpBC[s1_Integer,l1_Integer,\[Omega]1_,workingprecision_]:= Block[{s=s1,l=l1,A,a,n,\[Omega]=\[Omega]1,res,M=1,err,r,dres,d2res,rout, rsout,i},
+
+(*This ensures the boundary is placed in the wavezone*)
+rout =100\[Omega]^-1;
+
+A[n_]:=(I (2 M \[Omega](1-2 n+n^2-s^2) a[-2+n]+(l+l^2+n-n^2) a[-1+n]))/(2 n );
+
+a[-2]=0;
+a[-1]=0;
+a[0]=1;
+
+err=1;
+
+rsout = rs[rout];
+
+res = Exp[I \[Omega] rsout];
+dres = -((I E^(I \[Omega] rsout) rout \[Omega])/(2 M-rout));
+d2res=-((E^(I \[Omega] rsout) \[Omega] (2 I M+rout^2 \[Omega]))/(-2 M+rout)^2);
+i=1;
+While[err > 10^-workingprecision,
+
+a[i]=A[i];
+res+=Exp[I \[Omega] rsout] a[i]/( \[Omega] rout)^i;
+dres+=(E^(I \[Omega] rsout) (rout \[Omega])^-i (2 i M-i rout+I rout^2 \[Omega]) a[i])/(rout (-2 M+rout));
+d2res+= (E^(I \[Omega] rsout) (rout \[Omega])^-i (i^2 (-2 M+rout)^2-rout^2 \[Omega] (2 I M+rout^2 \[Omega])+i (2 M-rout) (2 M+rout (-1+2 I rout \[Omega]))) a[i])/(rout^2 (-2 M+rout)^2);
+
+err=Abs[RW[Uodd[r]]]/.{\[Psi][r]->res,\[Psi]'[r]->dres,\[Psi]''[r]->d2res}/.r->rout;
+
+i++;
+
+(*The infinity BCs is an asymptotic series so it might not converge.*)
+If[i > 100, Break[]];
+
+];
+
+{res,dres,rout}
+
+
 ]
 
 
@@ -182,7 +142,7 @@ ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,workingprecision_]:=
 (*SetAttributes[ReggeWheelerPotential,{NumericFunction}];*)
 SetAttributes[ZerilliPotential,{NumericFunction}];
 
-ReggeWheelerPotential[s_Integer,l_Integer,x_]:=(1-2/x)*(2(1-s^2)+l*(l+1)*x)/x^3;
+ReggeWheelerPotential[s_Integer,l_Integer,x_]:=(1-2/x)(2(1-s^2)+l(l+1)x)/x^3;
 
 (*only for spin s=2*)
 ZerilliPotential[l_Integer,x_Numeric]:=
