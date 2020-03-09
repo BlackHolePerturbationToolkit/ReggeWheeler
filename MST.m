@@ -504,5 +504,21 @@ Derivative[n_Integer?Positive][MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, 
 ];
 
 
+MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_][r:{_?NumericQ..}] :=
+  Map[MSTRadialIn[s, l, m, q, \[Epsilon], \[Nu], \[Lambda], norm], r];
+
+
+MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_][r:{_?NumericQ..}] :=
+  Map[MSTRadialUp[s, l, m, q, \[Epsilon], \[Nu], \[Lambda], norm], r];
+
+
+Derivative[n_][MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_]][r:{_?NumericQ..}] :=
+  Map[Derivative[n][MSTRadialIn[s, l, m, q, \[Epsilon], \[Nu], \[Lambda], norm]], r];
+
+
+Derivative[n_][MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_]][r:{_?NumericQ..}] :=
+  Map[Derivative[n][MSTRadialUp[s, l, m, q, \[Epsilon], \[Nu], \[Lambda], norm]], r];
+
+
 End[];
 EndPackage[];
