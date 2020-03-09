@@ -206,6 +206,8 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 (*ReggeWheelerRadialFunction*)
 
 
+SetAttributes[ReggeWheelerRadialFunction, {NumericFunction}];
+
 Format[ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]] := 
   "ReggeWheelerRadialFunction["<>ToString[s]<>","<>ToString[l]<>","<>ToString[\[Omega]]<>",<<>>]";
 
