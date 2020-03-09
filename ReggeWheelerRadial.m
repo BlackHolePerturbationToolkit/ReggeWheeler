@@ -214,11 +214,15 @@ Format[ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]] :=
 ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y_String] /; !MemberQ[{"RadialFunction"}, y] :=
   assoc[y];
 
+
+outsideDomainQ[r_, rmin_, rmax_] := Min[r]<rmin || Max[r]>rmax;
+
+
 ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ..})] :=
  Module[{rmin, rmax},
   {rmin, rmax} = assoc["Domain"];
-  If[!(rmin <= r <= rmax),
-    Message[ReggeWheelerRadialFunction::dmval, r];
+  If[outsideDomainQ[r, rmin, rmax],
+    Message[ReggeWheelerRadialFunction::dmval, #]& /@ Select[Flatten[{r}], outsideDomainQ[#, rmin, rmax]&];
   ];
   Quiet[assoc["RadialFunction"][r], InterpolatingFunction::dmval]
  ];
@@ -227,8 +231,8 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ.
 Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r:(_?NumericQ|{_?NumericQ..})] :=
  Module[{rmin, rmax},
   {rmin, rmax} = assoc["Domain"];
-  If[!(rmin <= r <= rmax),
-    Message[ReggeWheelerRadialFunction::dmval, r];
+  If[outsideDomainQ[r, rmin, rmax],
+    Message[ReggeWheelerRadialFunction::dmval, #]& /@ Select[Flatten[{r}], outsideDomainQ[#, rmin, rmax]&];
   ];
   Quiet[Derivative[n][assoc["RadialFunction"]][r], InterpolatingFunction::dmval]
  ];
