@@ -9,110 +9,50 @@ BeginPackage["ReggeWheeler`NumericalIntegration`"];
 Begin["`Private`"];
 
 
-SetAttributes[PsiIn, {NumericFunction}];
+SetAttributes[Psi, {NumericFunction}];
 
-PsiIn[s_, l_, \[Omega]_, xmin_, xmax_]:=
-Module[{newassoc},
-	If[\[Omega]==0,
-		newassoc=<|
-				"Psi"->Function[y,PsiInStaticOdd[s,l,y]],
-				"dPsidr"->Function[y,Derivative[0,0,1][PsiInStaticOdd][s,l,y]],
-				"xmin"->xmin,
-				"xmax"->xmax
-				|>;
-		,
-		If[s==2,
-			Module[{boundaryconditions,soln,newAssoc,psiBC,dpsidxBC,xBC},
-				boundaryconditions = ReggeWheelerInBC[s,l,\[Omega],$MachinePrecision];
-				psiBC=boundaryconditions["Psi"];
-				dpsidxBC=boundaryconditions["dPsidx"];
-				xBC=boundaryconditions["xBC"];
-				
-				soln = Integrator[s,l,\[Omega],psiBC,dpsidxBC,xBC,xmax,ReggeWheelerPotential,$MachinePrecision];
-				
-				newassoc=<|
-					"Psi"->soln[[1,1,2]],
-					"dPsidr"->soln[[1,2,2]],
-					"xmin"->xBC,
-					"xmax"->xmax					
-					|>;
-			];,
-			Nothing (*wait for further functionality*)
-		];
-	];
-newassoc
+Psi[s_, l_, (0|0.), bc_][{xmin_, xmax_}] :=
+ If[bc == "In",
+   Function[y, PsiInStaticOdd[s,l,y]],
+   Function[y, PsiUpStaticOdd[s,l,y]]
+ ];
+
+Psi[s_, l_, \[Omega]_, "In"][xmax_?NumericQ] := Psi[s, l, \[Omega], "In"][{Automatic, xmax}];
+Psi[s_, l_, \[Omega]_, "Up"][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up"][{xmin, Automatic}];
+
+Psi[s_, l_, \[Omega]_, bc_][{xmin_, xmax_}] :=
+ Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
+  If[s==2,
+    bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
+    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], $MachinePrecision];
+    If[bc === "In" && xmin === Automatic, xMin = xBC, xMin = xmin];
+    If[bc === "Up" && xmax === Automatic, xMax = xBC, xMax = xmax];
+    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, $MachinePrecision];
+  ,
+    soln = Function[{x}, $Failed] (*wait for further functionality*)
+  ];
+  soln
 ];
 
-(*Derivative[1][PsiIn[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][x_?InexactNumberQ] :=
- Module[{},
-];
-
-Derivative[n_Integer?Positive][PsiIn[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r0_?InexactNumberQ] :=
- Module[{d2R, pderivs, R, r, i},
-  d2R = -2/(x^2*(1-2/x))*Derivative[1][R][r] -(\[Omega]^2-ReggeWheelerPotential[s,l,x])/(1-2/x)^2*R[r];
-  
-  pderivs = D[R[r_], {r_, i_}] :> D[d2R, {r, i - 2}] /; i >= 2;
-  Do[Derivative[i][R][r] = Simplify[D[Derivative[i - 1][R][r], r] /. pderivs];, {i, 2, n}];
-  Derivative[n][R][r] /. {
-    R'[r] -> PsiIn[s, l, \[Omega]]'[r0],
-    R[r] -> PsiIn[s, l, \[Omega]][r0], r -> r0}
-];*)
-
-
-SetAttributes[PsiUp, {NumericFunction}];
-
-PsiUp[s_, l_, \[Omega]_, xmin_, xmax_]:=
-	Module[{newassoc},
-		If[\[Omega]==0,
-			newassoc=<|
-				"Psi"->Function[y,PsiUpStaticOdd[s,l,y]],
-				"dPsidr"->Function[y,Derivative[0,0,1][PsiUpStaticOdd][s,l,y]],
-				"xmin"->xmin,
-				"xmax"->xmax
-				|>;
-			,
-			If[s==2,
-				Module[{boundaryconditions,soln,newAssoc,psiBC,dpsidxBC,xBC},
-					boundaryconditions = ReggeWheelerUpBC[s,l,\[Omega],xmax,$MachinePrecision];
-					psiBC=boundaryconditions["Psi"];
-					dpsidxBC=boundaryconditions["dPsidx"];
-					xBC=boundaryconditions["xBC"];
-					soln = Integrator[s,l,\[Omega],psiBC,dpsidxBC,xBC,xmin,ReggeWheelerPotential,$MachinePrecision];
-					newassoc= <|
-						"Psi"->soln[[1,1,2]],
-						"dPsidr"->soln[[1,2,2]],
-						"xmin"->xmin,
-						"xmax"->xBC
-					|>
-				],
-			newassoc=Nothing (*wait for further functionality*)
-			];
-		];
-		newassoc
-	];
-
-(*Derivative[1][PsiUp[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][x_?InexactNumberQ] :=
- Module[{},
-];
-
-Derivative[n_Integer?Positive][PsiUp[s_Integer, l_Integer, \[Omega]_, rmin_, rmax_]][r0_?InexactNumberQ] :=
- Module[{d2R, pderivs, R, r, i},
-  d2R = -2/(x^2*(1-2/x))*Derivative[1][R][r] -(\[Omega]^2-ReggeWheelerPotential[s,l,x])/(1-2/x)^2*R[r];
-
-  pderivs = D[R[r_], {r_, i_}] :> D[d2R, {r, i - 2}] /; i >= 2;
-  Do[Derivative[i][R][r] = Simplify[D[Derivative[i - 1][R][r], r] /. pderivs];, {i, 2, n}];
-  Derivative[n][R][r] /. {
-    R'[r] -> PsiUp[s, l, \[Omega]]'[r0],
-    R[r] -> PsiUp[s, l, \[Omega]][r0], r -> r0}
-];*)
+Psi[s_, l_, \[Omega]_, bc_][All] :=
+ Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
+  If[s==2,
+    bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
+    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], $MachinePrecision];
+    soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, $MachinePrecision][x]]];
+  ,
+    soln = Function[{x}, $Failed] (*wait for further functionality*)
+  ];
+  soln
+]
 
 
 (*should this be in a module for y1 and y2?*)
-Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xend_,potential_,precision_]:=Module[{y1,y2,x},
-	NDSolve[
+Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xmin_?NumericQ,xmax_?NumericQ,potential_,precision_]:=Module[{y1,y2,x},
+	NDSolveValue[
 		{y1'[x]==y2[x],(1-2/x)^2*y2'[x]+2(1-2/x)/x^2*y2[x]+(\[Omega]^2-potential[s,l,x])*y1[x]==0,y1[xBC]==y1BC,y2[xBC]==y2BC},
-		{y1,y2},
-		If[xBC<xend,{x,xBC,xend},{x,xend,xBC}],
+		y1,
+		{x, xmin, xmax},
 		Method->"StiffnessSwitching",
 		MaxSteps->Infinity,
 		WorkingPrecision->precision,
@@ -182,14 +122,14 @@ ReggeWheelerInBC[s_Integer,l_Integer,\[Omega]_,workingprecision_]:=
 	drstardr = Reh/rm2M;
 	psi=Exp[I*om*rstar]*expeh;
 	dpsidr=Exp[I*om*rstar]*Dexpeh+I*om*drstardr*psi;
-	<|"Psi"->N[psi,precision],"dPsidx"->N[dpsidr,precision],"xBC"->N[Reh,precision]|>
+	{N[psi,precision], N[dpsidr,precision], N[Reh,precision]}
 ]
 
-ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
-	Module[{An=1,Anm1=0,Anm2=0,Anm3=0,Nmax=75,NNmax=1000,n,nn,rstart,rstar,drstardr,increment=0,
+ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,workingprecision_]:=
+	Module[{An=1,Anm1=0,Anm2=0,Nmax=75,NNmax=1000,n,nn,rstart,rstar,drstardr,increment=0,
 	lastincrement=1*^40,S=0,lastS=0,dS=0,lastdS=0,count=0,r,rn,np,continue=True,precision=workingprecision+10,om,BCinc},
 		(*rstarstart=xmax+2*Log[xmax/2-1]+5*Pi/Abs[om];*)
-		rstart=xmax;
+		rstart=10000;
 		om=-\[Omega];
 		nn=1;
 		r=rstart;
@@ -207,7 +147,6 @@ ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
 				np=n+1;
 				rn=rn*r;
 				lastincrement=Abs[increment];
-				Anm3=Anm2;
 				Anm2=Anm1;
 				Anm1=An;
 				An=N[(I(-1+np-s) (-1+np+s) Anm2)/(np \[Omega])+(I (l+l^2+np-np^2) Anm1)/(2 np \[Omega]),precision];
@@ -220,7 +159,6 @@ ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
 			An=1;
 			Anm1=0;
 			Anm2=0;
-			Anm3=0;
 			increment=0;
 			lastincrement=1*^40;
 			S=0;
@@ -233,9 +171,9 @@ ReggeWheelerUpBC[s_Integer,l_Integer,\[Omega]_,xmax_,workingprecision_]:=
 	If[nn>=NNmax,{Print["The UP boundary condition loop ran out of steps!"],Abort[]}];
 	rstar=rstart+2*Log[rstart/2-1];
 	drstardr = rstart/(rstart-2);
-	<|"Psi"->N[S*Exp[-I*om*rstart],precision],
-	"dPsidx"->N[(-I*om*S*drstardr+dS)*Exp[-I*om*rstart],precision],
-	"xBC"->N[rstart,precision]|>
+	{N[S*Exp[-I*om*rstar],precision],
+	 N[(-I*om*S*drstardr+dS)*Exp[-I*om*rstar],precision],
+	 N[rstart,precision]}
 ]
 
 

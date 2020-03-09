@@ -1,0 +1,335 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     12805,        327]
+NotebookOptionsPosition[     11299,        301]
+NotebookOutlinePosition[     11640,        316]
+CellTagsIndexPosition[     11597,        313]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{"<<", "ReggeWheeler`"}]], "Input",
+ CellChangeTimes->{{3.792443142501277*^9, 3.7924431445560417`*^9}},
+ CellLabel->"In[1]:=",ExpressionUUID->"9939890b-bf24-45eb-916a-d4a175e1539a"],
+
+Cell[BoxData[
+ RowBox[{"<<", "SimulationTools`"}]], "Input",
+ CellChangeTimes->{{3.792477578354884*^9, 3.792477582044091*^9}},
+ CellLabel->"In[2]:=",ExpressionUUID->"e5f33e8f-9db9-4e42-bdf6-83e9625dc744"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"M", "=", "1"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"\[Omega]", "=", "0.1`32"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"s", "=", "2"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"l", "=", "2"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.792477685694232*^9, 3.792477694120818*^9}},
+ CellLabel->"In[3]:=",ExpressionUUID->"1acc8737-2ed5-4ba0-9d66-49258b4fb169"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"rstar", "[", "r_", "]"}], ":=", 
+   RowBox[{"r", "+", 
+    RowBox[{"2", "M", " ", 
+     RowBox[{"Log", "[", 
+      RowBox[{
+       FractionBox["r", 
+        RowBox[{"2", "M"}]], "-", "1"}], "]"}]}]}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.792477669686057*^9, 3.792477684524418*^9}},
+ CellLabel->"In[7]:=",ExpressionUUID->"39313483-1636-4449-87b1-e52c026a651a"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"rm2M", "[", "rstar_", "]"}], ":=", 
+  RowBox[{"2", " ", "M", " ", 
+   RowBox[{"ProductLog", "[", 
+    SuperscriptBox["\[ExponentialE]", 
+     RowBox[{
+      FractionBox["rstar", 
+       RowBox[{"2", " ", "M"}]], "-", "1"}]], "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.7924779686193666`*^9, 3.7924779856955357`*^9}, {
+  3.792478045504838*^9, 3.792478051478273*^9}},
+ CellLabel->"In[8]:=",ExpressionUUID->"9c99aa5e-3ec6-47b0-9d1a-722be51fb66e"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\[Psi]In", ",", "\[Psi]Up"}], "}"}], "=", 
+   RowBox[{"Values", "[", 
+    RowBox[{"ReggeWheelerRadial", "[", 
+     RowBox[{"s", ",", "l", ",", "\[Omega]"}], "]"}], "]"}]}], ";"}]], "Input",\
+
+ CellChangeTimes->{
+  3.792443651508658*^9, {3.79244368749288*^9, 3.792443688972086*^9}, {
+   3.7924444609525642`*^9, 3.79244447878242*^9}, {3.792477436500383*^9, 
+   3.792477494742229*^9}, {3.7924777005911818`*^9, 3.792477703931548*^9}},
+ CellLabel->"In[9]:=",ExpressionUUID->"f03e2e76-ab78-44e5-9569-38a6e317b14b"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"\[Psi]Up\[ScriptCapitalI]", "=", 
+   RowBox[{"ToDataTable", "[", 
+    RowBox[{"Table", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"r", ",", 
+        RowBox[{"\[Psi]Up", "[", "r", "]"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"r", ",", "10000", ",", "10100", ",", "5"}], "}"}]}], "]"}], 
+    "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.792477930159809*^9, 3.7924779456894903`*^9}, {
+  3.792478091068719*^9, 3.79247809182061*^9}},
+ CellLabel->"In[10]:=",ExpressionUUID->"9de5798a-9903-4c76-b3b6-85a7a1b91877"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"\[Psi]In\[ScriptCapitalH]", "=", 
+   RowBox[{"ToDataTable", "[", 
+    RowBox[{"Table", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"rstar", ",", 
+        RowBox[{"\[Psi]In", "[", 
+         RowBox[{
+          RowBox[{"2", "M"}], "+", 
+          RowBox[{"rm2M", "[", "rstar", "]"}]}], "]"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"rstar", ",", 
+        RowBox[{"-", "100"}], ",", "0", ",", "5"}], "}"}]}], "]"}], "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.792477949582097*^9, 3.7924779627678337`*^9}, {
+  3.792478064887089*^9, 3.792478098165701*^9}, {3.792478183544976*^9, 
+  3.792478197843112*^9}, {3.792478347699214*^9, 3.792478349464218*^9}},
+ CellLabel->"In[11]:=",ExpressionUUID->"f30a1783-2a7b-4b66-aae0-3a458c713b3d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"\[Psi]Up\[ScriptCapitalI]N", "=", 
+   RowBox[{"ReggeWheelerRadial", "[", 
+    RowBox[{"s", ",", "l", ",", "\[Omega]", ",", 
+     RowBox[{"\"\<BoundaryConditions\>\"", "\[Rule]", "\"\<Up\>\""}], ",", 
+     RowBox[{"Method", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{"\"\<NumericalIntegration\>\"", ",", 
+        RowBox[{"\"\<Domain\>\"", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{"10000", ",", "10100"}], "}"}]}]}], "}"}]}]}], "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.792478445474494*^9, 3.792478505326852*^9}, {
+   3.792501655796549*^9, 3.79250177294464*^9}, 3.7925018077697*^9},
+ CellLabel->"In[12]:=",ExpressionUUID->"e4b226df-1933-40ce-974f-a706f7f1bf82"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"\[Psi]In\[ScriptCapitalH]N", "=", 
+   RowBox[{"ReggeWheelerRadial", "[", 
+    RowBox[{"s", ",", "l", ",", "\[Omega]", ",", 
+     RowBox[{"\"\<BoundaryConditions\>\"", "\[Rule]", "\"\<In\>\""}], ",", 
+     RowBox[{"Method", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{"\"\<NumericalIntegration\>\"", ",", 
+        RowBox[{"\"\<Domain\>\"", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"rm2M", "[", 
+             RowBox[{"-", "50"}], "]"}], "+", 
+            RowBox[{"2", "M"}]}], ",", 
+           RowBox[{
+            RowBox[{"rm2M", "[", "0", "]"}], "+", 
+            RowBox[{"2", "M"}]}]}], "}"}]}]}], "}"}]}]}], "]"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.792478445474494*^9, 3.792478537806859*^9}, {
+   3.79247857444816*^9, 3.7924785754052467`*^9}, {3.7924829776599417`*^9, 
+   3.792482990880781*^9}, {3.792501779505043*^9, 3.792501792891821*^9}, 
+   3.79250268197388*^9},
+ CellLabel->"In[20]:=",ExpressionUUID->"6c27741c-f0ce-4175-898c-f65c978b2568"],
+
+Cell[TextData[{
+ "Near \[ScriptCapitalI] the behaviour should be ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SubscriptBox["\[Psi]", "up"], "\[TildeEqual]", 
+    SuperscriptBox["\[ExponentialE]", 
+     RowBox[{"\[ImaginaryI]", " ", "\[Omega]", " ", 
+      SubscriptBox["r", "*"]}]]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "aa6faa8c-7573-4449-a657-d28c2308ce22"],
+ ". This is satisfied by both MST evaluation and numerical integration."
+}], "Text",
+ CellChangeTimes->{{3.7925027507901382`*^9, 3.7925028067378187`*^9}, {
+  3.792502846260721*^9, 
+  3.792502854012632*^9}},ExpressionUUID->"6e11058f-3956-42f5-a34a-\
+a86ea7168390"],
+
+Cell[BoxData[
+ RowBox[{"Show", "[", 
+  RowBox[{
+   RowBox[{"ListPlot", "[", 
+    RowBox[{
+     RowBox[{"ReIm", "[", "\[Psi]Up\[ScriptCapitalI]", "]"}], ",", 
+     RowBox[{"PlotTheme", "\[Rule]", "\"\<Detailed\>\""}]}], "]"}], ",", 
+   RowBox[{"Plot", "[", 
+    RowBox[{
+     RowBox[{"Evaluate", "[", 
+      RowBox[{"ReIm", "[", 
+       RowBox[{"\[Psi]Up\[ScriptCapitalI]N", "[", "r", "]"}], "]"}], "]"}], 
+     ",", 
+     RowBox[{"{", 
+      RowBox[{"r", ",", "10000", ",", "10100"}], "}"}]}], "]"}], ",", 
+   RowBox[{"Plot", "[", 
+    RowBox[{
+     RowBox[{"Evaluate", "[", 
+      RowBox[{"ReIm", "[", 
+       RowBox[{"Exp", "[", 
+        RowBox[{"\[ImaginaryI]", " ", "\[Omega]", " ", 
+         RowBox[{"rstar", "[", "r", "]"}]}], "]"}], "]"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"r", ",", "10000", ",", "10100"}], "}"}], ",", 
+     RowBox[{"PlotStyle", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"Directive", "[", 
+         RowBox[{
+          RowBox[{"Darker", "[", 
+           RowBox[{"ColorData", "[", 
+            RowBox[{"97", ",", "1"}], "]"}], "]"}], ",", "Dotted"}], "]"}], 
+        ",", 
+        RowBox[{"Directive", "[", 
+         RowBox[{
+          RowBox[{"Darker", "[", 
+           RowBox[{"ColorData", "[", 
+            RowBox[{"97", ",", "2"}], "]"}], "]"}], ",", "Dotted"}], "]"}]}], 
+       "}"}]}]}], "]"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.792477427923574*^9, 3.792477431222953*^9}, {
+   3.792477500243166*^9, 3.7924775996287327`*^9}, {3.792477637184228*^9, 
+   3.792477666692972*^9}, {3.7924777074835787`*^9, 3.792477740191854*^9}, 
+   3.7924779259468317`*^9, {3.792478110203144*^9, 3.792478113285878*^9}, {
+   3.792478640342547*^9, 3.792478767314073*^9}, {3.792478847160899*^9, 
+   3.792478850002668*^9}},
+ CellLabel->"In[14]:=",ExpressionUUID->"c8894332-d18a-4482-8597-994763a94a43"],
+
+Cell[TextData[{
+ "Near \[ScriptCapitalH] the behaviour should be ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SubscriptBox["\[Psi]", "in"], "\[TildeEqual]", 
+    SuperscriptBox["\[ExponentialE]", 
+     RowBox[{
+      RowBox[{"-", "\[ImaginaryI]"}], " ", "\[Omega]", " ", 
+      SubscriptBox["r", "*"]}]]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "31f89029-93c1-4eca-a934-2accf7f5122d"],
+ ". This is satisfied by the MST evaluation, but not currently by numerical \
+integration."
+}], "Text",
+ CellChangeTimes->{{3.7925027507901382`*^9, 
+  3.792502841310925*^9}},ExpressionUUID->"31da910e-08dd-4972-96b7-\
+8e6921448679"],
+
+Cell[BoxData[
+ RowBox[{"Show", "[", 
+  RowBox[{
+   RowBox[{"ListPlot", "[", 
+    RowBox[{
+     RowBox[{"ReIm", "[", "\[Psi]In\[ScriptCapitalH]", "]"}], ",", 
+     RowBox[{"PlotTheme", "\[Rule]", "\"\<Detailed\>\""}]}], "]"}], ",", 
+   RowBox[{"Plot", "[", 
+    RowBox[{
+     RowBox[{"Evaluate", "[", 
+      RowBox[{"ReIm", "[", 
+       RowBox[{"\[Psi]In\[ScriptCapitalH]N", "[", 
+        RowBox[{
+         RowBox[{"rm2M", "[", "rstar", "]"}], "+", 
+         RowBox[{"2", "M"}]}], "]"}], "]"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"rstar", ",", 
+       RowBox[{"-", "50"}], ",", "0"}], "}"}]}], "]"}], ",", 
+   RowBox[{"Plot", "[", 
+    RowBox[{
+     RowBox[{"Evaluate", "[", 
+      RowBox[{"ReIm", "[", 
+       RowBox[{"Exp", "[", 
+        RowBox[{
+         RowBox[{"-", "\[ImaginaryI]"}], " ", "\[Omega]", " ", "rstar"}], 
+        "]"}], "]"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"rstar", ",", 
+       RowBox[{"-", "100"}], ",", "0"}], "}"}], ",", 
+     RowBox[{"PlotStyle", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"Directive", "[", 
+         RowBox[{
+          RowBox[{"Darker", "[", 
+           RowBox[{"ColorData", "[", 
+            RowBox[{"97", ",", "1"}], "]"}], "]"}], ",", "Dotted"}], "]"}], 
+        ",", 
+        RowBox[{"Directive", "[", 
+         RowBox[{
+          RowBox[{"Darker", "[", 
+           RowBox[{"ColorData", "[", 
+            RowBox[{"97", ",", "2"}], "]"}], "]"}], ",", "Dotted"}], "]"}]}], 
+       "}"}]}]}], "]"}], ",", 
+   RowBox[{"PlotRange", "\[Rule]", "All"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.792477427923574*^9, 3.792477431222953*^9}, {
+   3.792477500243166*^9, 3.7924775996287327`*^9}, {3.792477637184228*^9, 
+   3.792477666692972*^9}, {3.7924777074835787`*^9, 3.792477740191854*^9}, 
+   3.7924779259468317`*^9, {3.792478110203144*^9, 3.792478113285878*^9}, {
+   3.792478640342547*^9, 3.792478767314073*^9}, {3.792478847160899*^9, 
+   3.7924789403435*^9}, {3.7924793433657293`*^9, 3.792479354320876*^9}, {
+   3.792502711855098*^9, 3.792502721900585*^9}},
+ CellLabel->"In[26]:=",ExpressionUUID->"eb44d9c6-af18-44d6-9c29-271638473ff8"]
+},
+WindowSize->{808, 709},
+WindowMargins->{{Automatic, -1482}, {Automatic, -96}},
+FrontEndVersion->"12.0 for Mac OS X x86 (64-bit) (April 8, 2019)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 203, 3, 30, "Input",ExpressionUUID->"9939890b-bf24-45eb-916a-d4a175e1539a"],
+Cell[764, 25, 204, 3, 30, "Input",ExpressionUUID->"e5f33e8f-9db9-4e42-bdf6-83e9625dc744"],
+Cell[971, 30, 429, 10, 94, "Input",ExpressionUUID->"1acc8737-2ed5-4ba0-9d66-49258b4fb169"],
+Cell[1403, 42, 410, 11, 45, "Input",ExpressionUUID->"39313483-1636-4449-87b1-e52c026a651a"],
+Cell[1816, 55, 477, 11, 43, "Input",ExpressionUUID->"9c99aa5e-3ec6-47b0-9d1a-722be51fb66e"],
+Cell[2296, 68, 573, 13, 30, "Input",ExpressionUUID->"f03e2e76-ab78-44e5-9569-38a6e317b14b"],
+Cell[2872, 83, 569, 14, 30, "Input",ExpressionUUID->"9de5798a-9903-4c76-b3b6-85a7a1b91877"],
+Cell[3444, 99, 788, 19, 30, "Input",ExpressionUUID->"f30a1783-2a7b-4b66-aae0-3a458c713b3d"],
+Cell[4235, 120, 719, 15, 52, "Input",ExpressionUUID->"e4b226df-1933-40ce-974f-a706f7f1bf82"],
+Cell[4957, 137, 1048, 24, 52, "Input",ExpressionUUID->"6c27741c-f0ce-4175-898c-f65c978b2568"],
+Cell[6008, 163, 659, 16, 38, "Text",ExpressionUUID->"6e11058f-3956-42f5-a34a-a86ea7168390"],
+Cell[6670, 181, 1847, 45, 115, "Input",ExpressionUUID->"c8894332-d18a-4482-8597-994763a94a43"],
+Cell[8520, 228, 649, 17, 58, "Text",ExpressionUUID->"31da910e-08dd-4972-96b7-8e6921448679"],
+Cell[9172, 247, 2123, 52, 115, "Input",ExpressionUUID->"eb44d9c6-af18-44d6-9c29-271638473ff8"]
+}
+]
+*)
+

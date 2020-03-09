@@ -8,6 +8,14 @@ pipeline {
   stages {
     stage('Run tests') {
       steps {
+        dir(path: 'SpinWeightedSpheroidalHarmonics') {
+          git 'https://github.com/BlackHolePerturbationToolkit/SpinWeightedSpheroidalHarmonics.git'
+        }
+
+        dir(path: 'KerrGeodesics') {
+          git 'https://github.com/BlackHolePerturbationToolkit/KerrGeodesics.git'
+        }
+
         dir(path: 'ReggeWheeler') {
           checkout scm
           sh 'Tests/AllTests.wls'
@@ -19,5 +27,6 @@ pipeline {
   }
   options {
     skipDefaultCheckout(true)
+    timeout(time: 10, unit: 'MINUTES')
   }
 }
