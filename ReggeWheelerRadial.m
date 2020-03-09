@@ -13,7 +13,8 @@ BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
     "ReggeWheeler`NumericalIntegration`",
     "ReggeWheeler`MST`RenormalizedAngularMomentum`",
     "ReggeWheeler`MST`MST`",
-    "SpinWeightedSpheroidalHarmonics`"
+    "SpinWeightedSpheroidalHarmonics`",
+    "DifferentialEquations`InterpolatingFunctionAnatomy`"
   }];
 
 
@@ -52,13 +53,17 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
 
   (* Function to construct a single ReggeWheelerRadialFunction *)
   RWRF[bc_, ns_, sf_, domain_] :=
+   Module[{solutionFunction},
+    solutionFunction = sf[domain];
     ReggeWheelerRadialFunction[s, l, \[Omega],
      Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
-      "Method" -> {"NumericalIntegration", "Domain" -> domain},
+      "Method" -> {"NumericalIntegration"},
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
-      "RadialFunction" -> sf[domain]
+      "Domain" -> If[domain === All, {2, \[Infinity]}, First[InterpolatingFunctionDomain[solutionFunction]]],
+      "RadialFunction" -> solutionFunction
      ]
-    ];
+    ]
+   ];
 
   (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
   BCs = OptionValue[{ReggeWheelerRadial, ReggeWheelerRadialNumericalIntegration}, {opts}, "BoundaryConditions"];
@@ -120,7 +125,7 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
      Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
       "Method" -> {"MST", "RenormalizedAngularMomentum" -> \[Nu]},
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
-      "RadialFunction" -> sf
+      "Domain" -> {2, \[Infinity]}, "RadialFunction" -> sf
      ]
     ];
 
