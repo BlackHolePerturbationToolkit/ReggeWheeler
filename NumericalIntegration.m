@@ -31,14 +31,9 @@ Psi[s_, l_, \[Omega]_, bc_][{xmin_, xmax_}] :=
 
 Psi[s_, l_, \[Omega]_, bc_][All] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
-  If[s==2,
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
     {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Precision[\[Omega]]];
-    soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, Precision[\[Omega]]][x]]];
-  ,
-    soln = Function[{x}, $Failed] (*wait for further functionality*)
-  ];
-  soln
+    soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, Precision[\[Omega]]][x]]]
 ]
 
 
