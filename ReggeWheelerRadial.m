@@ -49,7 +49,7 @@ domainQ[domain_] := MatchQ[domain, {_?NumericQ, _?NumericQ} | (_?NumericQ) | All
 
 
 ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
- Module[{\[Lambda], RWRF, norms, solFuncs, domains, m = 0, a=0},
+ Module[{\[Lambda], RWRF, norms, ndsolveopts, solFuncs, domains, m = 0, a=0},
   (* Compute the eigenvalue *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
 
@@ -91,9 +91,10 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, {w
   norms = Lookup[norms, BCs];
 
   (* Solution functions for the specified boundary conditions *)
+  ndsolveopts = Sequence@@@FilterRules[{opts}, Options[NDSolve]];
   solFuncs =
-   <|"In" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "In"],
-     "Up" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "Up"]|>;
+   <|"In" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "In", WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts],
+     "Up" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "Up", WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts]|>;
   solFuncs = Lookup[solFuncs, BCs];
 
   If[ListQ[BCs],

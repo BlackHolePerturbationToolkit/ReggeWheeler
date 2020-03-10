@@ -11,16 +11,16 @@ Begin["`Private`"];
 
 SetAttributes[Psi, {NumericFunction}];
 
-Psi[s_, l_, (0|0.), bc_][{xmin_, xmax_}] :=
+Psi[s_, l_, (0|0.), bc_, ndsolveopts___][{xmin_, xmax_}] :=
  If[bc == "In",
    Function[y, PsiInStaticOdd[s,l,y]],
    Function[y, PsiUpStaticOdd[s,l,y]]
  ];
 
-Psi[s_, l_, \[Omega]_, "In"][xmax_?NumericQ] := Psi[s, l, \[Omega], "In"][{Automatic, xmax}];
-Psi[s_, l_, \[Omega]_, "Up"][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up"][{xmin, Automatic}];
+Psi[s_, l_, \[Omega]_, "In", ndsolveopts___][xmax_?NumericQ] := Psi[s, l, \[Omega], "In", ndsolveopts][{Automatic, xmax}];
+Psi[s_, l_, \[Omega]_, "Up", ndsolveopts___][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up", ndsolveopts][{xmin, Automatic}];
 
-Psi[s_, l_, \[Omega]_, bc_][{xmin_, xmax_}] :=
+Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][{xmin_, xmax_}] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
     {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Precision[\[Omega]]];
@@ -29,14 +29,14 @@ Psi[s_, l_, \[Omega]_, bc_][{xmin_, xmax_}] :=
     soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, Precision[\[Omega]]]
 ];
 
-Psi[s_, l_, \[Omega]_, bc_][All] :=
+Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][All] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
     {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Precision[\[Omega]]];
     soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, Precision[\[Omega]]][x]]]
 ];
 
-Psi[s_, l_, \[Omega]_, bc_][None] := $Failed;
+Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][None] := $Failed;
 
 
 (*should this be in a module for y1 and y2?*)
