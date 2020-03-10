@@ -184,6 +184,9 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 
   (* Options associated with precision and accuracy *)
   {wp, prec, acc} = OptionValue[{WorkingPrecision, PrecisionGoal, AccuracyGoal}];
+  If[wp === Automatic, wp = Precision[\[Omega]]];
+  If[prec === Automatic, prec = wp / 2];
+  If[acc === Automatic, acc = wp / 2];
   If[Precision[\[Omega]] < wp, Message[ReggeWheelerRadial::precw, \[Omega], wp]];
 
   (* Decide which implementation to use *)
