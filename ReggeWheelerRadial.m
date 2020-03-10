@@ -55,12 +55,12 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, {w
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
 
   (* Function to construct a single ReggeWheelerRadialFunction *)
-  RWRF[bc_, ns_, sf_, domain_] :=
+  RWRF[bc_, ns_, sf_, domain_, ndsolveopts___] :=
    Module[{solutionFunction},
     solutionFunction = sf[domain];
     ReggeWheelerRadialFunction[s, l, \[Omega],
      Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
-      "Method" -> {"NumericalIntegration"},
+      "Method" -> {"NumericalIntegration", ndsolveopts},
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
       "Domain" -> If[domain === All, {2, \[Infinity]}, First[InterpolatingFunctionDomain[solutionFunction]]],
       "RadialFunction" -> solutionFunction
@@ -92,15 +92,15 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, {w
   norms = Lookup[norms, BCs];
 
   (* Solution functions for the specified boundary conditions *)
-  ndsolveopts = Sequence@@@FilterRules[{opts}, Options[NDSolve]];
+  ndsolveopts = Sequence@@FilterRules[{opts}, Options[NDSolve]];
   solFuncs =
    <|"In" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "In", WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts],
      "Up" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "Up", WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts]|>;
   solFuncs = Lookup[solFuncs, BCs];
 
   If[ListQ[BCs],
-    Return[Association[MapThread[#1 -> RWRF[#1, #2, #3, #4]&, {BCs, norms, solFuncs, domains}]]],
-    Return[RWRF[BCs, norms, solFuncs, domains]]
+    Return[Association[MapThread[#1 -> RWRF[#1, #2, #3, #4, ndsolveopts]&, {BCs, norms, solFuncs, domains}]]],
+    Return[RWRF[BCs, norms, solFuncs, domains, ndsolveopts]]
   ];
 ];
 
