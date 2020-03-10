@@ -47,7 +47,7 @@ Options[ReggeWheelerRadialNumericalIntegration] = {
 domainQ[domain_] := MatchQ[domain, {_?NumericQ, _?NumericQ} | (_?NumericQ) | All];
 
 
-ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, opts:OptionsPattern[]] :=
+ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
  Module[{\[Lambda], RWRF, norms, solFuncs, domains, m = 0, a=0},
   (* Compute the eigenvalue *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
@@ -110,7 +110,7 @@ Options[ReggeWheelerRadialMST] = {
   "RenormalizedAngularMomentum" -> "Monodromy"};
 
 
-ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, opts:OptionsPattern[]] :=
+ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
  Module[{\[Lambda], \[Nu], norms, solFuncs, RWRF, m = 0, a=0},
   (* Compute the eigenvalue and renormalized angular momentum *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
@@ -157,12 +157,15 @@ SyntaxInformation[ReggeWheelerRadial] =
 
 Options[ReggeWheelerRadial] = {
   Method -> "MST",
-  "BoundaryConditions" -> {"In", "Up"}
+  "BoundaryConditions" -> {"In", "Up"},
+  WorkingPrecision -> Automatic,
+  PrecisionGoal -> Automatic,
+  AccuracyGoal -> Automatic
 };
 
 
 ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsPattern[]] :=
- Module[{RWRF, subopts, BCs},
+ Module[{RWRF, subopts, BCs, wp, prec, acc},
   (* Extract suboptions from Method to be passed on. *)
   If[ListQ[OptionValue[Method]],
     subopts = Rest[OptionValue[Method]];,
@@ -175,6 +178,9 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
     Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
     Return[$Failed];
   ];
+
+  (* Options associated with precision and accuracy *)
+  {wp, prec, acc} = OptionValue[{WorkingPrecision, PrecisionGoal, AccuracyGoal}];
 
   (* Decide which implementation to use *)
   Switch[OptionValue[Method],
@@ -193,7 +199,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
   ];
 
   (* Call the chosen implementation *)
-  RWRF[s, l, \[Omega], BCs, Sequence@@subopts]
+  RWRF[s, l, \[Omega], BCs, {wp, prec, acc}, Sequence@@subopts]
 ];
 
 
