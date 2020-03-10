@@ -40,15 +40,14 @@ Begin["`Private`"];
 
 
 Options[ReggeWheelerRadialNumericalIntegration] = {
-  "Domain" -> None,
-  "BoundaryConditions" -> None};
+  "Domain" -> None};
 
 
 domainQ[domain_] := MatchQ[domain, {_?NumericQ, _?NumericQ} | (_?NumericQ) | All];
 
 
-ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
- Module[{\[Lambda], RWRF, BCs, norms, solFuncs, domains, m = 0, a=0},
+ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, opts:OptionsPattern[]] :=
+ Module[{\[Lambda], RWRF, norms, solFuncs, domains, m = 0, a=0},
   (* Compute the eigenvalue *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
 
@@ -65,13 +64,6 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
      ]
     ]
    ];
-
-  (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
-  BCs = OptionValue[{ReggeWheelerRadial, ReggeWheelerRadialNumericalIntegration}, {opts}, "BoundaryConditions"];
-  If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
-    Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
-    Return[$Failed];
-  ];
 
   (* Domain over which the numerical solution can be evaluated *)
   domains = OptionValue["Domain"];
@@ -110,12 +102,11 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
 
 
 Options[ReggeWheelerRadialMST] = {
-  "RenormalizedAngularMomentum" -> "Monodromy",
-  "BoundaryConditions" -> None};
+  "RenormalizedAngularMomentum" -> "Monodromy"};
 
 
-ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
- Module[{\[Lambda], \[Nu], BCs, norms, solFuncs, RWRF, m = 0, a=0},
+ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, opts:OptionsPattern[]] :=
+ Module[{\[Lambda], \[Nu], norms, solFuncs, RWRF, m = 0, a=0},
   (* Compute the eigenvalue and renormalized angular momentum *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
   \[Nu] = RenormalizedAngularMomentum[s, l, m, a, \[Omega], \[Lambda], Method -> OptionValue["RenormalizedAngularMomentum"]];
@@ -129,13 +120,6 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
       "Domain" -> {2, \[Infinity]}, "RadialFunction" -> sf
      ]
     ];
-
-  (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
-  BCs = OptionValue[{ReggeWheelerRadial, ReggeWheelerRadialMST}, {opts}, "BoundaryConditions"];
-  If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
-    Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
-    Return[$Failed];
-  ];
 
   (* Compute the asymptotic normalisations *)
   norms = ReggeWheeler`MST`MST`Private`Amplitudes[s, l, m, a, 2\[Omega], \[Nu], \[Lambda]];
@@ -173,19 +157,25 @@ Options[ReggeWheelerRadial] = {
 
 
 ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsPattern[]] :=
- Module[{RWRF, subopts},
-  (* All options  except for Method are passed on. Method is a special case where
-     only suboptions are passed on, if there are any. *)
-  subopts = Cases[{opts}, Except[Method -> _]];
+ Module[{RWRF, subopts, BCs},
+  (* Extract suboptions from Method to be passed on. *)
   If[ListQ[OptionValue[Method]],
-    subopts = Join[Rest[OptionValue[Method]], subopts];
+    subopts = Rest[OptionValue[Method]];,
+    subopts = {};
+  ];
+
+  (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
+  BCs = OptionValue["BoundaryConditions"];
+  If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
+    Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
+    Return[$Failed];
   ];
 
   (* Decide which implementation to use *)
   Switch[OptionValue[Method],
-    "MST" | {"MST", Rule[_,_]...},
+    "MST" | {"MST", OptionsPattern[ReggeWheelerRadialMST]},
       RWRF = ReggeWheelerRadialMST,
-    "NumericalIntegration" | {"NumericalIntegration", ___},
+    "NumericalIntegration" | {"NumericalIntegration", OptionsPattern[ReggeWheelerRadialNumericalIntegration]},
       RWRF = ReggeWheelerRadialNumericalIntegration;,
     _,
       Message[ReggeWheelerRadial::optx, Method -> OptionValue[Method]];
@@ -198,7 +188,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
   ];
 
   (* Call the chosen implementation *)
-  RWRF[s, l, \[Omega], Sequence@@subopts]
+  RWRF[s, l, \[Omega], BCs, Sequence@@subopts]
 ];
 
 
