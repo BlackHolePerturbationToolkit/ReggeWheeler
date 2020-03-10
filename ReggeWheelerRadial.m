@@ -24,6 +24,7 @@ ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], 
 
 
 (* Error messages *)
+ReggeWheelerRadial::precw = "The precision of \[Omega]=`1` is less than WorkingPrecision (`2`).";
 ReggeWheelerRadial::optx = "Unknown options in `1`";
 ReggeWheelerRadial::dm = "Option `1` is not valid with BoundaryConditions \[RightArrow] `2`.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
@@ -183,6 +184,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 
   (* Options associated with precision and accuracy *)
   {wp, prec, acc} = OptionValue[{WorkingPrecision, PrecisionGoal, AccuracyGoal}];
+  If[Precision[\[Omega]] < wp, Message[ReggeWheelerRadial::precw, \[Omega], wp]];
 
   (* Decide which implementation to use *)
   Switch[OptionValue[Method],
