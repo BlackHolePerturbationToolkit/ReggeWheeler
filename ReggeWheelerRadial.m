@@ -25,6 +25,7 @@ ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], 
 
 (* Error messages *)
 ReggeWheelerRadial::optx = "Unknown options in `1`";
+ReggeWheelerRadial::dm = "Option `1` is not valid with BoundaryConditions \[RightArrow] `2`.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
 
 
@@ -68,14 +69,18 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, op
   (* Domain over which the numerical solution can be evaluated *)
   domains = OptionValue["Domain"];
   If[ListQ[BCs],
-    If[!MatchQ[domains, (List|Association)[Rule[_,_?domainQ]..]],
-      Message[ReggeWheelerRadial::optx, "Domain" -> domains];
+    If[!MatchQ[domains, (List|Association)[Rule["In"|"Up",_?domainQ]..]],
+      Message[ReggeWheelerRadial::dm, "Domain" -> domains, BCs];
       Return[$Failed];
     ];
-    domains = Lookup[domains, BCs, None];
+    domains = Lookup[domains, BCs, None]; 
+    If[!AllTrue[domains, domainQ],
+      Message[ReggeWheelerRadial::dm, "Domain" -> OptionValue["Domain"], BCs];
+      Return[$Failed];
+    ];
   ,
     If[!domainQ[domains],
-      Message[ReggeWheelerRadial::optx, "Domain" -> domains];
+      Message[ReggeWheelerRadial::dm, "Domain" -> domains, BCs];
       Return[$Failed];
     ];
   ];
