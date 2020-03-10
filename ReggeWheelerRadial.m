@@ -40,8 +40,9 @@ Begin["`Private`"];
 (*Numerical Integration Method*)
 
 
-Options[ReggeWheelerRadialNumericalIntegration] = {
-  "Domain" -> None};
+Options[ReggeWheelerRadialNumericalIntegration] = Join[
+  {"Domain" -> None},
+  FilterRules[Options[NDSolve], Except[WorkingPrecision|AccuracyGoal|PrecisionGoal]]];
 
 
 domainQ[domain_] := MatchQ[domain, {_?NumericQ, _?NumericQ} | (_?NumericQ) | All];
