@@ -171,8 +171,8 @@ Switch[MST`$MasterFunction,
 _, Abort[];
 ];
 
-Amplitudes[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_] :=
- Module[{\[Kappa], \[Tau], \[Epsilon]p, \[Omega], K\[Nu], K\[Nu]1, K\[Nu]2, Aminus, Aplus, InTrans, UpTrans, InInc, InRef, n, fSumUp, fSumDown, fSumK\[Nu]1Up, fSumK\[Nu]1Down, fSumK\[Nu]2Up, fSumK\[Nu]2Down, fSumAminusUp, fSumAminusDown},
+Amplitudes[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, {wp_, prec_, acc_}] :=
+ Module[{\[Kappa], \[Tau], \[Epsilon]p, \[Omega], K\[Nu], K\[Nu]1, K\[Nu]2, Aminus, Aplus, InTrans, UpTrans, InInc, InRef, n, fSumUp, fSumDown, fSumK\[Nu]1Up, fSumK\[Nu]1Down, fSumK\[Nu]2Up, fSumK\[Nu]2Down, fSumAminusUp, fSumAminusDown, termf, termK\[Nu]1, termK\[Nu]2, termAminus},
  Internal`InheritedBlock[{\[Alpha], \[Beta], \[Gamma], fn},
   \[Kappa] = Sqrt[1 - q^2];
   \[Tau] = (\[Epsilon] - m q)/\[Kappa];
@@ -187,64 +187,43 @@ Amplitudes[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_]
      until the result doesn't change. *)
 
   (* Sum MST series coefficients with no extra factors *)
+  termf[n_] := termf[n] = fIn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n];
   fSumUp = fSumDown = 0;
 
   n = 0;
-  While[fSumUp != (fSumUp += 
-    fIn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n]),
-    n++;
-  ];
+  While[fSumUp != (fSumUp += termf[n]) && (Abs[termf[n]] > 10^-acc + Abs[fSumUp] 10^-prec), n++];
 
   n = -1;
-  While[fSumDown != (fSumDown += 
-    fIn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n]), 
-    n--;
-  ];
+  While[fSumDown != (fSumDown += termf[n]) && (Abs[termf[n]] > 10^-acc + Abs[fSumDown] 10^-prec), n--];
 
   (* Sums appearing in ST Eq. (165) with r=0. We evaluate these with 1: \[Nu] and 2:-\[Nu]-1 *)
-
+  termK\[Nu]1[n_] := termK\[Nu]1[n] = ((-1)^n Gamma[1 + n + s + I \[Epsilon] + \[Nu]] Gamma[1 + n + 2 \[Nu]] Gamma[1 + n + \[Nu] + I \[Tau]])/(n! Gamma[1 + n - s - I \[Epsilon] + \[Nu]] Gamma[1 + n + \[Nu] - I \[Tau]]) fn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n];
   fSumK\[Nu]1Up = fSumK\[Nu]1Down = 0;
 
   n = 0;
-  While[fSumK\[Nu]1Up != (fSumK\[Nu]1Up += 
-    ((-1)^n Gamma[1 + n + s + I \[Epsilon] + \[Nu]] Gamma[1 + n + 2 \[Nu]] Gamma[1 + n + \[Nu] + I \[Tau]])/(n! Gamma[1 + n - s - I \[Epsilon] + \[Nu]] Gamma[1 + n + \[Nu] - I \[Tau]]) fn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n]),
-    n++;
-  ];
+  While[fSumK\[Nu]1Up != (fSumK\[Nu]1Up += termK\[Nu]1[n]) && (Abs[termK\[Nu]1[n]] > 10^-acc + Abs[fSumK\[Nu]1Up] 10^-prec), n++];
 
   n = 0;
-  While[fSumK\[Nu]1Down != (fSumK\[Nu]1Down += 
-    (((-1)^n) Pochhammer[1 + s - I \[Epsilon] + \[Nu], n])/((-n)! Pochhammer[1 - s + I \[Epsilon] + \[Nu], n] Pochhammer[2 + 2 \[Nu], n]) fn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n]), 
-    n--;
-  ];
+  While[fSumK\[Nu]1Down != (fSumK\[Nu]1Down += termK\[Nu]1[n]) && (Abs[termK\[Nu]1[n]] > 10^-acc + Abs[fSumK\[Nu]1Down] 10^-prec), n--];
 
+  termK\[Nu]2[n_] := termK\[Nu]2[n] = ((-1)^n Gamma[1 + n + s + I \[Epsilon] + (-1-\[Nu])] Gamma[1 + n + 2 (-1-\[Nu])] Gamma[1 + n + (-1-\[Nu]) + I \[Tau]])/(n! Gamma[1 + n - s - I \[Epsilon] + (-1-\[Nu])] Gamma[1 + n + (-1-\[Nu]) - I \[Tau]]) fn[q, \[Epsilon], \[Kappa], \[Tau], (-1-\[Nu]), \[Lambda], s, m, n];
   fSumK\[Nu]2Up = fSumK\[Nu]2Down = 0;
 
   n = 0;
-  While[fSumK\[Nu]2Up != (fSumK\[Nu]2Up += 
-    ((-1)^n Gamma[1 + n + s + I \[Epsilon] + (-1-\[Nu])] Gamma[1 + n + 2 (-1-\[Nu])] Gamma[1 + n + (-1-\[Nu]) + I \[Tau]])/(n! Gamma[1 + n - s - I \[Epsilon] + (-1-\[Nu])] Gamma[1 + n + (-1-\[Nu]) - I \[Tau]]) fn[q, \[Epsilon], \[Kappa], \[Tau], (-1-\[Nu]), \[Lambda], s, m, n]),
-    n++;
-  ];
+  While[fSumK\[Nu]2Up != (fSumK\[Nu]2Up += termK\[Nu]2[n]) && (Abs[termK\[Nu]2[n]] > 10^-acc + Abs[fSumK\[Nu]2Up] 10^-prec), n++];
 
   n = 0;
-  While[fSumK\[Nu]2Down != (fSumK\[Nu]2Down += 
-    (((-1)^n) Pochhammer[1 + s - I \[Epsilon] + (-1-\[Nu]), n])/((-n)! Pochhammer[1 - s + I \[Epsilon] + (-1-\[Nu]), n] Pochhammer[2 + 2 (-1-\[Nu]), n]) fn[q, \[Epsilon], \[Kappa], \[Tau], (-1-\[Nu]), \[Lambda], s, m, n]), 
-    n--;
-  ];
+  While[fSumK\[Nu]2Down != (fSumK\[Nu]2Down += termK\[Nu]2[n]) && (Abs[termK\[Nu]2[n]] > 10^-acc + Abs[fSumK\[Nu]2Down] 10^-prec), n--];
 
   (* Sum appearing in ST (158), CO (3.19) *)
+  termAminus[n_] := termAminus[n] = (-1)^n Pochhammer[\[Nu] + 1 + s - I \[Epsilon], n]/Pochhammer[\[Nu] + 1 - s + I \[Epsilon], n] fn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n];
   fSumAminusUp = fSumAminusDown = 0;
 
   n = 0;
-  While[fSumAminusUp != (fSumAminusUp +=
-    (-1)^n Pochhammer[\[Nu] + 1 + s - I \[Epsilon], n]/Pochhammer[\[Nu] + 1 - s + I \[Epsilon], n] fn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n]),
-    n++;
-  ];
+  While[fSumAminusUp != (fSumAminusUp += termAminus[n]) && (Abs[termAminus[n]] > 10^-acc + Abs[fSumAminusUp] 10^-prec), n++];
 
   n = -1;
-  While[fSumAminusDown != (fSumAminusDown +=
-    (-1)^n Pochhammer[\[Nu] + 1 + s - I \[Epsilon], n]/Pochhammer[\[Nu] + 1 - s + I \[Epsilon], n] fn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n]), 
-    n--;
-  ];
+  While[fSumAminusDown != (fSumAminusDown += termAminus[n]) && (Abs[termAminus[n]] > 10^-acc + Abs[fSumAminusDown] 10^-prec), n--];
   
   (* In transmission coefficient: Btrans in ST (167) and CO (3.12) *)
   InTrans = prefacInTrans[s, \[Epsilon], \[Tau], \[Kappa]] (fSumUp+fSumDown);
