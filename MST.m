@@ -298,8 +298,8 @@ Switch[MST`$MasterFunction,
   prefacUp[s_, \[Epsilon]_, \[Kappa]_, \[Tau]_, \[Nu]_, zhat_] := 2^\[Nu] E^(-\[Pi] \[Epsilon]) E^(-I \[Pi] (\[Nu]+1)) E^(I zhat) zhat^(\[Nu]+I (\[Epsilon]+\[Tau])/2) (zhat-\[Epsilon] \[Kappa])^(-I (\[Epsilon]+\[Tau])/2) E^(-I \[Pi] s) (zhat-\[Epsilon] \[Kappa])^(-s);
 ];
 
-MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_][r_?NumericQ] :=
- Module[{\[Kappa], \[Tau], rp, x, resUp, nUp, resDown, nDown},
+MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_, {wp_, prec_, acc_}][r_?NumericQ] :=
+ Module[{\[Kappa], \[Tau], rp, x, resUp, nUp, resDown, nDown, term},
  Block[{H2F1},
  Internal`InheritedBlock[{\[Alpha], \[Beta], \[Gamma], fn},
   \[Kappa] = Sqrt[1 - q^2];
@@ -319,20 +319,21 @@ MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_
     res
   ];
  
+  term[n_] := term[n] = fIn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n]H2F1[n];
   resUp = resDown = 0;
 
   nUp = 0;
-  While[resUp != (resUp += fIn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, nUp]H2F1[nUp]), nUp++];
+  While[resUp != (resUp += term[nUp]) && (Abs[term[nUp]] > 10^-acc + Abs[resUp] 10^-prec), nUp++];
 
   nDown = -1;
-  While[resDown != (resDown += fIn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, nDown]H2F1[nDown]), nDown--];
+  While[resDown != (resDown += term[nDown]) && (Abs[term[nDown]] > 10^-acc + Abs[resDown] 10^-prec), nDown--];
 
   prefacIn[s, \[Epsilon], \[Tau], \[Kappa], x] (resUp + resDown) / norm
 ]]];
 
 
-Derivative[1][MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_]][r_?NumericQ] :=
- Module[{\[Kappa], \[Tau], rp, x, dxdr, prefac, dprefac, resUp, nUp, resDown, nDown},
+Derivative[1][MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_, {wp_, prec_, acc_}]][r_?NumericQ] :=
+ Module[{\[Kappa], \[Tau], rp, x, dxdr, prefac, dprefac, resUp, nUp, resDown, nDown, term},
  Block[{H2F1, dH2F1},
  Internal`InheritedBlock[{\[Alpha], \[Beta], \[Gamma], fn},
   \[Kappa] = Sqrt[1 - q^2];
@@ -368,13 +369,14 @@ Derivative[1][MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu
   prefac = prefacIn[s, \[Epsilon], \[Tau], \[Kappa], x];
   dprefac = Derivative[0,0,0,0,1][prefacIn][s, \[Epsilon], \[Tau], \[Kappa], x];
 
+  term[n_] := term[n] = fIn[q,\[Epsilon],\[Kappa],\[Tau],\[Nu],\[Lambda],s,m,n](dprefac H2F1[n] + prefac dH2F1[n]);
   resUp = resDown = 0;
 
   nUp = 0;
-  While[resUp != (resUp+= fIn[q,\[Epsilon],\[Kappa],\[Tau],\[Nu],\[Lambda],s,m,nUp](dprefac H2F1[nUp] + prefac dH2F1[nUp])), nUp++];
+  While[resUp != (resUp+= term[nUp]) && (Abs[term[nUp]] > 10^-acc + Abs[resUp] 10^-prec), nUp++];
 
   nDown = -1;
-  While[resDown != (resDown+= fIn[q,\[Epsilon],\[Kappa],\[Tau],\[Nu],\[Lambda],s,m,nDown](dprefac H2F1[nDown] + prefac dH2F1[nDown])), nDown--];
+  While[resDown != (resDown+= term[nDown]) && (Abs[term[nDown]] > 10^-acc + Abs[resDown] 10^-prec), nDown--];
 
   (resUp+resDown) dxdr/norm
 ]]];
@@ -387,8 +389,8 @@ Derivative[1][MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu
 
 SetAttributes[MSTRadialUp, {NumericFunction}];
 
-MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_][r_?NumericQ] :=
- Module[{\[Kappa], \[Tau], \[Epsilon]p, rm, z, zm, zhat, resUp, nUp, resDown, nDown},
+MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_, {wp_, prec_, acc_}][r_?NumericQ] :=
+ Module[{\[Kappa], \[Tau], \[Epsilon]p, rm, z, zm, zhat, resUp, nUp, resDown, nDown, term},
  Block[{HU},
  Internal`InheritedBlock[{\[Alpha], \[Beta], \[Gamma], fn},
   \[Kappa] = Sqrt[1 - q^2];
@@ -411,19 +413,20 @@ MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_
     res
   ];
 
+  term[n_] := term[n] = fUp[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n] HU[n];
   resDown = resUp = 0;
   nUp = 0;
-  While[resUp != (resUp += fUp[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, nUp] HU[nUp]),nUp++];
+  While[resUp != (resUp += term[nUp]) && (Abs[term[nUp]] > 10^-acc + Abs[resUp] 10^-prec), nUp++];
   
   nDown = -1;
-  While[resDown != (resDown += fUp[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, nDown] HU[nDown]),nDown--];
+  While[resDown != (resDown += term[nDown]) && (Abs[term[nDown]] > 10^-acc + Abs[resDown] 10^-prec), nDown--];
   
   prefacUp[s, \[Epsilon], \[Kappa], \[Tau], \[Nu], zhat] (resUp+resDown)/norm
 ]]];
 
 
-Derivative[1][MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_]][r_?NumericQ] :=
- Module[{\[Kappa], \[Tau], \[Epsilon]p, rm, z, zm, zhat, dzhatdr, prefac, dprefac, resUp, nUp, resDown, nDown},
+Derivative[1][MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_, {wp_, prec_, acc_}]][r_?NumericQ] :=
+ Module[{\[Kappa], \[Tau], \[Epsilon]p, rm, z, zm, zhat, dzhatdr, prefac, dprefac, resUp, nUp, resDown, nDown, term},
  Block[{HU, dHU},
  Internal`InheritedBlock[{\[Alpha], \[Beta], \[Gamma], fn},
   \[Kappa] = Sqrt[1 - q^2];
@@ -462,12 +465,13 @@ Derivative[1][MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu
   prefac = prefacUp[s, \[Epsilon], \[Kappa], \[Tau], \[Nu], zhat];
   dprefac = Derivative[0,0,0,0,0,1][prefacUp][s, \[Epsilon], \[Kappa], \[Tau], \[Nu], zhat];
 
+  term[n_] := term[n] = fUp[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n] (dprefac HU[n] + prefac dHU[n]);
   resDown = resUp = 0;
   nUp = 0;
-  While[resUp != (resUp += fUp[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, nUp] (dprefac HU[nUp] + prefac dHU[nUp])),nUp++];
+  While[resUp != (resUp += term[nUp]) && (Abs[term[nUp]] > 10^-acc + Abs[resUp] 10^-prec), nUp++];
   
   nDown = -1;
-  While[resDown != (resDown += fUp[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, nDown] (dprefac HU[nDown] + prefac dHU[nDown])),nDown--];
+  While[resDown != (resDown += term[nDown]) && (Abs[term[nDown]] > 10^-acc + Abs[resDown] 10^-prec), nDown--];
   
   (resUp+resDown) dzhatdr /norm
 ]]];
