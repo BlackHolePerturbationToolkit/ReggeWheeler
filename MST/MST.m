@@ -280,10 +280,10 @@ Amplitudes[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_,
   fSumUp = fSumDown = 0;
 
   n = 0;
-  While[fSumUp != (fSumUp += termf[n]) && (Abs[termf[n]] > 10^-acc + Abs[fSumUp] 10^-prec), n++];
+  While[fSumUp != (fSumUp += termf[n]), n++];
 
   n = -1;
-  While[fSumDown != (fSumDown += termf[n]) && (Abs[termf[n]] > 10^-acc + Abs[fSumDown] 10^-prec), n--];
+  While[fSumDown != (fSumDown += termf[n]), n--];
 
   (* Sums appearing in ST Eq. (165) with r=0. We evaluate these with 1: \[Nu] and 2:-\[Nu]-1 *)
   termK\[Nu]1Up[n_] := termK\[Nu]1Up[n] = ((-1)^n Gamma[1 + n + s + I \[Epsilon] + \[Nu]] Gamma[1 + n + 2 \[Nu]] Gamma[1 + n + \[Nu] + I \[Tau]])/(n! Gamma[1 + n - s - I \[Epsilon] + \[Nu]] Gamma[1 + n + \[Nu] - I \[Tau]]) fn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n];
@@ -291,30 +291,30 @@ Amplitudes[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_,
   fSumK\[Nu]1Up = fSumK\[Nu]1Down = 0;
 
   n = 0;
-  While[fSumK\[Nu]1Up != (fSumK\[Nu]1Up += termK\[Nu]1Up[n]) && (Abs[termK\[Nu]1Up[n]] > 10^-acc + Abs[fSumK\[Nu]1Up] 10^-prec), n++];
+  While[fSumK\[Nu]1Up != (fSumK\[Nu]1Up += termK\[Nu]1Up[n]), n++];
 
   n = 0;
-  While[fSumK\[Nu]1Down != (fSumK\[Nu]1Down += termK\[Nu]1Down[n]) && (Abs[termK\[Nu]1Down[n]] > 10^-acc + Abs[fSumK\[Nu]1Down] 10^-prec), n--];
+  While[fSumK\[Nu]1Down != (fSumK\[Nu]1Down += termK\[Nu]1Down[n]), n--];
 
   termK\[Nu]2Up[n_] := termK\[Nu]2Up[n] = ((-1)^n Gamma[1 + n + s + I \[Epsilon] + (-1-\[Nu])] Gamma[1 + n + 2 (-1-\[Nu])] Gamma[1 + n + (-1-\[Nu]) + I \[Tau]])/(n! Gamma[1 + n - s - I \[Epsilon] + (-1-\[Nu])] Gamma[1 + n + (-1-\[Nu]) - I \[Tau]]) fn[q, \[Epsilon], \[Kappa], \[Tau], (-1-\[Nu]), \[Lambda], s, m, n];
   termK\[Nu]2Down[n_] := termK\[Nu]2Down[n] = (((-1)^n) Pochhammer[1 + s - I \[Epsilon] + (-1-\[Nu]), n])/((-n)! Pochhammer[1 - s + I \[Epsilon] + (-1-\[Nu]), n] Pochhammer[2 + 2 (-1-\[Nu]), n]) fn[q, \[Epsilon], \[Kappa], \[Tau], (-1-\[Nu]), \[Lambda], s, m, n];
   fSumK\[Nu]2Up = fSumK\[Nu]2Down = 0;
 
   n = 0;
-  While[fSumK\[Nu]2Up != (fSumK\[Nu]2Up += termK\[Nu]2Up[n]) && (Abs[termK\[Nu]2Up[n]] > 10^-acc + Abs[fSumK\[Nu]2Up] 10^-prec), n++];
+  While[fSumK\[Nu]2Up != (fSumK\[Nu]2Up += termK\[Nu]2Up[n]), n++];
 
   n = 0;
-  While[fSumK\[Nu]2Down != (fSumK\[Nu]2Down += termK\[Nu]2Down[n]) && (Abs[termK\[Nu]2Down[n]] > 10^-acc + Abs[fSumK\[Nu]2Down] 10^-prec), n--];
+  While[fSumK\[Nu]2Down != (fSumK\[Nu]2Down += termK\[Nu]2Down[n]), n--];
 
   (* Sum appearing in ST (158), CO (3.19) *)
   termAminus[n_] := termAminus[n] = (-1)^n Pochhammer[\[Nu] + 1 + s - I \[Epsilon], n]/Pochhammer[\[Nu] + 1 - s + I \[Epsilon], n] fn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n];
   fSumAminusUp = fSumAminusDown = 0;
 
   n = 0;
-  While[fSumAminusUp != (fSumAminusUp += termAminus[n]) && (Abs[termAminus[n]] > 10^-acc + Abs[fSumAminusUp] 10^-prec), n++];
+  While[fSumAminusUp != (fSumAminusUp += termAminus[n]), n++];
 
   n = -1;
-  While[fSumAminusDown != (fSumAminusDown += termAminus[n]) && (Abs[termAminus[n]] > 10^-acc + Abs[fSumAminusDown] 10^-prec), n--];
+  While[fSumAminusDown != (fSumAminusDown += termAminus[n]), n--];
   
   (* In transmission coefficient: Btrans in ST (167) and CO (3.12) *)
   InTrans = prefacInTrans[s, \[Epsilon], \[Tau], \[Kappa]] (fSumUp+fSumDown);
@@ -363,7 +363,7 @@ SetAttributes[MSTRadialIn, {NumericFunction}];
 
 
 MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_, {wp_, prec_, acc_}][r_?NumericQ] :=
- Module[{\[Kappa], \[Tau], rp, x, resUp, nUp, resDown, nDown, term},
+ Module[{\[Kappa], \[Tau], rp, x, resUp, nUp, resDown, nDown, term, prefac},
  Block[{H2F1},
  Internal`InheritedBlock[{\[Alpha], \[Beta], \[Gamma], fn},
   \[Kappa] = Sqrt[1 - q^2];
@@ -383,7 +383,8 @@ MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_
     res
   ];
  
-  term[n_] := term[n] = fIn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n]H2F1[n];
+  prefac = prefacIn[s, \[Epsilon], \[Tau], \[Kappa], x]/norm;
+  term[n_] := term[n] = prefac fIn[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n]H2F1[n];
   resUp = resDown = 0;
 
   nUp = 0;
@@ -392,7 +393,7 @@ MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_
   nDown = -1;
   While[resDown != (resDown += term[nDown]) && (Abs[term[nDown]] > 10^-acc + Abs[resDown] 10^-prec), nDown--];
 
-  prefacIn[s, \[Epsilon], \[Tau], \[Kappa], x] (resUp + resDown) / norm
+  resUp + resDown
 ]]];
 
 
@@ -434,8 +435,8 @@ Derivative[1][MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu
     res
   ];
  
-  prefac = prefacIn[s, \[Epsilon], \[Tau], \[Kappa], x];
-  dprefac = Derivative[0,0,0,0,1][prefacIn][s, \[Epsilon], \[Tau], \[Kappa], x];
+  prefac = prefacIn[s, \[Epsilon], \[Tau], \[Kappa], x] dxdr/norm;
+  dprefac = Derivative[0,0,0,0,1][prefacIn][s, \[Epsilon], \[Tau], \[Kappa], x] dxdr/norm;
 
   term[n_] := term[n] = fIn[q,\[Epsilon],\[Kappa],\[Tau],\[Nu],\[Lambda],s,m,n](dprefac H2F1[n] + prefac dH2F1[n]);
   resUp = resDown = 0;
@@ -446,7 +447,7 @@ Derivative[1][MSTRadialIn[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu
   nDown = -1;
   While[resDown != (resDown+= term[nDown]) && (Abs[term[nDown]] > 10^-acc + Abs[resDown] 10^-prec), nDown--];
 
-  (resUp+resDown) dxdr/norm
+  (resUp+resDown)
 ]]];
 
 
@@ -468,7 +469,7 @@ SetAttributes[MSTRadialUp, {NumericFunction}];
 
 
 MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_, norm_, {wp_, prec_, acc_}][r_?NumericQ] :=
- Module[{\[Kappa], \[Tau], \[Epsilon]p, rm, z, zm, zhat, resUp, nUp, resDown, nDown, term},
+ Module[{\[Kappa], \[Tau], \[Epsilon]p, rm, z, zm, zhat, resUp, nUp, resDown, nDown, term, prefac},
  Block[{HU},
  Internal`InheritedBlock[{\[Alpha], \[Beta], \[Gamma], fn},
   \[Kappa] = Sqrt[1 - q^2];
@@ -491,7 +492,8 @@ MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_
     res
   ];
 
-  term[n_] := term[n] = fUp[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n] HU[n];
+  prefac = prefacUp[s, \[Epsilon], \[Kappa], \[Tau], \[Nu], zhat]/norm;
+  term[n_] := term[n] = prefac fUp[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n] HU[n];
   resDown = resUp = 0;
   nUp = 0;
   While[resUp != (resUp += term[nUp]) && (Abs[term[nUp]] > 10^-acc + Abs[resUp] 10^-prec), nUp++];
@@ -499,7 +501,7 @@ MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu]_, \[Lambda]_
   nDown = -1;
   While[resDown != (resDown += term[nDown]) && (Abs[term[nDown]] > 10^-acc + Abs[resDown] 10^-prec), nDown--];
   
-  prefacUp[s, \[Epsilon], \[Kappa], \[Tau], \[Nu], zhat] (resUp+resDown)/norm
+  resUp+resDown
 ]]];
 
 
@@ -544,8 +546,8 @@ Derivative[1][MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu
     res
   ];
 
-  prefac = prefacUp[s, \[Epsilon], \[Kappa], \[Tau], \[Nu], zhat];
-  dprefac = Derivative[0,0,0,0,0,1][prefacUp][s, \[Epsilon], \[Kappa], \[Tau], \[Nu], zhat];
+  prefac = prefacUp[s, \[Epsilon], \[Kappa], \[Tau], \[Nu], zhat] dzhatdr/norm;
+  dprefac = Derivative[0,0,0,0,0,1][prefacUp][s, \[Epsilon], \[Kappa], \[Tau], \[Nu], zhat] dzhatdr/norm;
 
   term[n_] := term[n] = fUp[q, \[Epsilon], \[Kappa], \[Tau], \[Nu], \[Lambda], s, m, n] (dprefac HU[n] + prefac dHU[n]);
   resDown = resUp = 0;
@@ -555,7 +557,7 @@ Derivative[1][MSTRadialUp[s_Integer, l_Integer, m_Integer, q_, \[Epsilon]_, \[Nu
   nDown = -1;
   While[resDown != (resDown += term[nDown]) && (Abs[term[nDown]] > 10^-acc + Abs[resDown] 10^-prec), nDown--];
   
-  (resUp+resDown) dzhatdr /norm
+  (resUp+resDown)
 ]]];
 
 
