@@ -26,30 +26,30 @@ Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][{xmin_, xmax_}] :=
     {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Precision[\[Omega]]];
     If[bc === "In" && xmin === Automatic, xMin = xBC, xMin = xmin];
     If[bc === "Up" && xmax === Automatic, xMax = xBC, xMax = xmax];
-    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, Precision[\[Omega]]]
+    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, ndsolveopts]
 ];
 
 Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][All] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
-    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Precision[\[Omega]]];
-    soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, Precision[\[Omega]]][x]]]
+    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Lookup[ndsolveopts, WorkingPrecision]];
+    soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, ndsolveopts][x]]]
 ];
 
 Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][None] := $Failed;
 
 
 (*should this be in a module for y1 and y2?*)
-Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xmin_?NumericQ,xmax_?NumericQ,potential_,precision_]:=Module[{y1,y2,x},
-	NDSolveValue[
+Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xmin_?NumericQ,xmax_?NumericQ,potential_,ndsolveopts___]:=Module[{y1,y2,x},
+	Quiet[NDSolveValue[
 		{y1'[x]==y2[x],(1-2/x)^2*y2'[x]+2(1-2/x)/x^2*y2[x]+(\[Omega]^2-potential[s,l,x])*y1[x]==0,y1[xBC]==y1BC,y2[xBC]==y2BC},
 		y1,
 		{x, xmin, xmax},
+		ndsolveopts,
 		Method->"StiffnessSwitching",
 		MaxSteps->Infinity,
-		WorkingPrecision->precision,
 		InterpolationOrder->All
-		]
+		], NDSolveValue::precw]
 	]
 
 
