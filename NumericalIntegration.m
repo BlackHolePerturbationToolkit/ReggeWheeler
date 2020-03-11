@@ -33,7 +33,7 @@ Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][All] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
     {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Lookup[{ndsolveopts}, WorkingPrecision, Precision[\[Omega]]]];
-    soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, ndsolveopts][x]]]
+    soln = AllIntegrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, ReggeWheelerPotential, ndsolveopts]
 ];
 
 Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][None] := $Failed;
@@ -51,6 +51,32 @@ Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xmin_?NumericQ,xmax_?NumericQ,potent
 		InterpolationOrder->All
 		], NDSolveValue::precw]
 	]
+
+
+(*should this be in a module for y1 and y2?*)
+AllIntegrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,potential_,ndsolveopts___][xval:(_?NumericQ | {_?NumericQ..})] := Module[{y1,y2,x},
+	Quiet[NDSolveValue[
+		{y1'[x]==y2[x],(1-2/x)^2*y2'[x]+2(1-2/x)/x^2*y2[x]+(\[Omega]^2-potential[s,l,x])*y1[x]==0,y1[xBC]==y1BC,y2[xBC]==y2BC},
+		y1[xval],
+		{x, Min[xBC,xval], Max[xBC,xval]},
+		ndsolveopts,
+		Method->"StiffnessSwitching",
+		MaxSteps->Infinity,
+		InterpolationOrder->All
+		], NDSolveValue::precw]
+	];
+
+Derivative[n_][AllIntegrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,potential_,ndsolveopts___]][xval:(_?NumericQ | {_?NumericQ..})] := Module[{y1,y2,x},
+	Quiet[NDSolveValue[
+		{y1'[x]==y2[x],(1-2/x)^2*y2'[x]+2(1-2/x)/x^2*y2[x]+(\[Omega]^2-potential[s,l,x])*y1[x]==0,y1[xBC]==y1BC,y2[xBC]==y2BC},
+		Derivative[n][y1][xval],
+		{x, Min[xBC,xval], Max[xBC,xval]},
+		ndsolveopts,
+		Method->"StiffnessSwitching",
+		MaxSteps->Infinity,
+		InterpolationOrder->All
+		], NDSolveValue::precw]
+	];
 
 
 (*boundary conditions for odd-parity Regge-Wheeler eqn.*)
