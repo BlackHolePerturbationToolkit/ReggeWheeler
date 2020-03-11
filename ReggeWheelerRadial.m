@@ -134,8 +134,8 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_},
 
   (* Solution functions for the specified boundary conditions *)
   solFuncs =
-    <|"In" :> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"]],
-      "Up" :> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"]]|>;
+    <|"In" :> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"], {wp, prec, acc}],
+      "Up" :> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"], {wp, prec, acc}]|>;
   solFuncs = Lookup[solFuncs, BCs];
 
   (* Select normalisation coefficients for the specified boundary conditions and rescale
