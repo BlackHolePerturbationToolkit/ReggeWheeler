@@ -130,7 +130,7 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_},
     ];
 
   (* Compute the asymptotic normalisations *)
-  norms = ReggeWheeler`MST`MST`Private`Amplitudes[s, l, m, a, 2\[Omega], \[Nu], \[Lambda]];
+  norms = ReggeWheeler`MST`MST`Private`Amplitudes[s, l, m, a, 2\[Omega], \[Nu], \[Lambda], {wp, prec, acc}];
 
   (* Solution functions for the specified boundary conditions *)
   solFuncs =
