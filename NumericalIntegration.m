@@ -23,7 +23,7 @@ Psi[s_, l_, \[Omega]_, "Up", ndsolveopts___][xmin_?NumericQ] := Psi[s, l, \[Omeg
 Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][{xmin_, xmax_}] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
-    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Precision[\[Omega]]];
+    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Lookup[{ndsolveopts}, WorkingPrecision, Precision[\[Omega]]]];
     If[bc === "In" && xmin === Automatic, xMin = xBC, xMin = xmin];
     If[bc === "Up" && xmax === Automatic, xMax = xBC, xMax = xmax];
     soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, ndsolveopts]
@@ -32,7 +32,7 @@ Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][{xmin_, xmax_}] :=
 Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][All] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
-    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Lookup[ndsolveopts, WorkingPrecision]];
+    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Lookup[{ndsolveopts}, WorkingPrecision, Precision[\[Omega]]]];
     soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, ndsolveopts][x]]]
 ];
 
