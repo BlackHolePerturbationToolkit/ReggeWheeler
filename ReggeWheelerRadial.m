@@ -249,7 +249,7 @@ ReggeWheelerRadialFunction /:
  Module[{summary, extended},
   summary = {Row[{BoxForm`SummaryItem[{"s: ", s}], "  ",
                   BoxForm`SummaryItem[{"l: ", l}], "  ",
-                  BoxForm`SummaryItem[{"\[Omega]: ", NumberForm[\[Omega], 6]}]}],
+                  BoxForm`SummaryItem[{"\[Omega]: ", \[Omega]}]}],
              BoxForm`SummaryItem[{"Domain: ", assoc["Domain"]}],
              BoxForm`SummaryItem[{"Boundary Conditions: " , assoc["BoundaryConditions"]}]};
   extended = {BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"]}],
