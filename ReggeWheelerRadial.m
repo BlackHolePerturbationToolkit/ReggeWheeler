@@ -214,13 +214,74 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 (*ReggeWheelerRadialFunction*)
 
 
-SetAttributes[ReggeWheelerRadialFunction, {NumericFunction}];
+(* ::Subsection::Closed:: *)
+(*Output format*)
 
-Format[ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]] := 
-  "ReggeWheelerRadialFunction["<>ToString[s]<>","<>ToString[l]<>","<>ToString[\[Omega]]<>",<<>>]";
+
+(* ::Subsubsection::Closed:: *)
+(*Icons*)
+
+
+icons = <|
+ "In" -> Graphics[{
+         Line[{{0,1/2},{1/2,1},{1,1/2},{1/2,0},{0,1/2}}],
+         Line[{{3/4,1/4},{1/2,1/2}}],
+         {Arrowheads[0.2],Arrow[Line[{{1/2,1/2},{1/4,3/4}}]]},
+         {Arrowheads[0.2],Arrow[Line[{{1/2,1/2},{3/4,3/4}}]]}},
+         Background -> White,
+         ImageSize -> Dynamic[{Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[Magnification]}]],
+ "Up" -> Graphics[{
+         Line[{{0,1/2},{1/2,1},{1,1/2},{1/2,0},{0,1/2}}],
+         Line[{{1/4,1/4},{1/2,1/2}}],
+         {Arrowheads[0.2],Arrow[Line[{{1/2,1/2},{1/4,3/4}}]]},
+         {Arrowheads[0.2],Arrow[Line[{{1/2,1/2},{3/4,3/4}}]]}},
+         Background -> White,
+         ImageSize -> Dynamic[{Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[Magnification]}]]
+|>;
+
+
+(* ::Subsubsection::Closed:: *)
+(*Formatting of ReggeWheelerRadialFunction*)
+
+
+ReggeWheelerRadialFunction /:
+ MakeBoxes[rwrf:ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_], form:(StandardForm|TraditionalForm)] :=
+ Module[{summary, extended},
+  summary = {Row[{BoxForm`SummaryItem[{"s: ", s}], "  ",
+                  BoxForm`SummaryItem[{"l: ", l}], "  ",
+                  BoxForm`SummaryItem[{"\[Omega]: ", NumberForm[\[Omega], 6]}]}],
+             BoxForm`SummaryItem[{"Domain: ", assoc["Domain"]}],
+             BoxForm`SummaryItem[{"Boundary Conditions: " , assoc["BoundaryConditions"]}]};
+  extended = {BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"]}],
+              BoxForm`SummaryItem[{"Transmission Amplitude: ", assoc["Amplitudes", "Transmission"]}],
+              BoxForm`SummaryItem[{"Incidence Amplitude: ", Lookup[assoc["Amplitudes"], "Incidence", Missing]}],
+              BoxForm`SummaryItem[{"Reflection Amplitude: ", Lookup[assoc["Amplitudes"], "Reflection", Missing]}],
+              BoxForm`SummaryItem[{"Method: ", First[assoc["Method"]]}],
+              BoxForm`SummaryItem[{"Method options: ",Column[Rest[assoc["Method"]]]}]};
+  BoxForm`ArrangeSummaryBox[
+    ReggeWheelerRadialFunction,
+    rwrf,
+    Lookup[icons, assoc["BoundaryConditions"], None],
+    summary,
+    extended,
+    form,
+    "Interpretable" -> Automatic]
+];
+
+
+(* ::Subsection::Closed:: *)
+(*Accessing attributes*)
+
 
 ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y_String] /; !MemberQ[{"RadialFunction"}, y] :=
   assoc[y];
+
+
+(* ::Subsection::Closed:: *)
+(*Numerical evaluation*)
+
+
+SetAttributes[ReggeWheelerRadialFunction, {NumericFunction}];
 
 
 outsideDomainQ[r_, rmin_, rmax_] := Min[r]<rmin || Max[r]>rmax;
