@@ -13,8 +13,7 @@ BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
     "ReggeWheeler`NumericalIntegration`",
     "ReggeWheeler`MST`RenormalizedAngularMomentum`",
     "ReggeWheeler`MST`MST`",
-    "SpinWeightedSpheroidalHarmonics`",
-    "DifferentialEquations`InterpolatingFunctionAnatomy`"
+    "SpinWeightedSpheroidalHarmonics`"
   }];
 
 
@@ -62,7 +61,7 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, {w
      Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
       "Method" -> {"NumericalIntegration", ndsolveopts},
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
-      "Domain" -> If[domain === All, {2, \[Infinity]}, First[InterpolatingFunctionDomain[solutionFunction]]],
+      "Domain" -> If[domain === All, {2, \[Infinity]}, First[solutionFunction["Domain"]]],
       "RadialFunction" -> solutionFunction
      ]
     ]
