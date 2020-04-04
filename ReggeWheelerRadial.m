@@ -13,8 +13,7 @@ BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
     "ReggeWheeler`NumericalIntegration`",
     "ReggeWheeler`MST`RenormalizedAngularMomentum`",
     "ReggeWheeler`MST`MST`",
-    "SpinWeightedSpheroidalHarmonics`",
-    "DifferentialEquations`InterpolatingFunctionAnatomy`"
+    "SpinWeightedSpheroidalHarmonics`"
   }];
 
 
@@ -24,7 +23,9 @@ ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], 
 
 
 (* Error messages *)
+ReggeWheelerRadial::precw = "The precision of \[Omega]=`1` is less than WorkingPrecision (`2`).";
 ReggeWheelerRadial::optx = "Unknown options in `1`";
+ReggeWheelerRadial::dm = "Option `1` is not valid with BoundaryConditions \[RightArrow] `2`.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
 
 
@@ -39,51 +40,48 @@ Begin["`Private`"];
 (*Numerical Integration Method*)
 
 
-Options[ReggeWheelerRadialNumericalIntegration] = {
-  "Domain" -> None,
-  "BoundaryConditions" -> None};
+Options[ReggeWheelerRadialNumericalIntegration] = Join[
+  {"Domain" -> None},
+  FilterRules[Options[NDSolve], Except[WorkingPrecision|AccuracyGoal|PrecisionGoal]]];
 
 
 domainQ[domain_] := MatchQ[domain, {_?NumericQ, _?NumericQ} | (_?NumericQ) | All];
 
 
-ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
- Module[{\[Lambda], RWRF, BCs, norms, solFuncs, domains, m = 0, a=0},
+ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
+ Module[{\[Lambda], RWRF, norms, ndsolveopts, solFuncs, domains, m = 0, a=0},
   (* Compute the eigenvalue *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
 
   (* Function to construct a single ReggeWheelerRadialFunction *)
-  RWRF[bc_, ns_, sf_, domain_] :=
+  RWRF[bc_, ns_, sf_, domain_, ndsolveopts___] :=
    Module[{solutionFunction},
     solutionFunction = sf[domain];
     ReggeWheelerRadialFunction[s, l, \[Omega],
      Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
-      "Method" -> {"NumericalIntegration"},
+      "Method" -> {"NumericalIntegration", ndsolveopts},
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
-      "Domain" -> If[domain === All, {2, \[Infinity]}, First[InterpolatingFunctionDomain[solutionFunction]]],
+      "Domain" -> If[domain === All, {2, \[Infinity]}, First[solutionFunction["Domain"]]],
       "RadialFunction" -> solutionFunction
      ]
     ]
    ];
 
-  (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
-  BCs = OptionValue[{ReggeWheelerRadial, ReggeWheelerRadialNumericalIntegration}, {opts}, "BoundaryConditions"];
-  If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
-    Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
-    Return[$Failed];
-  ];
-
   (* Domain over which the numerical solution can be evaluated *)
   domains = OptionValue["Domain"];
   If[ListQ[BCs],
-    If[!MatchQ[domains, (List|Association)[Rule[_,_?domainQ]..]],
-      Message[ReggeWheelerRadial::optx, "Domain" -> domains];
+    If[!MatchQ[domains, (List|Association)[Rule["In"|"Up",_?domainQ]..]],
+      Message[ReggeWheelerRadial::dm, "Domain" -> domains, BCs];
       Return[$Failed];
     ];
-    domains = Lookup[domains, BCs, None];
+    domains = Lookup[domains, BCs, None]; 
+    If[!AllTrue[domains, domainQ],
+      Message[ReggeWheelerRadial::dm, "Domain" -> OptionValue["Domain"], BCs];
+      Return[$Failed];
+    ];
   ,
     If[!domainQ[domains],
-      Message[ReggeWheelerRadial::optx, "Domain" -> domains];
+      Message[ReggeWheelerRadial::dm, "Domain" -> domains, BCs];
       Return[$Failed];
     ];
   ];
@@ -93,14 +91,15 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
   norms = Lookup[norms, BCs];
 
   (* Solution functions for the specified boundary conditions *)
+  ndsolveopts = Sequence@@FilterRules[{opts}, Options[NDSolve]];
   solFuncs =
-   <|"In" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "In"],
-     "Up" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "Up"]|>;
+   <|"In" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "In", WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts],
+     "Up" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "Up", WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts]|>;
   solFuncs = Lookup[solFuncs, BCs];
 
   If[ListQ[BCs],
-    Return[Association[MapThread[#1 -> RWRF[#1, #2, #3, #4]&, {BCs, norms, solFuncs, domains}]]],
-    Return[RWRF[BCs, norms, solFuncs, domains]]
+    Return[Association[MapThread[#1 -> RWRF[#1, #2, #3, #4, ndsolveopts]&, {BCs, norms, solFuncs, domains}]]],
+    Return[RWRF[BCs, norms, solFuncs, domains, ndsolveopts]]
   ];
 ];
 
@@ -110,12 +109,11 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, opts:Opt
 
 
 Options[ReggeWheelerRadialMST] = {
-  "RenormalizedAngularMomentum" -> "Monodromy",
-  "BoundaryConditions" -> None};
+  "RenormalizedAngularMomentum" -> "Monodromy"};
 
 
-ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
- Module[{\[Lambda], \[Nu], BCs, norms, solFuncs, RWRF, m = 0, a=0},
+ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
+ Module[{\[Lambda], \[Nu], norms, solFuncs, RWRF, m = 0, a=0},
   (* Compute the eigenvalue and renormalized angular momentum *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
   \[Nu] = RenormalizedAngularMomentum[s, l, m, a, \[Omega], \[Lambda], Method -> OptionValue["RenormalizedAngularMomentum"]];
@@ -130,25 +128,18 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] :=
      ]
     ];
 
-  (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
-  BCs = OptionValue[{ReggeWheelerRadial, ReggeWheelerRadialMST}, {opts}, "BoundaryConditions"];
-  If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
-    Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
-    Return[$Failed];
-  ];
-
   (* Compute the asymptotic normalisations *)
-  norms = ReggeWheeler`MST`MST`Private`Amplitudes[s, l, m, a, 2\[Omega], \[Nu], \[Lambda]];
+  norms = ReggeWheeler`MST`MST`Private`Amplitudes[s, l, m, a, 2\[Omega], \[Nu], \[Lambda], {wp, prec, acc}];
 
   (* Solution functions for the specified boundary conditions *)
   solFuncs =
-    <|"In" :> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"]],
-      "Up" :> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"]]|>;
+    <|"In" :> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"], {wp, prec, acc}],
+      "Up" :> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"], {wp, prec, acc}]|>;
   solFuncs = Lookup[solFuncs, BCs];
 
   (* Select normalisation coefficients for the specified boundary conditions and rescale
      to give unit transmission coefficient. *)
-  norms = norms/norms[[All, "Transmission"]];
+  norms = norms[[All, {"Transmission"}]]/norms[[All, "Transmission"]];
   norms = Lookup[norms, BCs];
 
   If[ListQ[BCs],
@@ -168,24 +159,40 @@ SyntaxInformation[ReggeWheelerRadial] =
 
 Options[ReggeWheelerRadial] = {
   Method -> "MST",
-  "BoundaryConditions" -> {"In", "Up"}
+  "BoundaryConditions" -> {"In", "Up"},
+  WorkingPrecision -> Automatic,
+  PrecisionGoal -> Automatic,
+  AccuracyGoal -> Automatic
 };
 
 
 ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsPattern[]] :=
- Module[{RWRF, subopts},
-  (* All options  except for Method are passed on. Method is a special case where
-     only suboptions are passed on, if there are any. *)
-  subopts = Cases[{opts}, Except[Method -> _]];
+ Module[{RWRF, subopts, BCs, wp, prec, acc},
+  (* Extract suboptions from Method to be passed on. *)
   If[ListQ[OptionValue[Method]],
-    subopts = Join[Rest[OptionValue[Method]], subopts];
+    subopts = Rest[OptionValue[Method]];,
+    subopts = {};
   ];
+
+  (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
+  BCs = OptionValue["BoundaryConditions"];
+  If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
+    Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
+    Return[$Failed];
+  ];
+
+  (* Options associated with precision and accuracy *)
+  {wp, prec, acc} = OptionValue[{WorkingPrecision, PrecisionGoal, AccuracyGoal}];
+  If[wp === Automatic, wp = Precision[\[Omega]]];
+  If[prec === Automatic, prec = wp / 2];
+  If[acc === Automatic, acc = wp / 2];
+  If[Precision[\[Omega]] < wp, Message[ReggeWheelerRadial::precw, \[Omega], wp]];
 
   (* Decide which implementation to use *)
   Switch[OptionValue[Method],
-    "MST" | {"MST", Rule[_,_]...},
+    "MST" | {"MST", OptionsPattern[ReggeWheelerRadialMST]},
       RWRF = ReggeWheelerRadialMST,
-    "NumericalIntegration" | {"NumericalIntegration", ___},
+    "NumericalIntegration" | {"NumericalIntegration", OptionsPattern[ReggeWheelerRadialNumericalIntegration]},
       RWRF = ReggeWheelerRadialNumericalIntegration;,
     _,
       Message[ReggeWheelerRadial::optx, Method -> OptionValue[Method]];
@@ -198,7 +205,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
   ];
 
   (* Call the chosen implementation *)
-  RWRF[s, l, \[Omega], Sequence@@subopts]
+  RWRF[s, l, \[Omega], BCs, {wp, prec, acc}, Sequence@@subopts]
 ];
 
 
@@ -206,13 +213,74 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 (*ReggeWheelerRadialFunction*)
 
 
-SetAttributes[ReggeWheelerRadialFunction, {NumericFunction}];
+(* ::Subsection::Closed:: *)
+(*Output format*)
 
-Format[ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]] := 
-  "ReggeWheelerRadialFunction["<>ToString[s]<>","<>ToString[l]<>","<>ToString[\[Omega]]<>",<<>>]";
+
+(* ::Subsubsection::Closed:: *)
+(*Icons*)
+
+
+icons = <|
+ "In" -> Graphics[{
+         Line[{{0,1/2},{1/2,1},{1,1/2},{1/2,0},{0,1/2}}],
+         Line[{{3/4,1/4},{1/2,1/2}}],
+         {Arrowheads[0.2],Arrow[Line[{{1/2,1/2},{1/4,3/4}}]]},
+         {Arrowheads[0.2],Arrow[Line[{{1/2,1/2},{3/4,3/4}}]]}},
+         Background -> White,
+         ImageSize -> Dynamic[{Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[Magnification]}]],
+ "Up" -> Graphics[{
+         Line[{{0,1/2},{1/2,1},{1,1/2},{1/2,0},{0,1/2}}],
+         Line[{{1/4,1/4},{1/2,1/2}}],
+         {Arrowheads[0.2],Arrow[Line[{{1/2,1/2},{1/4,3/4}}]]},
+         {Arrowheads[0.2],Arrow[Line[{{1/2,1/2},{3/4,3/4}}]]}},
+         Background -> White,
+         ImageSize -> Dynamic[{Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[Magnification]}]]
+|>;
+
+
+(* ::Subsubsection::Closed:: *)
+(*Formatting of ReggeWheelerRadialFunction*)
+
+
+ReggeWheelerRadialFunction /:
+ MakeBoxes[rwrf:ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_], form:(StandardForm|TraditionalForm)] :=
+ Module[{summary, extended},
+  summary = {Row[{BoxForm`SummaryItem[{"s: ", s}], "  ",
+                  BoxForm`SummaryItem[{"l: ", l}], "  ",
+                  BoxForm`SummaryItem[{"\[Omega]: ", \[Omega]}]}],
+             BoxForm`SummaryItem[{"Domain: ", assoc["Domain"]}],
+             BoxForm`SummaryItem[{"Boundary Conditions: " , assoc["BoundaryConditions"]}]};
+  extended = {BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"]}],
+              BoxForm`SummaryItem[{"Transmission Amplitude: ", assoc["Amplitudes", "Transmission"]}],
+              BoxForm`SummaryItem[{"Incidence Amplitude: ", Lookup[assoc["Amplitudes"], "Incidence", Missing]}],
+              BoxForm`SummaryItem[{"Reflection Amplitude: ", Lookup[assoc["Amplitudes"], "Reflection", Missing]}],
+              BoxForm`SummaryItem[{"Method: ", First[assoc["Method"]]}],
+              BoxForm`SummaryItem[{"Method options: ",Column[Rest[assoc["Method"]]]}]};
+  BoxForm`ArrangeSummaryBox[
+    ReggeWheelerRadialFunction,
+    rwrf,
+    Lookup[icons, assoc["BoundaryConditions"], None],
+    summary,
+    extended,
+    form,
+    "Interpretable" -> Automatic]
+];
+
+
+(* ::Subsection::Closed:: *)
+(*Accessing attributes*)
+
 
 ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y_String] /; !MemberQ[{"RadialFunction"}, y] :=
   assoc[y];
+
+
+(* ::Subsection::Closed:: *)
+(*Numerical evaluation*)
+
+
+SetAttributes[ReggeWheelerRadialFunction, {NumericFunction}];
 
 
 outsideDomainQ[r_, rmin_, rmax_] := Min[r]<rmin || Max[r]>rmax;

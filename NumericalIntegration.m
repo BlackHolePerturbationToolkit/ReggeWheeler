@@ -11,44 +11,72 @@ Begin["`Private`"];
 
 SetAttributes[Psi, {NumericFunction}];
 
-Psi[s_, l_, (0|0.), bc_][{xmin_, xmax_}] :=
+Psi[s_, l_, (0|0.), bc_, ndsolveopts___][{xmin_, xmax_}] :=
  If[bc == "In",
    Function[y, PsiInStaticOdd[s,l,y]],
    Function[y, PsiUpStaticOdd[s,l,y]]
  ];
 
-Psi[s_, l_, \[Omega]_, "In"][xmax_?NumericQ] := Psi[s, l, \[Omega], "In"][{Automatic, xmax}];
-Psi[s_, l_, \[Omega]_, "Up"][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up"][{xmin, Automatic}];
+Psi[s_, l_, \[Omega]_, "In", ndsolveopts___][xmax_?NumericQ] := Psi[s, l, \[Omega], "In", ndsolveopts][{Automatic, xmax}];
+Psi[s_, l_, \[Omega]_, "Up", ndsolveopts___][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up", ndsolveopts][{xmin, Automatic}];
 
-Psi[s_, l_, \[Omega]_, bc_][{xmin_, xmax_}] :=
+Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][{xmin_, xmax_}] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
-    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Precision[\[Omega]]];
+    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Lookup[{ndsolveopts}, WorkingPrecision, Precision[\[Omega]]]];
     If[bc === "In" && xmin === Automatic, xMin = xBC, xMin = xmin];
     If[bc === "Up" && xmax === Automatic, xMax = xBC, xMax = xmax];
-    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, Precision[\[Omega]]]
+    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, ndsolveopts]
 ];
 
-Psi[s_, l_, \[Omega]_, bc_][All] :=
+Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][All] :=
  Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
     bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
-    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Precision[\[Omega]]];
-    soln = Function[{x}, Evaluate[Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, Min[x, xBC], Max[x, xBC], ReggeWheelerPotential, Precision[\[Omega]]][x]]]
-]
+    {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Lookup[{ndsolveopts}, WorkingPrecision, Precision[\[Omega]]]];
+    soln = AllIntegrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, ReggeWheelerPotential, ndsolveopts]
+];
+
+Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][None] := $Failed;
 
 
 (*should this be in a module for y1 and y2?*)
-Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xmin_?NumericQ,xmax_?NumericQ,potential_,precision_]:=Module[{y1,y2,x},
-	NDSolveValue[
+Integrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,xmin_?NumericQ,xmax_?NumericQ,potential_,ndsolveopts___]:=Module[{y1,y2,x},
+	Quiet[NDSolveValue[
 		{y1'[x]==y2[x],(1-2/x)^2*y2'[x]+2(1-2/x)/x^2*y2[x]+(\[Omega]^2-potential[s,l,x])*y1[x]==0,y1[xBC]==y1BC,y2[xBC]==y2BC},
 		y1,
 		{x, xmin, xmax},
+		ndsolveopts,
 		Method->"StiffnessSwitching",
 		MaxSteps->Infinity,
-		WorkingPrecision->precision,
 		InterpolationOrder->All
-		]
+		], NDSolveValue::precw]
 	]
+
+
+(*should this be in a module for y1 and y2?*)
+AllIntegrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,potential_,ndsolveopts___][xval:(_?NumericQ | {_?NumericQ..})] := Module[{y1,y2,x},
+	Quiet[NDSolveValue[
+		{y1'[x]==y2[x],(1-2/x)^2*y2'[x]+2(1-2/x)/x^2*y2[x]+(\[Omega]^2-potential[s,l,x])*y1[x]==0,y1[xBC]==y1BC,y2[xBC]==y2BC},
+		y1[xval],
+		{x, Min[xBC,xval], Max[xBC,xval]},
+		ndsolveopts,
+		Method->"StiffnessSwitching",
+		MaxSteps->Infinity,
+		InterpolationOrder->All
+		], NDSolveValue::precw]
+	];
+
+Derivative[n_][AllIntegrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,potential_,ndsolveopts___]][xval:(_?NumericQ | {_?NumericQ..})] := Module[{y1,y2,x},
+	Quiet[NDSolveValue[
+		{y1'[x]==y2[x],(1-2/x)^2*y2'[x]+2(1-2/x)/x^2*y2[x]+(\[Omega]^2-potential[s,l,x])*y1[x]==0,y1[xBC]==y1BC,y2[xBC]==y2BC},
+		Derivative[n][y1][xval],
+		{x, Min[xBC,xval], Max[xBC,xval]},
+		ndsolveopts,
+		Method->"StiffnessSwitching",
+		MaxSteps->Infinity,
+		InterpolationOrder->All
+		], NDSolveValue::precw]
+	];
 
 
 (*boundary conditions for odd-parity Regge-Wheeler eqn.*)
