@@ -5,11 +5,17 @@ BeginPackage["ReggeWheeler`ConvolveSource`"];
 Begin["`Private`"];
 
 
-ConvolveSource[RF_, SO_] :=
-	If[SO["type"]=="PointParticleCircular", Return[ConvolvePointParticleSourceCircular[RF,SO]], Nothing];
+ConvolveSource[RF_, SO_] :=Module[{s},
+		s = RF["In"]["s"];
+		
+		If[Abs[s] == 2, 
+			If[SO["type"]=="PointParticleCircular", Return[ConvolvePointParticleSourceCircular[s,RF,SO]], Print["Only circular orbit sources are implemented"]];
+			,Print["Only the |s|=2 source is currently implemented"];
+		];
+	]
 
 
-ConvolvePointParticleSourceCircular[RF_,SO_]:=
+ConvolvePointParticleSourceCircular[(-2|2),RF_,SO_]:=
 	Module[{l,m,r0,PsiIn,dPsiIn,PsiUp,dPsiUp,PsiOddIn,dPsiOddIndr,PsiOddUp,dPsiOddUpdr,Wronskian,deltadPsidr,deltaPsi,n,np6M,denom,conjdenom,b,c,\[Omega],rm2M,ZIn,ZUp,jump},
 		l=SO["l"];
 		m=SO["m"];
