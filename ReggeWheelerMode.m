@@ -25,8 +25,8 @@ BeginPackage["ReggeWheeler`ReggeWheelerMode`",
 (*Usage messages*)
 
 
-ReggeWheelerModeObject::usage = "ReggeWheelerModeObject[assoc] an object which contains a Regge Wheeler mode.";
 ReggeWheelerPointParticleMode::usage = "ReggeWheelerPointParticleMode[s, l, m, n, orbit] solves the Regge Wheeler equation with a point particle source.";
+ReggeWheelerMode::usage = "ReggeWheelerMode[assoc] is an object which represents a Regge Wheeler mode.";
 
 
 (* ::Subsection::Closed:: *)
@@ -79,7 +79,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
              "Fluxes" -> Fluxes
            |>;
 
-  Return[ReggeWheelerModeObject[assoc]];
+  ReggeWheelerMode[assoc]
 ]
 
 
@@ -98,7 +98,7 @@ Format[ReggeWheelerModeObject[assoc_]] := "ReggeWheelerModeObject["<>ToString[as
 (*Accessing attributes*)
 
 
-ReggeWheelerModeObject[assoc_][string_] := assoc[string]
+ReggeWheelerMode[assoc_][string_] := assoc[string];
 
 
 (* ::Section::Closed:: *)
