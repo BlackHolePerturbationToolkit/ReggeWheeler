@@ -27,6 +27,7 @@ BeginPackage["ReggeWheeler`ReggeWheelerMode`",
 
 ReggeWheelerPointParticleMode::usage = "ReggeWheelerPointParticleMode[s, l, m, n, orbit] solves the Regge Wheeler equation with a point particle source.";
 ReggeWheelerMode::usage = "ReggeWheelerMode[assoc] is an object which represents a Regge Wheeler mode.";
+EnergyFlux::usage = "EnergyFlux[mode] computes the flux of energy radiated in the given mode.";
 
 
 (* ::Subsection::Closed:: *)
@@ -52,7 +53,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 
 
 ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, source_ReggeWheelerSourceObject] :=
- Module[{assoc, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z, FluxH, FluxInf, Fluxes},
+ Module[{assoc, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z},
   (*{\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = orbit["Frequencies"];*) (*This gives Mino frequencies, need BL frequencies*)
   {\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = Values[KerrGeoFrequencies[orbit["a"], orbit["p"], orbit["e"], orbit["Inclination"]]];
   \[Omega] = m \[CapitalOmega]\[Phi] + n \[CapitalOmega]r;
@@ -61,13 +62,6 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
   
 
   Z = ReggeWheeler`ConvolveSource`Private`ConvolveSource[R, source];
-  
-  (*currently fluxes for circular orbit*)
-   FluxInf = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZInf"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZInf"]]^2/(16*Pi)];
-   FluxH   = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZHor"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[m*\[CapitalOmega]\[Phi]*Z["ZHor"]]^2/(16*Pi)];
-  
-  
-  Fluxes = <| "FluxInf" -> FluxInf, "FluxHor" -> FluxH, "FluxTotal" -> FluxH + FluxInf |>;
 
   assoc = <| "s" -> s, 
              "l" -> l,
@@ -75,8 +69,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
              "n" -> n,
              "Type" -> "PointParticleCircular",
              "Homogeneous" -> R,
-             "Particular" -> Z,
-             "Fluxes" -> Fluxes
+             "Particular" -> Z
            |>;
 
   ReggeWheelerMode[assoc]
@@ -99,6 +92,28 @@ Format[ReggeWheelerModeObject[assoc_]] := "ReggeWheelerModeObject["<>ToString[as
 
 
 ReggeWheelerMode[assoc_][string_] := assoc[string];
+
+
+(* ::Section::Closed:: *)
+(*Fluxes*)
+
+
+(* ::Subsection::Closed:: *)
+(*Energy Flux*)
+
+
+EnergyFlux[mode_ReggeWheelerMode] :=
+ Module[{l, m, \[Omega], Z, FluxInf, FluxH},
+  l = mode["l"];
+  m = mode["m"];
+  \[Omega] = mode["\[Omega]"];
+  Z = mode["Amplitudes"];
+
+  FluxInf = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[\[Omega]*Z["\[ScriptCapitalI]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[\[Omega]*Z["\[ScriptCapitalI]"]]^2/(16*Pi)];
+  FluxH   = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[\[Omega]*Z["\[ScriptCapitalH]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[\[Omega]*Z["\[ScriptCapitalH]"]]^2/(16*Pi)];
+  
+  <| "\[ScriptCapitalI]" -> FluxInf, "\[ScriptCapitalH]" -> FluxH |>
+];
 
 
 (* ::Section::Closed:: *)
