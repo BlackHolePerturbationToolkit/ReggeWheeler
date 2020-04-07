@@ -1,5 +1,17 @@
 (* ::Package:: *)
 
+(* ::Title:: *)
+(*ReggeWheelerMode*)
+
+
+(* ::Section::Closed:: *)
+(*Create Package*)
+
+
+(* ::Subsection::Closed:: *)
+(*BeginPackage*)
+
+
 BeginPackage["ReggeWheeler`ReggeWheelerMode`",
   {"ReggeWheeler`ReggeWheelerSource`",
    "ReggeWheeler`ReggeWheelerRadial`",
@@ -8,11 +20,24 @@ BeginPackage["ReggeWheeler`ReggeWheelerMode`",
    "KerrGeodesics`OrbitalFrequencies`"}
 ];
 
-ReggeWheelerModeObject::usage = "ReggeWheelerModeObject[assoc] an object which contains a Regge Wheeler mode.";
 
+(* ::Subsection::Closed:: *)
+(*Usage messages*)
+
+
+ReggeWheelerModeObject::usage = "ReggeWheelerModeObject[assoc] an object which contains a Regge Wheeler mode.";
 ReggeWheelerPointParticleMode::usage = "ReggeWheelerPointParticleMode[s, l, m, n, orbit] solves the Regge Wheeler equation with a point particle source.";
 
+
+(* ::Subsection::Closed:: *)
+(*Begin Private section*)
+
+
 Begin["`Private`"];
+
+
+(* ::Section::Closed:: *)
+(*ReggeWheelerPointParticleMode*)
 
 
 (*defined currently for circular orbits*)
@@ -58,9 +83,26 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 ]
 
 
+(* ::Section::Closed:: *)
+(*ReggeWheelerMode*)
+
+
+(* ::Subsection::Closed:: *)
+(*Output format*)
+
+
 Format[ReggeWheelerModeObject[assoc_]] := "ReggeWheelerModeObject["<>ToString[assoc["s"]]<>","<>ToString[assoc["l"]]<>","<>ToString[assoc["m"]]<>","<>ToString[assoc["n"]]<>","<>"<<>>]";
 
+
+(* ::Subsection::Closed:: *)
+(*Accessing attributes*)
+
+
 ReggeWheelerModeObject[assoc_][string_] := assoc[string]
+
+
+(* ::Section::Closed:: *)
+(*End Package*)
 
 
 End[];

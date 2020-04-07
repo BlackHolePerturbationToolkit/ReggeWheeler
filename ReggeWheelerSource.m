@@ -1,12 +1,37 @@
 (* ::Package:: *)
 
+(* ::Title:: *)
+(*ReggeWheelerSource*)
+
+
+(* ::Section::Closed:: *)
+(*Create Package*)
+
+
+(* ::Subsection::Closed:: *)
+(*BeginPackage*)
+
+
 BeginPackage["ReggeWheeler`ReggeWheelerSource`"];
 
-ReggeWheelerSourceObject::usage = "ReggeWheelerSourceObject[assoc] an object which contains a Regge Wheeler source."
 
+(* ::Subsection::Closed:: *)
+(*Usage messages*)
+
+
+ReggeWheelerSourceObject::usage = "ReggeWheelerSourceObject[assoc] an object which contains a Regge Wheeler source."
 ReggeWheelerPointParticleSource::usage = "ReggeWheelerPointParticleSource[s, orbit] Point particle source for the Regge Wheeler equation."
 
+
+(* ::Subsection::Closed:: *)
+(*Begin Private section*)
+
+
 Begin["`Private`"];
+
+
+(* ::Section::Closed:: *)
+(*ReggeWheelerPointParticleSource*)
 
 
 ReggeWheelerPointParticleSource[s_,l_,m_, orbit_] :=
@@ -93,6 +118,10 @@ ReggeWheelerPointParticleCircularAKEvenJump[l_,m_,orbit_]:=
 		];
 		ReggeWheelerSourceObject[assoc]
 	];
+
+
+(* ::Section::Closed:: *)
+(*End Package*)
 
 
 End[];

@@ -1,8 +1,29 @@
 (* ::Package:: *)
 
+(* ::Title:: *)
+(*ConvolveSource*)
+
+
+(* ::Section::Closed:: *)
+(*Create Package*)
+
+
+(* ::Subsection::Closed:: *)
+(*BeginPackage*)
+
+
 BeginPackage["ReggeWheeler`ConvolveSource`"];
 
+
+(* ::Subsection::Closed:: *)
+(*Begin Private section*)
+
+
 Begin["`Private`"];
+
+
+(* ::Section::Closed:: *)
+(*ConvolveSource*)
 
 
 ConvolveSource[RF_, SO_] :=Module[{s},
@@ -51,6 +72,10 @@ ConvolvePointParticleSourceCircular[(-2|2),RF_,SO_]:=
 		ZUp = (PsiIn*deltadPsidr - deltaPsi*dPsiIn)/Wronskian;
 		<|"ZInf"->ZUp, "ZHor"->ZIn|>
 	];
+
+
+(* ::Section::Closed:: *)
+(*End Package*)
 
 
 End[];
