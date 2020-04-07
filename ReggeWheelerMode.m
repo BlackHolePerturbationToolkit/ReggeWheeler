@@ -54,7 +54,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
   If[orbit["a"] != 0,
     Message[ReggeWheelerPointParticleMode::nospin, orbit["a"]];
     Return[$Failed];
-	];
+  ];
 
   (*{\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = orbit["Frequencies"];*) (*This gives Mino frequencies, need BL frequencies*)
   {\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = Values[KerrGeoFrequencies[orbit["a"], orbit["p"], orbit["e"], orbit["Inclination"]]];
@@ -89,7 +89,27 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 (*Output format*)
 
 
-Format[ReggeWheelerModeObject[assoc_]] := "ReggeWheelerModeObject["<>ToString[assoc["s"]]<>","<>ToString[assoc["l"]]<>","<>ToString[assoc["m"]]<>","<>ToString[assoc["n"]]<>","<>"<<>>]";
+ReggeWheelerMode /:
+ MakeBoxes[rwm:ReggeWheelerMode[assoc_], form:(StandardForm|TraditionalForm)] :=
+ Module[{summary, extended},
+  summary = {Row[{BoxForm`SummaryItem[{"s: ", assoc["s"]}], "  ",
+                  BoxForm`SummaryItem[{"l: ", assoc["l"]}], "  ",
+                  BoxForm`SummaryItem[{"m: ", assoc["m"]}], "  ",
+                  BoxForm`SummaryItem[{"\[Omega]: ", assoc["\[Omega]"]}]}],
+             BoxForm`SummaryItem[{"Type: ", First[assoc["Type"]]}]};
+  extended = {BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"]}],
+              BoxForm`SummaryItem[{"Amplitude at \[ScriptCapitalI]: ", assoc["Amplitudes"]["\[ScriptCapitalI]"]}],
+              BoxForm`SummaryItem[{"Amplitude at \[ScriptCapitalH]: ", assoc["Amplitudes"]["\[ScriptCapitalH]"]}],
+              BoxForm`SummaryItem[{"Type details: ", Column[Rest[assoc["Type"]]]}]};
+  BoxForm`ArrangeSummaryBox[
+    ReggeWheelerMode,
+    rwm,
+    None,
+    summary,
+    extended,
+    form,
+    "Interpretable" -> Automatic]
+];
 
 
 (* ::Subsection::Closed:: *)
