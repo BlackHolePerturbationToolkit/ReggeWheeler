@@ -25,8 +25,9 @@ BeginPackage["ReggeWheeler`ReggeWheelerMode`",
 (*Usage messages*)
 
 
-ReggeWheelerPointParticleMode::usage = "ReggeWheelerPointParticleMode[s, l, m, n, orbit] solves the Regge Wheeler equation with a point particle source.";
 ReggeWheelerMode::usage = "ReggeWheelerMode[assoc] is an object which represents a Regge Wheeler mode.";
+ReggeWheelerPointParticleMode::usage = "ReggeWheelerPointParticleMode[s, l, m, n, orbit] produces a "<>
+ "ReggeWheelerMode representing a solution to the Regge-Wheeler equation with a point particle source.";
 EnergyFlux::usage = "EnergyFlux[mode] computes the flux of energy radiated in the given mode.";
 
 
