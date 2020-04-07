@@ -63,7 +63,8 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
   source = ReggeWheelerPointParticleSource[s, l, m, orbit];
 
   R = ReggeWheelerRadial[s, l, \[Omega]];
-  Z = ReggeWheeler`ConvolveSource`Private`ConvolveSource[R, source];
+  S = SpinWeightedSpheroidalHarmonicS[s, l, m, 0];
+  Z = ReggeWheeler`ConvolveSource`Private`ConvolveSource[R, S, source];
 
   assoc = <| "s" -> s, 
              "l" -> l,
@@ -71,6 +72,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
              "n" -> n,
              "Type" -> "PointParticleCircular",
              "Homogeneous" -> R,
+             "AngularFunction" -> S,
              "Particular" -> Z
            |>;
 

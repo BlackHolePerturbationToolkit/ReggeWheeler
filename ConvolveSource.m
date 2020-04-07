@@ -26,7 +26,7 @@ Begin["`Private`"];
 (*ConvolveSource*)
 
 
-ConvolveSource[RF_, SO_] :=Module[{s},
+ConvolveSource[RF_, SF_, SO_] :=Module[{s},
 		s = RF["In"]["s"];
 		
 		If[Abs[s] == 2, 
