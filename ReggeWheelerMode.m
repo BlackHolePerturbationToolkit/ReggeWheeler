@@ -69,11 +69,12 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
   assoc = <| "s" -> s, 
              "l" -> l,
              "m" -> m,
-             "n" -> n,
-             "Type" -> "PointParticleCircular",
-             "Homogeneous" -> R,
+             "\[Omega]" -> \[Omega],
+             "Eigenvalue" -> R["In"]["Eigenvalue"],
+             "Type" -> {"PointParticleCircular", "Radius" -> orbit["p"]},
+             "RadialFunctions" -> R,
              "AngularFunction" -> S,
-             "Particular" -> Z
+             "Amplitudes" -> Z
            |>;
 
   ReggeWheelerMode[assoc]
