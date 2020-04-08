@@ -1,12 +1,36 @@
 (* ::Package:: *)
 
+(* ::Title:: *)
+(*NumericalIntegration*)
+
+
+(* ::Section::Closed:: *)
+(*Create Package*)
+
+
 (*use 'x' as r/M and \[Omega] to denote 'M\[Omega]'*)
+
+
+(* ::Subsection::Closed:: *)
+(*BeginPackage*)
 
 
 BeginPackage["ReggeWheeler`NumericalIntegration`"];
 
 
+(* ::Subsection::Closed:: *)
+(*Begin Private section*)
+
+
 Begin["`Private`"];
+
+
+(* ::Section::Closed:: *)
+(*Radial solutions*)
+
+
+(* ::Subsection::Closed:: *)
+(*Radiative modes*)
 
 
 SetAttributes[Psi, {NumericFunction}];
@@ -77,6 +101,10 @@ Derivative[n_][AllIntegrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,potential_,ndsolve
 		InterpolationOrder->All
 		], NDSolveValue::precw]
 	];
+
+
+(* ::Subsection::Closed:: *)
+(*Boundary Conditions*)
 
 
 (*boundary conditions for odd-parity Regge-Wheeler eqn.*)
@@ -161,7 +189,10 @@ If[i > 100, Break[]];
 
 
 
-(*radial potentials for ODE*)
+(* ::Subsection::Closed:: *)
+(*Radial Potentials*)
+
+
 (*SetAttributes[ReggeWheelerPotential,{NumericFunction}];*)
 SetAttributes[ZerilliPotential,{NumericFunction}];
 
@@ -173,6 +204,10 @@ ZerilliPotential[l_Integer,x_Numeric]:=
 		n=(l-1)*(l+2)/2;
 		2*(1-2/x)*(9+9*n*x+n^2*x^2*(3+x)+n^3*x^3)/(x^3(3+n*x)^2)
 	];
+
+
+(* ::Subsection::Closed:: *)
+(*Static modes*)
 
 
 (*analytic solutions to the homogeneous static ReggeWheeler Eq. (see e.g. Field, Hesthaven, and Lau, PRD81, 124030 (2010)*)
@@ -208,8 +243,15 @@ PsiInStaticEven[s_Integer,l_Integer,x_]:=
 	];
 
 
-(*useful functions?*)
+(* ::Subsection::Closed:: *)
+(*Useful functions?*)
+
+
 rfromrstar=Function[rstar,2 (1+ProductLog[Sqrt[E^(-2+rstar)]])];
+
+
+(* ::Section::Closed:: *)
+(*End Package*)
 
 
 End[]

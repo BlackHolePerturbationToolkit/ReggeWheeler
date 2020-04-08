@@ -8,6 +8,10 @@
 (*Create Package*)
 
 
+(* ::Subsection::Closed:: *)
+(*BeginPackage*)
+
+
 BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
   {
     "ReggeWheeler`NumericalIntegration`",
@@ -17,16 +21,26 @@ BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
   }];
 
 
-(* Usage messages *)
+(* ::Subsection::Closed:: *)
+(*Usage messages*)
+
+
 ReggeWheelerRadial::usage = "ReggeWheelerRadial[s, l, \[Omega]] computes homogeneous solutions to the Regge Wheeler equation."
 ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], assoc] is an object representing a homogeneous solution to the Regge Wheeler equation."
 
 
-(* Error messages *)
+(* ::Subsection::Closed:: *)
+(*Error Messages*)
+
+
 ReggeWheelerRadial::precw = "The precision of \[Omega]=`1` is less than WorkingPrecision (`2`).";
 ReggeWheelerRadial::optx = "Unknown options in `1`";
 ReggeWheelerRadial::dm = "Option `1` is not valid with BoundaryConditions \[RightArrow] `2`.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
+
+
+(* ::Subsection::Closed:: *)
+(*Begin Private section*)
 
 
 Begin["`Private`"];
