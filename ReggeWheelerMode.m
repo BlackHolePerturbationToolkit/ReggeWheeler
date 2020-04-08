@@ -60,7 +60,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
   {\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = Values[KerrGeoFrequencies[orbit["a"], orbit["p"], orbit["e"], orbit["Inclination"]]];
   \[Omega] = m \[CapitalOmega]\[Phi] + n \[CapitalOmega]r;
 
-  source = ReggeWheelerPointParticleSource[s, l, m, orbit];
+  source = ReggeWheeler`ReggeWheelerSource`Private`ReggeWheelerPointParticleSource[s, l, m, orbit];
 
   R = ReggeWheelerRadial[s, l, \[Omega]];
   S = SpinWeightedSpheroidalHarmonicS[s, l, m, 0];
