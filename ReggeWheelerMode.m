@@ -49,7 +49,14 @@ Begin["`Private`"];
 (*ReggeWheelerPointParticleMode*)
 
 
-ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction] :=
+SyntaxInformation[ReggeWheelerPointParticleMode] =
+ {"ArgumentsPattern" -> {_, _, _, _, _, OptionsPattern[]}};
+
+
+Options[ReggeWheelerPointParticleMode] = {};
+
+
+ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]] :=
  Module[{source, assoc, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z},
   If[orbit["a"] != 0,
     Message[ReggeWheelerPointParticleMode::nospin, orbit["a"]];
