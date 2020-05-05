@@ -15,12 +15,8 @@
 BeginPackage["ReggeWheeler`ReggeWheelerSource`"];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Usage messages*)
-
-
-ReggeWheelerSourceObject::usage = "ReggeWheelerSourceObject[assoc] an object which contains a Regge Wheeler source."
-ReggeWheelerPointParticleSource::usage = "ReggeWheelerPointParticleSource[s, orbit] Point particle source for the Regge Wheeler equation."
 
 
 (* ::Subsection::Closed:: *)

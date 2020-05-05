@@ -26,7 +26,7 @@ Begin["`Private`"];
 (*ConvolveSource*)
 
 
-ConvolveSource[RF_, SO_] :=Module[{s},
+ConvolveSource[RF_, SF_, SO_] :=Module[{s},
 		s = RF["In"]["s"];
 		
 		If[Abs[s] == 2, 
@@ -70,7 +70,7 @@ ConvolvePointParticleSourceCircular[(-2|2),RF_,SO_]:=
 		deltadPsidr=SO["deltadPsidr"];
 		ZIn = (PsiUp*deltadPsidr - deltaPsi*dPsiUp)/Wronskian;
 		ZUp = (PsiIn*deltadPsidr - deltaPsi*dPsiIn)/Wronskian;
-		<|"ZInf"->ZUp, "ZHor"->ZIn|>
+		<|"\[ScriptCapitalI]" -> ZUp, "\[ScriptCapitalH]" -> ZIn|>
 	];
 
 
