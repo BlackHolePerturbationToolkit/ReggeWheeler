@@ -17,7 +17,8 @@ BeginPackage["ReggeWheeler`ReggeWheelerMode`",
    "ReggeWheeler`ReggeWheelerRadial`",
    "ReggeWheeler`ConvolveSource`",
    "KerrGeodesics`KerrGeoOrbit`",
-   "KerrGeodesics`OrbitalFrequencies`"}
+   "KerrGeodesics`OrbitalFrequencies`",
+   "SpinWeightedSpheroidalHarmonics`"}
 ];
 
 
@@ -28,7 +29,6 @@ BeginPackage["ReggeWheeler`ReggeWheelerMode`",
 ReggeWheelerMode::usage = "ReggeWheelerMode[assoc] is an object which represents a Regge Wheeler mode.";
 ReggeWheelerPointParticleMode::usage = "ReggeWheelerPointParticleMode[s, l, m, n, orbit] produces a "<>
  "ReggeWheelerMode representing a solution to the Regge-Wheeler equation with a point particle source.";
-EnergyFlux::usage = "EnergyFlux[mode] computes the flux of energy radiated in the given mode.";
 
 
 (* ::Subsection::Closed:: *)
@@ -121,6 +121,12 @@ ReggeWheelerMode /:
 
 (* ::Subsection::Closed:: *)
 (*Accessing attributes*)
+
+
+ReggeWheelerMode[assoc_]["EnergyFlux"] := EnergyFlux[ReggeWheelerMode[assoc]];
+
+
+ReggeWheelerMode[assoc_]["Fluxes"] := <|"Energy" -> ReggeWheelerMode[assoc]["EnergyFlux"]|>;
 
 
 ReggeWheelerMode[assoc_][string_] := assoc[string];
