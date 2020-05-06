@@ -7,12 +7,12 @@ withinRoundoff[a_, b_] :=
   Block[{Internal`$SameQTolerance = 4},
     SameQ[a,b]];
 
-PrependTo[$Path, FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];
+PacletDirectoryLoad[FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];
 
 << ReggeWheeler`
 
 testFiles = FileNames["*.wlt", 
-  FileNameJoin[{$ReggeWheelerInstallationDirectory, "Tests"}]];
+  FileNameJoin[{PacletObject["ReggeWheeler"]["Location"], "Tests"}]];
 
 reports = TestReport /@ testFiles;
 
