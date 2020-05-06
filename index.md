@@ -10,7 +10,7 @@ $$ f^2 \frac{d^2\Psi}{dr^2} + f f' \frac{d\Psi}{dr} + (\omega^2 - U_l_(r))\Psi =
 
 where the potential is given by
 
-$$ U_l(r) = \frac{f}{r^2}\left l(l+1) -\frac{6M}{r} \right) $$
+$$ U_l(r) = \frac{f}{r^2}\left( l(l+1) -\frac{6M}{r} \right) $$
 
 and
 $f = 1-2M/r$  
