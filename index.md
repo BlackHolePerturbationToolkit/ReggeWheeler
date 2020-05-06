@@ -6,7 +6,7 @@ A Mathematica package for computing solutions to the ReggeWheeler equation. Note
 
 Explicitly the package computes solutions to the Regge-Wheeler equation:
 
-$$ f^2 \frac{d^2\Psi}{dr^2} + f f' \frac{d\Psi}{dr} + (\omega^2 - U_l_(r))\Psi = \mathcal{T} $$
+$$ f^2 \frac{d^2\Psi}{dr^2} + f f' \frac{d\Psi}{dr} + (\omega^2 - U_l(r))\Psi = \mathcal{T} $$
 
 where the potential is given by
 
