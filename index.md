@@ -19,7 +19,7 @@ $\Psi$ is the Regge-Wheeler master variable,
 and $\mathcal{T}$ is the source.
 
 
-Currently the source has been implement for a point particle moving along a circular geodesic orbit. As an example, the flux of gravitational waves in this case for the $l=2,m=2$ mode is easily computed using:
+Currently the source has been implemented for a point particle moving along a circular geodesic orbit. As an example, the flux of gravitational waves in this case for the $l=2,m=2$ mode is easily computed using:
 
 ```
 r0 = 10`30;
@@ -34,6 +34,8 @@ The `mode` variable is now a `ReggeWheelerMode` object which can be queried for 
 ```
 
 Note the high precision of the input value of $r_0$. This is required by default as the package uses the MST method to calculate the homogeneous solutions.
+
+From the `ReggeWheelerMode` object you can also extract, "s", "l", "m", "ω", "Eigenvalue", "RadialFunctions", "Amplitudes", etc.
 
 ## Homogeneous solutions
 
