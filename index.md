@@ -51,7 +51,7 @@ The numerical integration method can be used via, e.g.,
 ```
 RW = ReggeWheelerRadial[2, 2, 0.1, Method -> {"NumericalIntegration", "Domain" -> {10, 10^4}}, "BoundaryConditions" -> "Up"]
 ```
-for the "Up" solution. Note you have to set the integration "Domain". The resulting `ReggeWheelerRadialFunction` can be rapidly evaluated (though this method is not as effective for beyond machine precision results.)
+for the "Up" solution. Note you have to set the integration "Domain". The resulting `ReggeWheelerRadialFunction` can be rapidly evaluated (though this method is not as effective for beyond machine precision results).
 
 You can plot the real and imaginary parts of the above radial solution using `Plot[RW[r] // ReIm // Evaluate, {r, 10, 200}, PlotTheme -> "Detailed",
   PlotLegends -> None, BaseStyle -> 20]`. This gives:
