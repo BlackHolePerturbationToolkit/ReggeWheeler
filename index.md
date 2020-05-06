@@ -13,9 +13,9 @@ where the potential is given by
 $$ U_l(r) = \frac{f}{r^2}\left( l(l+1) -\frac{6M}{r} \right) \nonumber $$
 
 where $f = 1-2M/r$, a prime denotes differentiation w.r.t. $r$,  
-$M$ is the black hole mass,
-$\omega$ is the mode frequency, 
-$\Psi$ is the Regge-Wheeler master variable, 
+$M$ is the black hole mass,  
+$\omega$ is the mode frequency,  
+$\Psi$ is the Regge-Wheeler master variable,  
 and $\mathcal{T}$ is the source.
 
 
@@ -37,6 +37,13 @@ Note the high precision of the input value of $r_0$. This is required by default
 
 ## Homogeneous solutions
 
+You can compute just the (homogeneous) radial solutions using `ReggeWheelerRadial[s,l,ω]` function. Currently two methods are implemented for computing the homogeneous radial solutions. These use the semi-analytic MST method and direct numerical integration. You can switch between using the `Method` option as detailed below.
+
+
 ### MST
 
+This is the default method and the example flux calculation given above is using it. The method works well for high precision results, but note that (currently) it needs high precision input to work correctly (a warning will be given if you use machine precision input). It is also slower to evaluate than the numerical integration method. You can explicitly use the method by passing the `Method->"MST"` option.
+
 ### Numerical integration
+
+
