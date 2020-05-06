@@ -6,15 +6,15 @@ A Mathematica package for computing solutions to the ReggeWheeler equation. Note
 
 Explicitly the package computes solutions to the Regge-Wheeler equation:
 
-$$f^2 \frac{d^2\Psi}{dr^2} + f f' \frac{d\Psi}{dr} + (\omega^2 - U_l_(r))\Psi = \mathcal{T} $$
+$$ f^2 \frac{d^2\Psi}{dr^2} + f f' \frac{d\Psi}{dr} + (\omega^2 - U_l_(r))\Psi = \mathcal{T} $$
 
 where the potential is given by
 
-$$U_l(r) = \frac{f}{r^2}\left l(l+1) -\frac{6M}{r} \right) $$
+$$ U_l(r) = \frac{f}{r^2}\left l(l+1) -\frac{6M}{r} \right) $$
 
 and
-$f = 1-2M/r$
-$\omega$ is the mode frequency
+$f = 1-2M/r$  
+$\omega$ is the mode frequency  
 $\mathcal{T}$ is the source.
 
 
