@@ -37,13 +37,24 @@ Note the high precision of the input value of $r_0$. This is required by default
 
 ## Homogeneous solutions
 
-You can compute just the (homogeneous) radial solutions using `ReggeWheelerRadial[s,l,ω]` function. Currently two methods are implemented for computing the homogeneous radial solutions. These use the semi-analytic MST method and direct numerical integration. You can switch between using the `Method` option as detailed below.
+You can compute just the (homogeneous) radial solutions using `ReggeWheelerRadial[s,l,ω]` function. Currently two methods are implemented for computing the homogeneous radial solutions. These use either the semi-analytic MST or direct numerical integration methods. You can switch between using the `Method` option as detailed below. The `ReggeWheelerRadial` function returns a `ReggeWheelerRadialFunction` (or an Association of them).
 
 
 ### MST
 
-This is the default method and the example flux calculation given above is using it. The method works well for high precision results, but note that (currently) it needs high precision input to work correctly (a warning will be given if you use machine precision input). It is also slower to evaluate than the numerical integration method. You can explicitly use the method by passing the `Method->"MST"` option.
+This is the default method and the example flux calculation given above is using it. The method works well for high precision results, but note that (currently) it needs high precision input to work correctly (a warning will be given if you use machine precision input). It is also slower to evaluate than the numerical integration method. You can explicitly use the method by passing the `Method->"MST"` option. By default this method computes both the "In" and the "Up solutions". You can choose to calculate just one or the other by passing the e.g., "BoundaryConditions" -> "Up" option.
 
 ### Numerical integration
 
+The numerical integration method can be used via, e.g.,
+
+```
+RW = ReggeWheelerRadial[2, 2, 0.1, Method -> {"NumericalIntegration", "Domain" -> {10, 10^4}}, "BoundaryConditions" -> "Up"]
+```
+for the "Up" solution. Note you have to set the integration "Domain". The resulting `ReggeWheelerRadialFunction` can be rapidly evaluated (though this method is not as effective for beyond machine precision results.)
+
+You can plot the real and imaginary parts of the above radial solution using `Plot[RW[r] // ReIm // Evaluate, {r, 10, 200}, PlotTheme -> "Detailed",
+  PlotLegends -> None, BaseStyle -> 20]`. This gives:
+  
+  <p align="center"><img width="50%" src="RW_radial_plot.png" alt="ReggeWheelerRadial plot"/></p>
 
