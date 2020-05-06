@@ -7,8 +7,10 @@ withinRoundoff[a_, b_] :=
   Block[{Internal`$SameQTolerance = 4},
     SameQ[a,b]];
 
-PacletDirectoryLoad[FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];
-PrependTo[$Path, FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];
+If[$VersionNumber >= 12.1,
+  PacletDirectoryLoad[FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];,
+  PacletDirectoryAdd[FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];
+];
 
 << ReggeWheeler`
 
