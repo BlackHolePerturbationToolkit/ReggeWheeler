@@ -55,6 +55,9 @@ This code is distributed under the MIT License. Details can
 be found in the LICENSE file.
 
 
-### Authors
+### Contributors
 
+Leanne Durkan
 Jonathan Thompson
+Niels Warburton
+Barry Wardell
