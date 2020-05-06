@@ -8,6 +8,7 @@ withinRoundoff[a_, b_] :=
     SameQ[a,b]];
 
 PacletDirectoryLoad[FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];
+PrependTo[$Path, FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];
 
 << ReggeWheeler`
 
