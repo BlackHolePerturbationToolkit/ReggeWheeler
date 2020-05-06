@@ -22,6 +22,13 @@ BeginPackage["ReggeWheeler`ReggeWheelerRadial`",
 
 
 (* ::Subsection::Closed:: *)
+(*Unprotect symbols*)
+
+
+ClearAttributes[{ReggeWheelerRadial, ReggeWheelerRadialFunction}, {Protected, ReadProtected}];
+
+
+(* ::Subsection::Closed:: *)
 (*Usage messages*)
 
 
@@ -322,6 +329,17 @@ Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r:(_?Numer
 
 (* ::Section::Closed:: *)
 (*End Package*)
+
+
+(* ::Subsection::Closed:: *)
+(*Protect symbols*)
+
+
+SetAttributes[{ReggeWheelerRadial, ReggeWheelerRadialFunction}, {Protected, ReadProtected}];
+
+
+(* ::Subsection::Closed:: *)
+(*End*)
 
 
 End[]

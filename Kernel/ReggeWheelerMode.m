@@ -23,6 +23,13 @@ BeginPackage["ReggeWheeler`ReggeWheelerMode`",
 
 
 (* ::Subsection::Closed:: *)
+(*Unprotect symbols*)
+
+
+ClearAttributes[{ReggeWheelerMode, ReggeWheelerPointParticleMode}, {Protected}];
+
+
+(* ::Subsection::Closed:: *)
 (*Usage messages*)
 
 
@@ -177,6 +184,17 @@ AngularMomentumFlux[mode_ReggeWheelerMode] :=
 
 (* ::Section::Closed:: *)
 (*End Package*)
+
+
+(* ::Subsection::Closed:: *)
+(*Protect symbols*)
+
+
+SetAttributes[{ReggeWheelerMode, ReggeWheelerPointParticleMode}, {Protected, ReadProtected}];
+
+
+(* ::Subsection::Closed:: *)
+(*End*)
 
 
 End[];
