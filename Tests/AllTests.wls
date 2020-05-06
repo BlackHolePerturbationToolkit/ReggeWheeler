@@ -8,14 +8,16 @@ withinRoundoff[a_, b_] :=
     SameQ[a,b]];
 
 If[$VersionNumber >= 12.1,
-  PacletDirectoryLoad[FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];,
+  PacletDirectoryLoad[FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];
+  testFiles = FileNames["*.wlt",
+    FileNameJoin[{PacletObject["ReggeWheeler"]["Location"], "Tests"}]];
+  ,
   PacletDirectoryAdd[FileNameDrop[ExpandFileName[First[$ScriptCommandLine]],-3]];
+  testFiles = FileNames["*.wlt",
+    FileNameJoin[{Lookup[PacletInformation["ReggeWheeler"], "Location"], "Tests"}]];
 ];
 
 << ReggeWheeler`
-
-testFiles = FileNames["*.wlt", 
-  FileNameJoin[{PacletObject["ReggeWheeler"]["Location"], "Tests"}]];
 
 reports = TestReport /@ testFiles;
 
