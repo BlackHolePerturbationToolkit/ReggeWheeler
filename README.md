@@ -57,7 +57,9 @@ be found in the LICENSE file.
 
 ### Contributors
 
-Leanne Durkan
-Jonathan Thompson
-Niels Warburton
-Barry Wardell
+David Q. Aruquipa  
+Marc Casals  
+Leanne Durkan  
+Jonathan Thompson  
+Niels Warburton  
+Barry Wardell  
