@@ -1,28 +1,33 @@
 (* Mathematica Test File *)
 
-\[Psi] = ReggeWheelerRadial[2, 2, 0.1];
-\[Psi]In = \[Psi]["In"];
+{\[Psi]In, \[Psi]Up} = Values[ReggeWheelerRadial[2, 2, 0.1]];
 
 (****************************************************************)
 (* TeukolskyRadial                                              *)
 (****************************************************************)
 VerificationTest[
-    \[Psi]
+    \[Psi]In
     ,
-    ReggeWheelerRadialFunction[2, 2, 0.1, 
-     <|"Method" -> {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20}, 
-      "BoundaryConditions" -> {"In", "Up"}, 
-      "SolutionFunctions" -> {ReggeWheeler`NumericalIntegration`Private`PsiIn[2, 2, 0.1, 4, 20], ReggeWheeler`NumericalIntegration`Private`PsiUp[2, 2, 0.1, 4, 20]}|>]
+    ReggeWheelerRadialFunction[2, 2, 0.1, <|
+      "s" -> 2, "l" -> 2, "\[Omega]" -> 0.1, "Eigenvalue" -> \[Lambda]_, 
+      "Method" -> {"MST", "RenormalizedAngularMomentum" -> \[Nu]_},
+      "BoundaryConditions" -> "In", 
+      "Amplitudes" -> <|"Transmission" -> _|>,
+      "Domain" -> {2, Infinity},
+      "RadialFunction" ->
+        ReggeWheeler`MST`MST`Private`MSTRadialIn[2, 2, 0, 0, 0.2, \[Nu]_, \[Lambda]_, _,
+          {MachinePrecision, MachinePrecision/2, MachinePrecision/2}] |>
+    ]
     ,
     TestID->"ReggeWheelerRadial",
-    SameTest -> withinRoundoff
+    SameTest -> MatchQ
 ]
 
 (****************************************************************)
 (* InvalidKey                                                   *)
 (****************************************************************)
 VerificationTest[
-    \[Psi]["NotAKey"]
+    \[Psi]In["NotAKey"]
     ,
     Missing["KeyAbsent", "NotAKey"]
     ,
@@ -34,9 +39,9 @@ VerificationTest[
 (* BoundaryConditions                                           *)
 (****************************************************************)
 VerificationTest[
-    \[Psi]["BoundaryConditions"]
+    \[Psi]In["BoundaryConditions"]
     ,
-    {"In", "Up"}
+    "In"
     ,
     TestID->"BoundaryConditions"
 ]
@@ -46,11 +51,24 @@ VerificationTest[
 (* Method                                                       *)
 (****************************************************************)
 VerificationTest[
-    \[Psi]["Method"]
+    \[Psi]In["Method"]
     ,
-    {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20}
+    {"MST", "RenormalizedAngularMomentum" -> _}
     ,
-    TestID->"Method"
+    TestID->"Method",
+    SameTest -> MatchQ
+]
+
+
+(****************************************************************)
+(* Eigenvalue                                                   *)
+(****************************************************************)
+VerificationTest[
+    \[Psi]In["Eigenvalue"]
+    ,
+    0
+    ,
+    TestID->"Eigenvalue"
 ]
 
 
@@ -58,11 +76,12 @@ VerificationTest[
 (* SolutionFunctions                                            *)
 (****************************************************************)
 VerificationTest[
-    \[Psi]["SolutionFunctions"]
+    \[Psi]In["RadialFunction"]
     ,
-    {ReggeWheeler`NumericalIntegration`Private`PsiIn[2, 2, 0.1, 4, 20], ReggeWheeler`NumericalIntegration`Private`PsiUp[2, 2, 0.1, 4, 20]}
+    ReggeWheelerRadialFunction[__]["RadialFunction"]
     ,
-    TestID->"SolutionFunctions"
+    TestID->"SolutionFunctions",
+    SameTest -> MatchQ
 ]
 
 
@@ -70,10 +89,9 @@ VerificationTest[
 (* Numerical Evaluation                                         *)
 (****************************************************************)
 VerificationTest[
-    \[Psi][10.0]
+    \[Psi]In[10.0]
     ,
-    <|"In" -> 0.0, 
-     "Up" -> 0.0 |>
+    93.12096963408008 + 17.576391050258476*I
     ,
     TestID->"Numerical Evaluation",
     SameTest -> withinRoundoff
@@ -84,10 +102,9 @@ VerificationTest[
 (* Derivative Numerical Evaluation                              *)
 (****************************************************************)
 VerificationTest[
-    \[Psi]'[10.0]
+    \[Psi]In'[10.0]
     ,
-    <|"In" -> 0.0, 
-     "Up" -> 0.0 |>
+    25.692572303913664 + 4.8480777278799865*I
     ,
     TestID->"Derivative Numerical Evaluation ",
     SameTest -> withinRoundoff
@@ -98,65 +115,11 @@ VerificationTest[
 (* Higher Derivative Numerical Evaluation                       *)
 (****************************************************************)
 VerificationTest[
-    \[Psi]''''[10.0]
+    \[Psi]In''''[10.0]
     ,
-    <|"In" -> 0.0, 
-     "Up" -> 0.0 |>
+    -0.07496035958290637 - 0.014105323216607984*I
     ,
     TestID->"Higher Derivative Numerical Evaluation ",
     SameTest -> withinRoundoff
 ]
-
-
-(****************************************************************)
-(* Subcase                                                      *)
-(****************************************************************)
-VerificationTest[
-    \[Psi]In
-    ,
-    ReggeWheelerRadialFunction[2, 2, 0.1, 
-     <|"Method" -> {"NumericalIntegration", "rmin" -> 4, "rmax" -> 20}, 
-      "BoundaryConditions" -> "In",
-      "SolutionFunctions" -> ReggeWheeler`NumericalIntegration`Private`PsiIn[2, 2, 0.1, 4, 20]
-      |>]
-    ,
-    TestID->"Subcase"
-]
-
-(****************************************************************)
-(* Single Subcase Boundary Conditions                           *)
-(****************************************************************)
-VerificationTest[
-    \[Psi]In["BoundaryConditions"]
-    ,
-    "In"
-    ,
-    TestID->"Single Subcase Boundary Conditions"
-]
-
-(****************************************************************)
-(* Single Subcase Numerical Evaluation                          *)
-(****************************************************************)
-VerificationTest[
-    \[Psi]In[10.0]
-    ,
-    0.0
-    ,
-    TestID->"Single Subcase Numerical Evaluation",
-    SameTest -> withinRoundoff
-]
-
-
-(****************************************************************)
-(* Single Subcase Derivative Numerical Evaluation               *)
-(****************************************************************)
-VerificationTest[
-    \[Psi]In'[10.0]
-    ,
-    0.0
-    ,
-    TestID->"Single Subcase Derivative Numerical Evaluation ",
-    SameTest -> withinRoundoff
-]
-
 
