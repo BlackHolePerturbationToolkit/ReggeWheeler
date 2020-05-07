@@ -744,7 +744,7 @@ PrivateNotebookOptions->{"FileOutlineCache"->False,
 "VersionedStylesheet"->{"Default.nb"[8.] -> False}},
 ShowSelection->True,
 TrackCellChangeTimes->False,
-FrontEndVersion->"12.1 for Mac OS X x86 (64-bit) (March 13, 2020)",
+FrontEndVersion->"10.2 for Mac OS X x86 (64-bit) (July 14, 2015)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"6b04c7f0-8ba4-4ad5-90e2-9c02ff66cd40"
 ]
