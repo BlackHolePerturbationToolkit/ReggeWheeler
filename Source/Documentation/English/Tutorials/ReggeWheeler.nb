@@ -460,20 +460,17 @@ real and imaginary parts appear to have an interesting structure.\
 \>", "Text",ExpressionUUID->"3fb2642f-fc8b-42f5-9bb3-bb8d5a04407c"],
 
 Cell[BoxData[
- RowBox[{"Block", "[", 
-  RowBox[{
-   RowBox[{"{", "\[Omega]", "}"}], ",", 
-   RowBox[{"Plot", "[", 
-    RowBox[{
-     RowBox[{"Evaluate", "[", 
-      RowBox[{"ReIm", "[", 
-       RowBox[{"RenormalizedAngularMomentum", "[", 
-        RowBox[{"s", ",", "l", ",", "0", ",", "0", ",", "\[Omega]"}], "]"}], 
-       "]"}], "]"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"\[Omega]", ",", "0", ",", "6"}], "}"}]}], "]"}]}], 
-  "]"}]], "Input",
- CellLabel->"In[84]:=",ExpressionUUID->"c5ff0a29-5635-4f07-a085-f73f83258444"],
+ RowBox[{
+  RowBox[{"Plot", "[", 
+   RowBox[{
+    RowBox[{"Evaluate", "[", 
+     RowBox[{"ReIm", "[", 
+      RowBox[{"RenormalizedAngularMomentum", "[", 
+       RowBox[{"s", ",", "l", ",", "0", ",", "0", ",", "\[Omega]0"}], "]"}], 
+      "]"}], "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"\[Omega]0", ",", "0", ",", "6"}], "}"}]}], "]"}], "//", 
+  "Quiet"}]], "Input",ExpressionUUID->"c5ff0a29-5635-4f07-a085-f73f83258444"],
 
 Cell[TextData[{
  "This is a consequence of the interesting property that ",
@@ -486,20 +483,17 @@ Cell[TextData[{
 }], "Text",ExpressionUUID->"dbcca7fb-8aa6-4d34-ba07-ce69d98d66f1"],
 
 Cell[BoxData[
- RowBox[{"Block", "[", 
-  RowBox[{
-   RowBox[{"{", "\[Omega]", "}"}], ",", 
-   RowBox[{"Plot", "[", 
-    RowBox[{
-     RowBox[{"Cos", "[", 
-      RowBox[{"2", "\[Pi]", " ", 
-       RowBox[{"RenormalizedAngularMomentum", "[", 
-        RowBox[{"s", ",", "l", ",", "0", ",", "0", ",", "\[Omega]"}], "]"}]}],
-       "]"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"\[Omega]", ",", "0", ",", "0.65"}], "}"}]}], "]"}]}], 
-  "]"}]], "Input",
- CellLabel->"In[87]:=",ExpressionUUID->"aa941f29-8f70-436d-ae35-3c706ce1f739"],
+ RowBox[{
+  RowBox[{"Plot", "[", 
+   RowBox[{
+    RowBox[{"Cos", "[", 
+     RowBox[{"2", "\[Pi]", " ", 
+      RowBox[{"RenormalizedAngularMomentum", "[", 
+       RowBox[{"s", ",", "l", ",", "0", ",", "0", ",", "\[Omega]0"}], "]"}]}],
+      "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"\[Omega]0", ",", "0", ",", "0.65"}], "}"}]}], "]"}], "//", 
+  "Quiet"}]], "Input",ExpressionUUID->"aa941f29-8f70-436d-ae35-3c706ce1f739"],
 
 Cell["\<\
 The RenormalizedAngularMomentum function has a single option, Method. The \
