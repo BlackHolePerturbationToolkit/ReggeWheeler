@@ -284,8 +284,7 @@ ReggeWheelerRadialFunction /:
     Lookup[icons, assoc["BoundaryConditions"], None],
     summary,
     extended,
-    form,
-    "Interpretable" -> Automatic]
+    form]
 ];
 
 
