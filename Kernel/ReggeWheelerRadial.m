@@ -43,6 +43,7 @@ ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], 
 ReggeWheelerRadial::precw = "The precision of \[Omega]=`1` is less than WorkingPrecision (`2`).";
 ReggeWheelerRadial::optx = "Unknown options in `1`";
 ReggeWheelerRadial::dm = "Option `1` is not valid with BoundaryConditions \[RightArrow] `2`.";
+ReggeWheelerRadial::sopt = "Option `1` not supported for static (\[Omega]=0) modes.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
 
 
@@ -171,6 +172,46 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_},
 
 
 (* ::Subsection::Closed:: *)
+(*Static modes*)
+
+
+ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_] :=
+ Module[{\[Lambda], norms, solFuncs, RWRF, m = 0, a=0},
+  (* Compute the eigenvalue *)
+  \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, 0];
+
+  (* Function to construct a ReggeWheelerRadialFunction *)
+  RWRF[bc_, ns_, sf_] :=
+    ReggeWheelerRadialFunction[s, l, \[Omega],
+     Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
+      "Method" -> {"Static"},
+      "BoundaryConditions" -> bc, "Amplitudes" -> ns,
+      "Domain" -> {2, \[Infinity]}, "RadialFunction" -> sf
+     ]
+    ];
+
+  (* Compute the asymptotic normalisations *)
+  norms = <|"In" -> <|"Transmission" -> 1|>, "Up" -> <|"Transmission" -> 1|>|>;
+
+  (* Solution functions for the specified boundary conditions *)
+  solFuncs =
+    <|"In" :> Function[{r},(r/2)^(-l)*Hypergeometric2F1[l+s+1,l-s+1,1,(r-2)/r]],
+      "Up" :> Function[{r},(r/2)^(-l)*Hypergeometric2F1[l+s+1,l-s+1,2*(l+1),2/r]]|>;
+  solFuncs = Lookup[solFuncs, BCs];
+
+  (* Select normalisation coefficients for the specified boundary conditions and rescale
+     to give unit transmission coefficient. *)
+  norms = norms[[All, {"Transmission"}]]/norms[[All, "Transmission"]];
+  norms = Lookup[norms, BCs];
+
+  If[ListQ[BCs],
+    Return[Association[MapThread[#1 -> RWRF[#1, #2, #3]&, {BCs, norms, solFuncs}]]],
+    Return[RWRF[BCs, norms, solFuncs]]
+  ];
+];
+
+
+(* ::Subsection::Closed:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -179,12 +220,40 @@ SyntaxInformation[ReggeWheelerRadial] =
 
 
 Options[ReggeWheelerRadial] = {
-  Method -> "MST",
+  Method -> Automatic,
   "BoundaryConditions" -> {"In", "Up"},
   WorkingPrecision -> Automatic,
   PrecisionGoal -> Automatic,
   AccuracyGoal -> Automatic
 };
+
+
+(* ::Subsubsection::Closed:: *)
+(*Static modes*)
+
+
+ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] /; \[Omega] == 0 :=
+ Module[{RWRF, subopts, BCs, wp, prec, acc},
+  (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
+  BCs = OptionValue["BoundaryConditions"];
+  If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
+    Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
+    Return[$Failed];
+  ];
+
+  (* Options are not supported for static modes *)
+  Do[
+    If[OptionValue[opt] =!= Automatic, Message[ReggeWheelerRadial::sopt, opt]];,
+    {opt, {Method, WorkingPrecision, PrecisionGoal, AccuracyGoal}}
+  ];
+
+  (* Call the chosen implementation *)
+  ReggeWheelerRadialStatic[s, l, \[Omega], BCs]
+]
+
+
+(* ::Subsubsection::Closed:: *)
+(*Non-static modes*)
 
 
 ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsPattern[]] :=
@@ -211,6 +280,8 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 
   (* Decide which implementation to use *)
   Switch[OptionValue[Method],
+    Automatic,
+      RWRF = ReggeWheelerRadialMST,
     "MST" | {"MST", OptionsPattern[ReggeWheelerRadialMST]},
       RWRF = ReggeWheelerRadialMST,
     "NumericalIntegration" | {"NumericalIntegration", OptionsPattern[ReggeWheelerRadialNumericalIntegration]},

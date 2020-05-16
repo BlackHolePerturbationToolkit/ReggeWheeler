@@ -35,12 +35,6 @@ Begin["`Private`"];
 
 SetAttributes[Psi, {NumericFunction}];
 
-Psi[s_, l_, (0|0.), bc_, ndsolveopts___][{xmin_, xmax_}] :=
- If[bc == "In",
-   Function[y, PsiInStaticOdd[s,l,y]],
-   Function[y, PsiUpStaticOdd[s,l,y]]
- ];
-
 Psi[s_, l_, \[Omega]_, "In", ndsolveopts___][xmax_?NumericQ] := Psi[s, l, \[Omega], "In", ndsolveopts][{Automatic, xmax}];
 Psi[s_, l_, \[Omega]_, "Up", ndsolveopts___][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up", ndsolveopts][{xmin, Automatic}];
 
@@ -203,43 +197,6 @@ ZerilliPotential[l_Integer,x_Numeric]:=
 	Module[{n},
 		n=(l-1)*(l+2)/2;
 		2*(1-2/x)*(9+9*n*x+n^2*x^2*(3+x)+n^3*x^3)/(x^3(3+n*x)^2)
-	];
-
-
-(* ::Subsection::Closed:: *)
-(*Static modes*)
-
-
-(*analytic solutions to the homogeneous static ReggeWheeler Eq. (see e.g. Field, Hesthaven, and Lau, PRD81, 124030 (2010)*)
-SetAttributes[PsiUpStaticOdd,{NumericFunction}]
-SetAttributes[PsiInStaticOdd,{NumericFunction}]
-
-PsiUpStaticOdd[s_Integer,l_Integer,x_]:=(x/2)^(-l)*Hypergeometric2F1[l+s+1,l-s+1,2*(l+1),2/x];
-
-PsiInStaticOdd[s_Integer,l_Integer,x_]:=(x/2)^(-l)*Hypergeometric2F1[l+s+1,l-s+1,1,(x-2)/x];
-
-(*SetAttributes[PsiUpStaticEven,{NumericFunction}]
-SetAttributes[PsiInStaticEven,{NumericFunction}]*)
-
-(*even-parity static solutions for s=2 given by the intertwining operatior*)
-PsiUpStaticEven[s_Integer,l_Integer,x_]:=
-	If[s==2,(*handle spin-2 case*)
-		Module[{n},
-			n=(l-1)*(l+2)/2;
-			2*(1-2/x)*Derivative[0,0,1][PsiUpStaticOdd][s,l,x]+(2*n*(n+1)/3+6*(x-2)/(x^2*(3+n*x)))*PsiUpStaticOdd[s,l,x]
-		]
-	,
-		Nothing
-	];
-	
-PsiInStaticEven[s_Integer,l_Integer,x_]:=
-	If[s==2,(*handle spin-2 case*)
-		Module[{n},
-			n=(l-1)*(l+2)/2;
-			2*(1-2/x)*Derivative[0,0,1][PsiInStaticOdd][s,l,x]+(2*n*(n+1)/3+6*(x-2)/(x^2*(3+n*x)))*PsiInStaticOdd[s,l,x]
-		]
-	,
-		Nothing
 	];
 
 
