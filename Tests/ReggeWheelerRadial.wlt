@@ -3,7 +3,7 @@
 {\[Psi]In, \[Psi]Up} = Values[ReggeWheelerRadial[2, 2, 0.1]];
 
 (****************************************************************)
-(* TeukolskyRadial                                              *)
+(* ReggeWheelerRadialFunction                                   *)
 (****************************************************************)
 VerificationTest[
     \[Psi]In
@@ -123,3 +123,53 @@ VerificationTest[
     SameTest -> withinRoundoff
 ]
 
+(****************************************************************)
+(* Static modes                                                 *)
+(****************************************************************)
+VerificationTest[
+    ReggeWheelerRadial[2, 2, 0]["In"][10]
+    ,
+    125
+    ,
+    TestID->"Static \"in\" mode"
+]
+
+VerificationTest[
+    ReggeWheelerRadial[2, 2, 0.0]["In"][10]
+    ,
+    125
+    ,
+    TestID->"Static \"in\" mode (machine-precision omega)"
+]
+
+VerificationTest[
+    ReggeWheelerRadial[2, 2, 0.0``32]["In"][10]
+    ,
+    125
+    ,
+    TestID->"Static \"in\" mode (high-accuracy omega)"
+]
+
+VerificationTest[
+    ReggeWheelerRadial[2, 2, 0]["Up"][10]
+    ,
+    1/12 (-1673 + 7500 Log[5/4])
+    ,
+    TestID->"Static \"in\" mode"
+]
+
+VerificationTest[
+    ReggeWheelerRadial[2, 2, 0.0]["Up"][10]
+    ,
+    1/12 (-1673 + 7500 Log[5/4])
+    ,
+    TestID->"Static \"in\" mode (machine-precision omega)"
+]
+
+VerificationTest[
+    ReggeWheelerRadial[2, 2, 0.0``32]["Up"][10]
+    ,
+    1/12 (-1673 + 7500 Log[5/4])
+    ,
+    TestID->"Static \"in\" mode (high-accuracy omega)"
+]
