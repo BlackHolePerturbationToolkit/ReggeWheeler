@@ -1,5 +1,3 @@
-(* ::Package:: *)
-
 Paclet[
   "Name" -> "ReggeWheeler",
   "Version" -> "0.2.0",
@@ -16,12 +14,11 @@ Paclet[
         "ReggeWheeler`"
       }
     },
-
     { "Documentation",
       "Language" -> "English",
       "MainPage" -> "Guides/ReggeWheeler",
       "Resources" ->
-     	{
+      {
         "Guides/ReggeWheeler"
       }
     }
