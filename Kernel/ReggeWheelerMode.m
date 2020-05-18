@@ -95,7 +95,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 ]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*ReggeWheelerMode*)
 
 
@@ -121,12 +121,12 @@ ReggeWheelerMode /:
     None,
     summary,
     extended,
-    form,
-    "Interpretable" -> Automatic]
+    form
+  ]
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Accessing attributes*)
 
 
