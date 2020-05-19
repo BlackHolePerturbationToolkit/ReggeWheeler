@@ -63,7 +63,7 @@ SyntaxInformation[ReggeWheelerPointParticleMode] =
 Options[ReggeWheelerPointParticleMode] = {};
 
 
-ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]] :=
+ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]] /; AllTrue[orbit["Frequencies"], InexactNumberQ] :=
  Module[{source, assoc, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z},
   If[orbit["a"] != 0,
     Message[ReggeWheelerPointParticleMode::nospin, orbit["a"]];
