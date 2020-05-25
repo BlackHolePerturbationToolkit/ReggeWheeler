@@ -5,7 +5,10 @@ Block[{MST`$MasterFunction = "ReggeWheeler"},
   Get["ReggeWheeler`MST`MST`"];
 ];
 
-Get["ReggeWheeler`NumericalIntegration`"];
-Get["ReggeWheeler`ReggeWheelerRadial`"];
-Get["ReggeWheeler`ReggeWheelerSource`"];
-Get["ReggeWheeler`ReggeWheelerMode`"];
+BeginPackage["ReggeWheeler`", {
+  "ReggeWheeler`NumericalIntegration`",
+  "ReggeWheeler`ReggeWheelerRadial`",
+  "ReggeWheeler`ReggeWheelerSource`",
+  "ReggeWheeler`ReggeWheelerMode`"}];
+
+EndPackage[];
