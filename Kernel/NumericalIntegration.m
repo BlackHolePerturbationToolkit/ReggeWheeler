@@ -29,7 +29,7 @@ Begin["`Private`"];
 (*Radial solutions*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Radiative modes*)
 
 
@@ -106,11 +106,11 @@ Derivative[n_][AllIntegrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,potential_,ndsolve
 (*SetAttributes[ReggeWheelerInBC, {NumericFunction}];
 SetAttributes[ReggeWheelerUpBC, {NumericFunction}];*)
 
-ReggeWheelerMSTBC[s1_Integer, l1_Integer, \[Omega]1_, workingprecision_]:=
+ReggeWheelerMSTBC[s1_Integer, l1_Integer, \[Omega]1_, domainMin_, domainMax_, workingprecision_]:=
 	Block[{s=s1,l=l1,\[Omega]=\[Omega]1,resIN,dresIN,resUP,dresUP,r,rin,rout, RW},
 	
-	rin = 2 + 10^-5;
-	rout = 100\[Omega]^-1;
+	rin = domainMin;
+	rout = domainMax;
 	
 	RW = ReggeWheelerRadial[s,l,\[Omega],PrecisionGoal->workingprecision, AccuracyGoal->Infinity,Method->{"MST"}];
 	
