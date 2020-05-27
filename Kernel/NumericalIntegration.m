@@ -25,7 +25,7 @@ BeginPackage["ReggeWheeler`NumericalIntegration`"];
 Begin["`Private`"];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Radial solutions*)
 
 
@@ -35,26 +35,32 @@ Begin["`Private`"];
 
 SetAttributes[Psi, {NumericFunction}];
 
-Psi[s_, l_, \[Omega]_, "In", ndsolveopts___][xmax_?NumericQ] := Psi[s, l, \[Omega], "In", ndsolveopts][{Automatic, xmax}];
-Psi[s_, l_, \[Omega]_, "Up", ndsolveopts___][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up", ndsolveopts][{xmin, Automatic}];
+Psi[s_, l_, \[Omega]_, "In", pot_, ndsolveopts___][xmax_?NumericQ] := Psi[s, l, \[Omega], "In", pot, ndsolveopts][{Automatic, xmax}];
+Psi[s_, l_, \[Omega]_, "Up", pot_, ndsolveopts___][xmin_?NumericQ] := Psi[s, l, \[Omega], "Up", pot, ndsolveopts][{xmin, Automatic}];
 
-Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][{xmin_, xmax_}] :=
- Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
-    bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
+Psi[s_, l_, \[Omega]_, bc_, pot_, ndsolveopts___][{xmin_, xmax_}] :=
+ Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln, Potential},
+    Potential = Switch[pot,"ReggeWheeler",ReggeWheelerPotential,"Zerilli",ZerilliPotential];
+    bcFunc = Switch[pot,
+        "ReggeWheeler", Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc],
+		"Zerilli", Lookup[<|"In" -> ZerilliInBC, "Up" -> ZerilliUpBC|>, bc]];
     {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Lookup[{ndsolveopts}, WorkingPrecision, Precision[\[Omega]]]];
     If[bc === "In" && xmin === Automatic, xMin = xBC, xMin = xmin];
     If[bc === "Up" && xmax === Automatic, xMax = xBC, xMax = xmax];
-    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, ReggeWheelerPotential, ndsolveopts]
+    soln = Integrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, xMin, xMax, Potential, ndsolveopts]
 ];
 
-Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][All] :=
- Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln},
-    bcFunc = Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc];
+Psi[s_, l_, \[Omega]_, bc_, pot_, ndsolveopts___][All] :=
+ Module[{bcFunc, psiBC, dpsidxBC, xBC, xMin, xMax, soln, Potential},
+    Potential = Switch[pot,"ReggeWheeler",ReggeWheelerPotential,"Zerilli",ZerilliPotential];
+    bcFunc = Switch[pot,
+        "ReggeWheeler", Lookup[<|"In" -> ReggeWheelerInBC, "Up" -> ReggeWheelerUpBC|>, bc],
+		"Zerilli", Lookup[<|"In" -> ZerilliInBC, "Up" -> ZerilliUpBC|>, bc]];
     {psiBC, dpsidxBC, xBC} = bcFunc[s, l, \[Omega], Lookup[{ndsolveopts}, WorkingPrecision, Precision[\[Omega]]]];
     soln = AllIntegrator[s, l, \[Omega], psiBC, dpsidxBC, xBC, ReggeWheelerPotential, ndsolveopts]
 ];
 
-Psi[s_, l_, \[Omega]_, bc_, ndsolveopts___][None] := $Failed;
+Psi[s_, l_, \[Omega]_, bc_, pot_, ndsolveopts___][None] := $Failed;
 
 
 (*should this be in a module for y1 and y2?*)
@@ -97,7 +103,7 @@ Derivative[n_][AllIntegrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,potential_,ndsolve
 	];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Boundary Conditions*)
 
 
@@ -187,7 +193,7 @@ If[i > 100, Break[]];
 
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Zerilli Potential*)
 
 
@@ -286,7 +292,7 @@ SetAttributes[ZerilliPotential,{NumericFunction}];
 ReggeWheelerPotential[s_Integer,l_Integer,x_]:=(1-2/x)(2(1-s^2)+l(l+1)x)/x^3;
 
 (*only for spin s=2, but we'll put the spin term in there to keep functionality the same*)
-ZerilliPotential[s_Integer,l_Integer,x_Numeric]:=
+ZerilliPotential[s_Integer,l_Integer,x_]:=
 	Module[{\[Lambda],\[CapitalLambda],f},
 		\[Lambda]=(l-1)*(l+2)/2;
 		\[CapitalLambda]=\[Lambda]+3/x;
