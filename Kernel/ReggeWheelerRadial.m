@@ -462,19 +462,19 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ.
 
 
 Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r0:(_?NumericQ|{_?NumericQ..})] :=
- Module[{rmin, rmax, \[Lambda], sign, R},
+ Module[{rmin, rmax, \[Lambda], sign, R, r},
   {rmin, rmax} = assoc["Domain"];
-  If[outsideDomainQ[r, rmin, rmax],
-    Message[ReggeWheelerRadialFunction::dmval, #]& /@ Select[Flatten[{r}], outsideDomainQ[#, rmin, rmax]&];
+  If[outsideDomainQ[r0, rmin, rmax],
+    Message[ReggeWheelerRadialFunction::dmval, #]& /@ Select[Flatten[{r0}], outsideDomainQ[#, rmin, rmax]&];
   ];
-  R = assoc["RadialFunction"];
   Quiet[Switch[assoc["Potential"],
     "ReggeWheeler",
-    R[r],
+    Derivative[n][assoc["RadialFunction"]][r0],
     "Zerilli",
     sign = Switch[assoc["BoundaryConditions"], "In", -1, "Out", 1, _, Indeterminate];
     \[Lambda] = assoc["Eigenvalue"];
-    D[1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),{r,n}] /. r-> r0,
+    (* FIXME: we could reduce this using the Zerilli equation *)
+    Collect[D[1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),{r,n}], {Derivative[_][R][r], R[r]}] /. R -> assoc["RadialFunction"] /. r -> r0,
     _,
     Message[ReggeWheelerRadialFunction::pot, assoc["Potential"]]
     ]
