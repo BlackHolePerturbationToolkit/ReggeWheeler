@@ -44,6 +44,7 @@ ReggeWheelerRadial::precw = "The precision of \[Omega]=`1` is less than WorkingP
 ReggeWheelerRadial::optx = "Unknown options in `1`";
 ReggeWheelerRadial::dm = "Option `1` is not valid with BoundaryConditions \[RightArrow] `2`.";
 ReggeWheelerRadial::sopt = "Option `1` not supported for static (\[Omega]=0) modes.";
+ReggeWheelerRadial::hcopt = "Option `1` not supported for HeunC method.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
 ReggeWheelerRadialFunction::pot = "Invalid potential `1`.";
 
@@ -160,6 +161,50 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, pot_, {wp_, prec_, 
   solFuncs =
     <|"In" :> ReggeWheeler`MST`MST`Private`MSTRadialIn[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["In"]["Transmission"], {wp, prec, acc}],
       "Up" :> ReggeWheeler`MST`MST`Private`MSTRadialUp[s,l,m,a,2\[Omega],\[Nu],\[Lambda],norms["Up"]["Transmission"], {wp, prec, acc}]|>;
+  solFuncs = Lookup[solFuncs, BCs];
+
+  (* Select normalisation coefficients for the specified boundary conditions and rescale
+     to give unit transmission coefficient. *)
+  norms = norms[[All, {"Transmission"}]]/norms[[All, "Transmission"]];
+  norms = Lookup[norms, BCs];
+
+  If[ListQ[BCs],
+    Return[Association[MapThread[#1 -> RWRF[#1, #2, #3]&, {BCs, norms, solFuncs}]]],
+    Return[RWRF[BCs, norms, solFuncs]]
+  ];
+];
+
+
+(* ::Subsection::Closed:: *)
+(*HeunC*)
+
+
+Options[ReggeWheelerRadialHeunC] = {};
+
+
+ReggeWheelerRadialHeunC[s_Integer, l_Integer, \[Omega]_, BCs_, pot_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
+ Module[{\[Lambda], \[Nu], norms, solFuncs, RWRF, m = 0, a=0},
+  (* Compute the eigenvalue and renormalized angular momentum *)
+  \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
+
+  (* Function to construct a ReggeWheelerRadialFunction *)
+  RWRF[bc_, ns_, sf_] :=
+    ReggeWheelerRadialFunction[s, l, \[Omega],
+     Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
+      "Potential" -> pot,
+      "Method" -> {"HeunC"},
+      "BoundaryConditions" -> bc, "Amplitudes" -> ns,
+      "Domain" -> {2, \[Infinity]}, "RadialFunction" -> sf
+     ]
+    ];
+
+  (* Compute the asymptotic normalisations *)
+  norms = <|"In" -> <|"Transmission" -> 1|>, "Up" -> <|"Transmission" -> 1|>|>;
+
+  (* Solution functions for the specified boundary conditions *)
+  solFuncs =
+    <|"In" :> Function[{r}, (r/2)^(s + 1) E^(-I \[Omega] (r + 2 Log[r/2 - 1])) HeunC[l + l^2 - (1 + s) (s - 4 I \[Omega]), 4 I (1 + s) \[Omega], 1 - 4 I \[Omega], 1 + 2 s, 4 I \[Omega], 1 - r/2]],
+      "Up" :> Function[{r}, $Failed]|>;
   solFuncs = Lookup[solFuncs, BCs];
 
   (* Select normalisation coefficients for the specified boundary conditions and rescale
@@ -297,6 +342,13 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
       RWRF = ReggeWheelerRadialMST,
     "NumericalIntegration" | {"NumericalIntegration", OptionsPattern[ReggeWheelerRadialNumericalIntegration]},
       RWRF = ReggeWheelerRadialNumericalIntegration;,
+    "HeunC",
+      (* Some options are not supported for the HeunC method modes *)
+      Do[
+        If[OptionValue[opt] =!= Automatic, Message[ReggeWheelerRadial::hcopt, opt]];,
+        {opt, {WorkingPrecision, PrecisionGoal, AccuracyGoal}}
+      ];
+      RWRF = ReggeWheelerRadialHeunC;,
     _,
       Message[ReggeWheelerRadial::optx, Method -> OptionValue[Method]];
       Return[$Failed];
