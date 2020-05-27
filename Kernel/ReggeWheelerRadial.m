@@ -56,7 +56,7 @@ ReggeWheelerRadialFunction::pot = "Invalid potential `1`.";
 Begin["`Private`"];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -260,7 +260,7 @@ ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_, pot_] :=
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -364,7 +364,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerRadialFunction*)
 
 
@@ -430,7 +430,7 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y_String] /; !MemberQ[{"Ra
   assoc[y];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Numerical evaluation*)
 
 
@@ -480,6 +480,8 @@ Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r0:(_?Nume
     ]
   , InterpolatingFunction::dmval]
  ];
+
+
 
 
 (* ::Section::Closed:: *)
