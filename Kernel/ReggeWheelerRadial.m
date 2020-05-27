@@ -56,7 +56,7 @@ ReggeWheelerRadialFunction::pot = "Invalid potential `1`.";
 Begin["`Private`"];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -118,8 +118,8 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, po
   (* Solution functions for the specified boundary conditions *)
   ndsolveopts = Sequence@@FilterRules[{opts}, Options[NDSolve]];
   solFuncs =
-   <|"In" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "In", WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts],
-     "Up" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "Up", WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts]|>;
+   <|"In" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "In", pot, WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts],
+     "Up" :> ReggeWheeler`NumericalIntegration`Private`Psi[s, l, \[Omega], "Up", pot, WorkingPrecision -> wp, PrecisionGoal -> prec, AccuracyGoal -> acc, ndsolveopts]|>;
   solFuncs = Lookup[solFuncs, BCs];
 
   If[ListQ[BCs],
@@ -260,7 +260,7 @@ ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_, pot_] :=
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -305,7 +305,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] /; \[
 ]
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Non-static modes*)
 
 
@@ -364,7 +364,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*ReggeWheelerRadialFunction*)
 
 
@@ -430,7 +430,7 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y_String] /; !MemberQ[{"Ra
   assoc[y];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Numerical evaluation*)
 
 
@@ -446,8 +446,8 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ.
   If[outsideDomainQ[r, rmin, rmax],
     Message[ReggeWheelerRadialFunction::dmval, #]& /@ Select[Flatten[{r}], outsideDomainQ[#, rmin, rmax]&];
   ];
-  R = assoc["RadialFunction"];
-  Quiet[Switch[assoc["Potential"],
+  assoc["RadialFunction"][r]
+  (*Quiet[Switch[assoc["Potential"],
     "ReggeWheeler",
     R[r],
     "Zerilli",
@@ -457,8 +457,12 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ.
     _,
     Message[ReggeWheelerRadialFunction::pot, assoc["Potential"]]
     ]
-  , InterpolatingFunction::dmval]
+  , InterpolatingFunction::dmval]*)
  ];
+
+
+(*Second derivative of Zerilli master function reduced by the field equations*)
+d2RZerilli[\[Lambda]_,\[Omega]_,r_,R_]:=(-3 ((2 -r) (18 -9  r-6 r^2 \[Lambda] (1+\[Lambda])-2 r^3 \[Lambda]^2 (1+\[Lambda]))+r^4 (3 +r \[Lambda])^2 \[Omega]^2) R[r]+(2 -r) r (3 +r \[Lambda]) (18 -9 r-3 r^2 \[Lambda] (1+\[Lambda])-r^3 \[Lambda]^2 (1+\[Lambda])) Derivative[1][R][r])/(r^3 (-2+r) (3+r \[Lambda])^2 (\[Lambda]+\[Lambda]^2-3 I \[Omega]));
 
 
 Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r0:(_?NumericQ|{_?NumericQ..})] :=
@@ -473,7 +477,6 @@ Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r0:(_?Nume
     "Zerilli",
     sign = Switch[assoc["BoundaryConditions"], "In", -1, "Out", 1, _, Indeterminate];
     \[Lambda] = assoc["Eigenvalue"];
-    (* FIXME: we could reduce this using the Zerilli equation *)
     Collect[D[1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),{r,n}], {Derivative[_][R][r], R[r]}] /. R -> assoc["RadialFunction"] /. r -> r0,
     _,
     Message[ReggeWheelerRadialFunction::pot, assoc["Potential"]]
