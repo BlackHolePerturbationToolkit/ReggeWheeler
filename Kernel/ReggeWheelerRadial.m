@@ -45,6 +45,7 @@ ReggeWheelerRadial::optx = "Unknown options in `1`";
 ReggeWheelerRadial::dm = "Option `1` is not valid with BoundaryConditions \[RightArrow] `2`.";
 ReggeWheelerRadial::sopt = "Option `1` not supported for static (\[Omega]=0) modes.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
+ReggeWheelerRadialFunction::pot = "Invalid potential `1`.";
 
 
 (* ::Subsection::Closed:: *)
@@ -70,7 +71,7 @@ Options[ReggeWheelerRadialNumericalIntegration] = Join[
 domainQ[domain_] := MatchQ[domain, {_?NumericQ, _?NumericQ} | (_?NumericQ) | All];
 
 
-ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
+ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, pot_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
  Module[{\[Lambda], RWRF, norms, ndsolveopts, solFuncs, domains, m = 0, a=0},
   (* Compute the eigenvalue *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
@@ -81,6 +82,7 @@ ReggeWheelerRadialNumericalIntegration[s_Integer, l_Integer, \[Omega]_, BCs_, {w
     solutionFunction = sf[domain];
     ReggeWheelerRadialFunction[s, l, \[Omega],
      Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
+      "Potential" -> pot,
       "Method" -> {"NumericalIntegration", ndsolveopts},
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
       "Domain" -> If[domain === All, {2, \[Infinity]}, First[solutionFunction["Domain"]]],
@@ -134,7 +136,7 @@ Options[ReggeWheelerRadialMST] = {
   "RenormalizedAngularMomentum" -> "Monodromy"};
 
 
-ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
+ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, pot_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
  Module[{\[Lambda], \[Nu], norms, solFuncs, RWRF, m = 0, a=0},
   (* Compute the eigenvalue and renormalized angular momentum *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
@@ -144,6 +146,7 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_},
   RWRF[bc_, ns_, sf_] :=
     ReggeWheelerRadialFunction[s, l, \[Omega],
      Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
+      "Potential" -> pot,
       "Method" -> {"MST", "RenormalizedAngularMomentum" -> \[Nu]},
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
       "Domain" -> {2, \[Infinity]}, "RadialFunction" -> sf
@@ -175,7 +178,7 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, {wp_, prec_, acc_},
 (*Static modes*)
 
 
-ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_] :=
+ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_, pot_] :=
  Module[{\[Lambda], norms, solFuncs, RWRF, m = 0, a=0},
   (* Compute the eigenvalue *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, 0];
@@ -184,6 +187,7 @@ ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_] :=
   RWRF[bc_, ns_, sf_] :=
     ReggeWheelerRadialFunction[s, l, \[Omega],
      Association["s" -> s, "l" -> l, "\[Omega]" -> \[Omega], "Eigenvalue" -> \[Lambda],
+      "Potential" -> pot,
       "Method" -> {"Static"},
       "BoundaryConditions" -> bc, "Amplitudes" -> ns,
       "Domain" -> {2, \[Infinity]}, "RadialFunction" -> sf
@@ -222,6 +226,7 @@ SyntaxInformation[ReggeWheelerRadial] =
 Options[ReggeWheelerRadial] = {
   Method -> Automatic,
   "BoundaryConditions" -> {"In", "Up"},
+  "Potential" -> "ReggeWheeler",
   WorkingPrecision -> Automatic,
   PrecisionGoal -> Automatic,
   AccuracyGoal -> Automatic
@@ -233,13 +238,16 @@ Options[ReggeWheelerRadial] = {
 
 
 ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] /; \[Omega] == 0 :=
- Module[{RWRF, subopts, BCs, wp, prec, acc},
+ Module[{pot, BCs, wp, prec, acc},
   (* Determine which boundary conditions the homogeneous solution(s) should satisfy *)
   BCs = OptionValue["BoundaryConditions"];
   If[!MatchQ[BCs, "In"|"Up"|{("In"|"Up")..}], 
     Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
     Return[$Failed];
   ];
+
+  (* Potential *)
+  pot = OptionValue["Potential"];
 
   (* Options are not supported for static modes *)
   Do[
@@ -248,7 +256,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] /; \[
   ];
 
   (* Call the chosen implementation *)
-  ReggeWheelerRadialStatic[s, l, \[Omega], BCs]
+  ReggeWheelerRadialStatic[s, l, \[Omega], BCs, pot]
 ]
 
 
@@ -257,7 +265,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] /; \[
 
 
 ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsPattern[]] :=
- Module[{RWRF, subopts, BCs, wp, prec, acc},
+ Module[{RWRF, subopts, pot, BCs, wp, prec, acc},
   (* Extract suboptions from Method to be passed on. *)
   If[ListQ[OptionValue[Method]],
     subopts = Rest[OptionValue[Method]];,
@@ -270,6 +278,9 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
     Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
     Return[$Failed];
   ];
+
+  (* Potential *)
+  pot = OptionValue["Potential"];
 
   (* Options associated with precision and accuracy *)
   {wp, prec, acc} = OptionValue[{WorkingPrecision, PrecisionGoal, AccuracyGoal}];
@@ -297,7 +308,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
   ];
 
   (* Call the chosen implementation *)
-  RWRF[s, l, \[Omega], BCs, {wp, prec, acc}, Sequence@@subopts]
+  RWRF[s, l, \[Omega], BCs, pot, {wp, prec, acc}, Sequence@@subopts]
 ];
 
 
@@ -378,22 +389,44 @@ outsideDomainQ[r_, rmin_, rmax_] := Min[r]<rmin || Max[r]>rmax;
 
 
 ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ..})] :=
- Module[{rmin, rmax},
+ Module[{rmin, rmax, \[Lambda], sign, R},
   {rmin, rmax} = assoc["Domain"];
   If[outsideDomainQ[r, rmin, rmax],
     Message[ReggeWheelerRadialFunction::dmval, #]& /@ Select[Flatten[{r}], outsideDomainQ[#, rmin, rmax]&];
   ];
-  Quiet[assoc["RadialFunction"][r], InterpolatingFunction::dmval]
+  R = assoc["RadialFunction"];
+  Quiet[Switch[assoc["Potential"],
+    "ReggeWheeler",
+    R[r],
+    "Zerilli",
+    sign = Switch[assoc["BoundaryConditions"], "In", -1, "Out", 1, _, Indeterminate];
+    \[Lambda] = assoc["Eigenvalue"];
+    1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),
+    _,
+    Message[ReggeWheelerRadialFunction::pot, assoc["Potential"]]
+    ]
+  , InterpolatingFunction::dmval]
  ];
 
 
-Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r:(_?NumericQ|{_?NumericQ..})] :=
- Module[{rmin, rmax},
+Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r0:(_?NumericQ|{_?NumericQ..})] :=
+ Module[{rmin, rmax, \[Lambda], sign, R},
   {rmin, rmax} = assoc["Domain"];
   If[outsideDomainQ[r, rmin, rmax],
     Message[ReggeWheelerRadialFunction::dmval, #]& /@ Select[Flatten[{r}], outsideDomainQ[#, rmin, rmax]&];
   ];
-  Quiet[Derivative[n][assoc["RadialFunction"]][r], InterpolatingFunction::dmval]
+  R = assoc["RadialFunction"];
+  Quiet[Switch[assoc["Potential"],
+    "ReggeWheeler",
+    R[r],
+    "Zerilli",
+    sign = Switch[assoc["BoundaryConditions"], "In", -1, "Out", 1, _, Indeterminate];
+    \[Lambda] = assoc["Eigenvalue"];
+    D[1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),{r,n}] /. r-> r0,
+    _,
+    Message[ReggeWheelerRadialFunction::pot, assoc["Potential"]]
+    ]
+  , InterpolatingFunction::dmval]
  ];
 
 
