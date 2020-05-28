@@ -25,11 +25,11 @@ BeginPackage["ReggeWheeler`NumericalIntegration`"];
 Begin["`Private`"];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Radial solutions*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Radiative modes*)
 
 
@@ -97,7 +97,7 @@ Derivative[n_][AllIntegrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,potential_,ndsolve
 	];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Boundary Conditions*)
 
 
@@ -106,20 +106,31 @@ Derivative[n_][AllIntegrator[s_,l_,\[Omega]_,y1BC_,y2BC_,xBC_,potential_,ndsolve
 (*SetAttributes[ReggeWheelerInBC, {NumericFunction}];
 SetAttributes[ReggeWheelerUpBC, {NumericFunction}];*)
 
-ReggeWheelerMSTBC[s1_Integer, l1_Integer, \[Omega]1_, domainMin_, domainMax_, workingprecision_]:=
-	Block[{s=s1,l=l1,\[Omega]=\[Omega]1,resIN,dresIN,resUP,dresUP,r,rin,rout, RW},
+ReggeWheelerInMSTBC[s1_Integer, l1_Integer, \[Omega]1_, workingprecision_]:=
+	Block[{s=s1,l=l1,\[Omega]=\[Omega]1,resIN,dresIN,r,rin, RW},
 	
-	rin = domainMin;
-	rout = domainMax;
+	rin=2+10^-5;
 	
-	RW = ReggeWheelerRadial[s,l,\[Omega],PrecisionGoal->workingprecision, AccuracyGoal->Infinity,Method->{"MST"}];
+	RW = ReggeWheelerRadial[s,l,\[Omega],PrecisionGoal->workingprecision, WorkingPrecision->workingprecision, AccuracyGoal->Infinity,Method->{"MST"}];
 	
 	resIN = RW["In"][rin];
 	dresIN = D[RW["In"][r],r]/.r->rin;
+	
+	{resIN,dresIN,rin}
+	
+]
+
+ReggeWheelerUpMSTBC[s1_Integer, l1_Integer, \[Omega]1_, workingprecision_]:=
+	Block[{s=s1,l=l1,\[Omega]=\[Omega]1,resUP,dresUP,r,rin,rout, RW},
+	
+	rout =100\[Omega]^-1;
+	
+	RW = ReggeWheelerRadial[s,l,\[Omega],PrecisionGoal->workingprecision, WorkingPrecision->workingprecision, AccuracyGoal->Infinity,Method->{"MST"}];
+	
 	resUP = RW["Up"][rout];
 	dresUP = D[RW["Up"][r],r]/.r->rout;
 	
-	<|"UpBC"->{resUP,dresUP,rout}, "InBC"->{resIN,dresIN,rin}|>
+	{resUP,dresUP,rout}
 	
 ]
 
