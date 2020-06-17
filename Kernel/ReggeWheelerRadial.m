@@ -305,7 +305,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] /; \[
 ]
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Non-static modes*)
 
 
@@ -441,23 +441,33 @@ outsideDomainQ[r_, rmin_, rmax_] := Min[r]<rmin || Max[r]>rmax;
 
 
 ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ..})] :=
- Module[{rmin, rmax, \[Lambda], sign, R},
+ Module[{rmin, rmax, \[Lambda], \[ScriptL], sign, R},
   {rmin, rmax} = assoc["Domain"];
   If[outsideDomainQ[r, rmin, rmax],
     Message[ReggeWheelerRadialFunction::dmval, #]& /@ Select[Flatten[{r}], outsideDomainQ[#, rmin, rmax]&];
   ];
-  assoc["RadialFunction"][r]
-  (*Quiet[Switch[assoc["Potential"],
+  R=assoc["RadialFunction"];
+  Quiet[Switch[assoc["Potential"],
     "ReggeWheeler",
     R[r],
     "Zerilli",
-    sign = Switch[assoc["BoundaryConditions"], "In", -1, "Out", 1, _, Indeterminate];
-    \[Lambda] = assoc["Eigenvalue"];
-    1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),
+    Switch[assoc["Method"][[1]],
+    "MST"
+    ,
+    sign = Switch[assoc["BoundaryConditions"], "In", -1, "Up", 1, _, Indeterminate];
+    (*\[Lambda] = assoc["Eigenvalue"];*)
+    \[ScriptL]=assoc["l"];
+    \[Lambda]=1/2 (\[ScriptL]-1)(\[ScriptL]+2);
+    1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r])
+    ,
+    "NumericalIntegration"
+    ,
+    R[r]
+    ],
     _,
     Message[ReggeWheelerRadialFunction::pot, assoc["Potential"]]
     ]
-  , InterpolatingFunction::dmval]*)
+  , InterpolatingFunction::dmval]
  ];
 
 
@@ -475,9 +485,17 @@ Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r0:(_?Nume
     "ReggeWheeler",
     Derivative[n][assoc["RadialFunction"]][r0],
     "Zerilli",
-    sign = Switch[assoc["BoundaryConditions"], "In", -1, "Out", 1, _, Indeterminate];
+    Switch[assoc["Method"][[1]],
+    "MST"
+    ,
+    sign = Switch[assoc["BoundaryConditions"], "In", -1, "Up", 1, _, Indeterminate];
     \[Lambda] = assoc["Eigenvalue"];
-    Collect[D[1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),{r,n}], {Derivative[_][R][r], R[r]}] /. R -> assoc["RadialFunction"] /. r -> r0,
+    Collect[D[1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),{r,n}], {Derivative[_][R][r], R[r]}] /. R -> assoc["RadialFunction"] /. r -> r0
+    ,
+    "NumericalIntegration"
+    ,
+    Derivative[n][assoc["RadialFunction"]][r0]
+    ],
     _,
     Message[ReggeWheelerRadialFunction::pot, assoc["Potential"]]
     ]
