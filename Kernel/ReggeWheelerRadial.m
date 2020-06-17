@@ -476,7 +476,7 @@ d2RZerilli[\[Lambda]_,\[Omega]_,r_,R_]:=(-3 ((2 -r) (18 -9  r-6 r^2 \[Lambda] (1
 
 
 Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r0:(_?NumericQ|{_?NumericQ..})] :=
- Module[{rmin, rmax, \[Lambda], sign, R, r},
+ Module[{rmin, rmax, \[Lambda], \[ScriptL],sign, R, r},
   {rmin, rmax} = assoc["Domain"];
   If[outsideDomainQ[r0, rmin, rmax],
     Message[ReggeWheelerRadialFunction::dmval, #]& /@ Select[Flatten[{r0}], outsideDomainQ[#, rmin, rmax]&];
@@ -489,7 +489,8 @@ Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r0:(_?Nume
     "MST"
     ,
     sign = Switch[assoc["BoundaryConditions"], "In", -1, "Up", 1, _, Indeterminate];
-    \[Lambda] = assoc["Eigenvalue"];
+    \[ScriptL]=assoc["l"];
+    \[Lambda]=1/2 (\[ScriptL]-1)(\[ScriptL]+2);
     Collect[D[1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),{r,n}], {Derivative[_][R][r], R[r]}] /. R -> assoc["RadialFunction"] /. r -> r0
     ,
     "NumericalIntegration"
