@@ -47,6 +47,7 @@ ReggeWheelerRadial::sopt = "Option `1` not supported for static (\[Omega]=0) mod
 ReggeWheelerRadial::hcopt = "Option `1` not supported for HeunC method.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
 ReggeWheelerRadialFunction::pot = "Invalid potential `1`.";
+ReggeWheelerRadialFunction::potm = "Method `1` does not currently support potential `2`.";
 
 
 (* ::Subsection::Closed:: *)
@@ -455,7 +456,6 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ.
     "MST"
     ,
     sign = Switch[assoc["BoundaryConditions"], "In", -1, "Up", 1, _, Indeterminate];
-    (*\[Lambda] = assoc["Eigenvalue"];*)
     \[ScriptL]=assoc["l"];
     \[Lambda]=1/2 (\[ScriptL]-1)(\[ScriptL]+2);
     1/(\[Lambda]^2 + \[Lambda] + sign 3 I \[Omega]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r])
@@ -463,6 +463,10 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ.
     "NumericalIntegration"
     ,
     R[r]
+    ,
+    _
+    ,
+    Message[ReggeWheelerRadialFunction::potm, assoc["Method"][[1]], assoc["Potential"]]
     ],
     _,
     Message[ReggeWheelerRadialFunction::pot, assoc["Potential"]]
