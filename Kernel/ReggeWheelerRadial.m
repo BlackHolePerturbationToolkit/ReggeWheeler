@@ -44,6 +44,7 @@ ReggeWheelerRadial::precw = "The precision of \[Omega]=`1` is less than WorkingP
 ReggeWheelerRadial::optx = "Unknown options in `1`";
 ReggeWheelerRadial::dm = "Option `1` is not valid with BoundaryConditions \[RightArrow] `2`.";
 ReggeWheelerRadial::sopt = "Option `1` not supported for static (\[Omega]=0) modes.";
+ReggeWheelerRadial::hc = "Method HeunC is only supported with Mathematica version 12.1 and later.";
 ReggeWheelerRadial::hcopt = "Option `1` not supported for HeunC method.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
 ReggeWheelerRadialFunction::pot = "Invalid potential `1`.";
@@ -185,6 +186,12 @@ Options[ReggeWheelerRadialHeunC] = {};
 
 ReggeWheelerRadialHeunC[s_Integer, l_Integer, \[Omega]_, BCs_, pot_, {wp_, prec_, acc_}, opts:OptionsPattern[]] :=
  Module[{\[Lambda], \[Nu], norms, solFuncs, RWRF, m = 0, a=0},
+  (* The HeunC method is only supported on version 12.1 and newer *)
+  If[$VersionNumber < 12.1,
+    Message[ReggeWheelerRadial::hc];
+    Return[$Failed]
+  ];
+ 
   (* Compute the eigenvalue and renormalized angular momentum *)
   \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, a \[Omega]];
 
