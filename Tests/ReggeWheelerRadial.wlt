@@ -10,6 +10,7 @@ VerificationTest[
     ,
     ReggeWheelerRadialFunction[2, 2, 0.1, <|
       "s" -> 2, "l" -> 2, "\[Omega]" -> 0.1, "Eigenvalue" -> \[Lambda]_, 
+      "Potential" -> pot_,
       "Method" -> {"MST", "RenormalizedAngularMomentum" -> \[Nu]_},
       "BoundaryConditions" -> "In", 
       "Amplitudes" -> <|"Transmission" -> _|>,
@@ -122,6 +123,19 @@ VerificationTest[
     TestID->"Higher Derivative Numerical Evaluation ",
     SameTest -> withinRoundoff
 ]
+
+
+(****************************************************************)
+(* HeunC method                                                 *)
+(****************************************************************)
+VerificationTest[
+   ReggeWheelerRadial[2, 2, 0.1`32, "Method" -> "HeunC"]["In"][10]
+    ,
+    93.12096959625011003703910894487 + 17.57639105704051949775013340926 I
+    ,
+    TestID->"HeunC Method"
+]
+
 
 (****************************************************************)
 (* Static modes                                                 *)
