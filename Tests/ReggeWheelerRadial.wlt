@@ -10,6 +10,7 @@ VerificationTest[
     ,
     ReggeWheelerRadialFunction[2, 2, 0.1, <|
       "s" -> 2, "l" -> 2, "\[Omega]" -> 0.1, "Eigenvalue" -> \[Lambda]_, 
+      "Potential" -> pot_,
       "Method" -> {"MST", "RenormalizedAngularMomentum" -> \[Nu]_},
       "BoundaryConditions" -> "In", 
       "Amplitudes" -> <|"Transmission" -> _|>,
