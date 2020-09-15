@@ -278,34 +278,11 @@ Cell["Method", \
 "Subsubsection",ExpressionUUID->"2f0179bc-ef11-4cf9-92cb-c60abf45fa78"],
 
 Cell["\<\
-There are currently two supported methods for computing homogeneous \
-solutions: MST and NumericalIntegration. The MST method is the default and \
-can produce highly accurate results, but often needs to work beyond machine \
-precision whereas the NumericalIntegration method is fast and can be used to \
-efficiently evaluate on a grid of points. Further details on the methods \
-including their supported sub-options are given in the Methods section below.\
-\
-\>", "Text",ExpressionUUID->"441352eb-e3cc-4739-8b27-5196274450d9"],
-
-Cell[BoxData[
- RowBox[{"ReggeWheelerRadial", "[", 
-  RowBox[{"s", ",", "l", ",", "\[Omega]", ",", 
-   RowBox[{"\"\<BoundaryConditions\>\"", "\[Rule]", "\"\<In\>\""}], ",", 
-   RowBox[{"Method", "\[Rule]", "\"\<MST\>\""}]}], "]"}]], "Input",
- CellLabel->"In[43]:=",ExpressionUUID->"3e16de21-47a7-4ac4-8081-0c89d603164f"],
-
-Cell[BoxData[
- RowBox[{"ReggeWheelerRadial", "[", 
-  RowBox[{"s", ",", "l", ",", "\[Omega]", ",", 
-   RowBox[{"\"\<BoundaryConditions\>\"", "\[Rule]", "\"\<In\>\""}], ",", 
-   RowBox[{"Method", "\[Rule]", 
-    RowBox[{"{", 
-     RowBox[{"\"\<NumericalIntegration\>\"", ",", 
-      RowBox[{"\"\<Domain\>\"", "\[Rule]", 
-       RowBox[{"{", 
-        RowBox[{"3", ",", "20"}], "}"}]}]}], "}"}]}]}], "]"}]], "Input",
- CellLabel->
-  "In[45]:=",ExpressionUUID->"68c6fe16-395c-4a0b-8a9b-6b04af2877b7"]
+There are currently three supported methods for computing homogeneous \
+solutions: MST, NumericalIntegration and HeunC. Further details on the method \
+including its supported sub-options are given in the Methods section below. \
+In most cases, all three methods produce identical results.\
+\>", "Text",ExpressionUUID->"94ff6cb9-5e58-44ac-b000-e5ff88d1768e"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -367,13 +344,21 @@ Cell["Methods", \
 "Section",ExpressionUUID->"1729a2ca-914c-4788-ac7a-e670a80f7327"],
 
 Cell["\<\
-There are currently two supported methods for computing homogeneous \
-solutions: MST and NumericalIntegration. The MST method is the default and \
-can produce highly accurate results, but often needs to work beyond machine \
-precision whereas the NumericalIntegration method is fast and can be used to \
-efficiently evaluate on a grid of points. Each of the methods has sub-options \
-which are detailed below.\
-\>", "Text",ExpressionUUID->"297105d7-dac4-457a-88c1-7d2e2aad4847"],
+There is currently three supported methods for computing homogeneous \
+solutions: MST, NumericalIntegration and HeunC. The MST method is the default \
+and can produce highly accurate results, but often needs to work beyond \
+machine precision. The NumericalIntegration method can produce fast results \
+on a grid of points, but is not always as accurate as the MST method. The \
+HeunC method uses the new HeunC function included in Mathematica 12.1, but \
+only currently supports computing solutions satisfying \
+\[OpenCurlyDoubleQuote]in\[CloseCurlyDoubleQuote] boundary conditions. It is \
+often fast, but fails to produce accurate (or even correct) results in some \
+cases.\
+\>", "Text",ExpressionUUID->"18275b88-c209-4371-8725-d9fc0325306e"],
+
+Cell["\<\
+In most cases, all three methods produce consistent numerical results.\
+\>", "Text",ExpressionUUID->"dd1eedbb-944a-4a3c-b023-9fcbc6de38ce"],
 
 Cell[CellGroupData[{
 
@@ -506,7 +491,7 @@ working precision.\
 
 Cell[CellGroupData[{
 
-Cell["NumericalIntegration", \
+Cell["NumericalIntegration method", \
 "Subsection",ExpressionUUID->"4c9a4d5e-48e3-4312-a5ac-ac1e0ade8f37"],
 
 Cell[TextData[{
@@ -594,7 +579,60 @@ Cell[BoxData[
      RowBox[{"\"\<NumericalIntegration\>\"", ",", 
       RowBox[{"\"\<Domain\>\"", "\[Rule]", "All"}]}], "}"}]}]}], 
   "]"}]], "Input",
- CellLabel->"In[105]:=",ExpressionUUID->"54e8c9ce-b854-4686-9ca9-e753abd468f8"]
+ CellLabel->
+  "In[105]:=",ExpressionUUID->"54e8c9ce-b854-4686-9ca9-e753abd468f8"],
+
+Cell["\<\
+Once a TeukolskyRadialFunction is constructed using the NumericalIntegration \
+method, it can be efficiently evaluated on a grid of points.\
+\>", "Text",ExpressionUUID->"3cbafd25-6adf-4235-8a5f-dba2398f9f02"],
+
+Cell[BoxData[
+ RowBox[{"R", "=", 
+  RowBox[{"ReggeWheelerRadial", "[", 
+   RowBox[{"s", ",", "l", ",", "\[Omega]", ",", 
+    RowBox[{"\"\<BoundaryConditions\>\"", "\[Rule]", "\"\<In\>\""}], ",", 
+    RowBox[{"Method", "\[Rule]", 
+     RowBox[{"{", 
+      RowBox[{"\"\<NumericalIntegration\>\"", ",", 
+       RowBox[{"\"\<Domain\>\"", "\[Rule]", 
+        RowBox[{"{", 
+         RowBox[{"3", ",", "20"}], "}"}]}]}], "}"}]}]}], 
+   "]"}]}]], "Input",ExpressionUUID->"d7f2ebf1-3478-4a7c-94d4-bf9b91ce824c"],
+
+Cell[BoxData[
+ RowBox[{"Table", "[", 
+  RowBox[{
+   RowBox[{"R", "[", "r", "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"r", ",", "3", ",", "20"}], "}"}]}], "]"}]], "Input",
+ CellLabel->
+  "In[43]:=",ExpressionUUID->"e737db02-864b-499e-a326-44cd7559dd40"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["HeunC method", \
+"Subsection",ExpressionUUID->"f0941190-379d-4e38-9846-9c78b4f43d11"],
+
+Cell["\<\
+The HeunC method uses Mathematica\[CloseCurlyQuote]s built-in HeunC method \
+(available since version 12.1) to compute solutions of the Regge-Wheeler \
+equation. It is reasonably fast and accurate in many instances and is as \
+reliable as the HeunC function itself (which works in many, but not all cases \
+typically of interest). Currently, only \[OpenCurlyDoubleQuote]In\
+\[CloseCurlyDoubleQuote] boundary conditions are supported as no version of \
+HeunC directly maps onto a solution satisfying \[OpenCurlyDoubleQuote]Up\
+\[CloseCurlyDoubleQuote] boundary conditions.\
+\>", "Text",ExpressionUUID->"d5428a4c-2f23-4100-8a3d-b3e49aa1aa3a"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"R", "=", 
+   RowBox[{"ReggeWheelerRadial", "[", 
+    RowBox[{"s", ",", "l", ",", "\[Omega]", ",", 
+     RowBox[{"Method", "\[Rule]", "\"\<HeunC\>\""}]}], "]"}]}], 
+  ";"}]], "Input",ExpressionUUID->"e9acb07f-bcc3-4935-90e0-62d263f057c9"]
 }, Open  ]]
 }, Open  ]],
 

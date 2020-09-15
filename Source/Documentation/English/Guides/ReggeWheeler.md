@@ -17,13 +17,13 @@
     "DetailedFunctions" -> {
       {"ReggeWheelerRadial", "compute homogeneous solutions of the Regge-Wheeler equation"},
       {"ReggeWheelerRadialFunction", "object representing a solution of the Regge-Wheeler equation"},
-      {"RenormalizedAngularMomentum", "parameter used in MST method"},
-      {"ReggeWheelerMode", "object representing a single mode of a solution of the Regge-Wheeler equation"}
+      {"RenormalizedAngularMomentum", "parameter used in MST method"}
     }
    },
    {"Title" -> "Sources",
     "DetailedFunctions" -> {
-      {"ReggeWheelerPointParticleMode", "object representing a single mode of a solution of the Regge-Wheeler equation with point particle source"}
+      {"ReggeWheelerPointParticleMode", "object representing a single mode of a solution of the Regge-Wheeler equation with point particle source"},
+      {"ReggeWheelerMode", "object representing a single mode of a solution of the Regge-Wheeler equation"}
     }
    }
  },
