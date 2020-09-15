@@ -13,7 +13,7 @@ VerificationTest[
       "Potential" -> pot_,
       "Method" -> {"MST", "RenormalizedAngularMomentum" -> \[Nu]_},
       "BoundaryConditions" -> "In", 
-      "Amplitudes" -> <|"Transmission" -> _|>,
+      "Amplitudes" -> <|"Incidence" -> _, "Transmission" -> _, "Reflection" -> _ |>,
       "Domain" -> {2, Infinity},
       "RadialFunction" ->
         ReggeWheeler`MST`MST`Private`MSTRadialIn[2, 2, 0, 0, 0.2, \[Nu]_, \[Lambda]_, _,
