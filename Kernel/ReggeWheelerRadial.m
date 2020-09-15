@@ -167,7 +167,7 @@ ReggeWheelerRadialMST[s_Integer, l_Integer, \[Omega]_, BCs_, pot_, {wp_, prec_, 
 
   (* Select normalisation coefficients for the specified boundary conditions and rescale
      to give unit transmission coefficient. *)
-  norms = norms[[All, {"Transmission"}]]/norms[[All, "Transmission"]];
+  norms = norms/norms[[All, "Transmission"]];
   norms = Lookup[norms, BCs];
 
   If[ListQ[BCs],

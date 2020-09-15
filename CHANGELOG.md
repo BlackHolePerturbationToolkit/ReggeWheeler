@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Support for computing "In" solutions using Mathematica's HeunC function (available since version 12.1).
  - Support for computing solutions to the Zerilli equation.
+ - All asymptotic amplitudes (incidence, transmission and reflection) are now computed and available in a ReggeWheelerRadialFunction.
 
 ### Fixed
  - Fixed several memory leaks.
