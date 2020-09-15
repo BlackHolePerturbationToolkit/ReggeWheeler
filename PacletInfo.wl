@@ -1,6 +1,6 @@
 Paclet[
   "Name" -> "ReggeWheeler",
-  "Version" -> "0.2.0",
+  "Version" -> "0.3.0",
   "WolframVersion" -> "10.2+",
   "Creator" -> "Black Hole Perturbation Toolkit",
   "Description" -> "A set of functions for computing solutions to the Regge Wheeler equation.",
