@@ -62,3 +62,8 @@ You can plot the real and imaginary parts of the above radial solution using `Pl
   
   <p align="center"><img width="50%" src="RW_radial_plot.png" alt="ReggeWheelerRadial plot"/></p>
 
+
+
+## Authors and contributors
+
+David Q. Aruquipa, Marc Casals, Leanne Durkan, Jonathan Thompson, Niels Warburton, Barry Wardell
