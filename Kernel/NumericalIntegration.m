@@ -154,7 +154,7 @@ i++;
 ReggeWheelerUpBC[s1_Integer,l1_Integer,\[Omega]1_,workingprecision_]:= Block[{s=s1,l=l1,A,a,n,\[Omega]=\[Omega]1,res,M=1,err,r,dres,d2res,rout, rsout,i},
 
 (*This ensures the boundary is placed in the wavezone*)
-rout =100\[Omega]^-1;
+rout =100*Abs[\[Omega]]^-1;
 
 A[n_]:=(I (2 M \[Omega](1-2 n+n^2-s^2) a[-2+n]+(l+l^2+n-n^2) a[-1+n]))/(2 n );
 
@@ -243,7 +243,7 @@ ZerilliUpBC[s1_Integer,l1_Integer,\[Omega]1_,workingprecision_]:=
 Block[{s=s1,l=l1,A,a,n,\[Omega]=\[Omega]1,res,M=1,err,r,dres,d2res,rout, rsout,i,\[Lambda]=(l1-1)*(l1+2)/2},
 
 (*This ensures the boundary is placed in the wavezone*)
-rout =100\[Omega]^-1;
+rout =100*Abs[\[Omega]]^-1;
 
 
 (*Recurrence relation from Hopper and Evans, PhysRevD.82.084010 *)
