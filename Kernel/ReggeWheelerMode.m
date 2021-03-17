@@ -64,7 +64,7 @@ Options[ReggeWheelerPointParticleMode] = {};
 
 
 ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]] /; AllTrue[orbit["Frequencies"], InexactNumberQ] :=
- Module[{source, assoc, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z},
+ Module[{source, assoc, radialopts, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z},
   If[orbit["a"] != 0,
     Message[ReggeWheelerPointParticleMode::nospin, orbit["a"]];
     Return[$Failed];
@@ -76,7 +76,12 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 
   source = ReggeWheeler`ReggeWheelerSource`Private`ReggeWheelerPointParticleSource[s, l, m, orbit];
 
-  R = ReggeWheelerRadial[s, l, \[Omega]];
+  radialopts = Sequence@@FilterRules[{opts}, Options[ReggeWheelerRadial]]; (*May need to remove the "Potential" option if it's in this list!*)
+  If[EvenQ[l+m], (*Switch for parity of the homogeneous solution*)
+      R = ReggeWheelerRadial[s, l, \[Omega], "Potential"->"Zerilli", radialopts];
+  ,
+      R = ReggeWheelerRadial[s, l, \[Omega], "Potential"->"ReggeWheeler", radialopts];
+  ];
   S = SpinWeightedSpheroidalHarmonicS[s, l, m, 0];
   Z = ReggeWheeler`ConvolveSource`Private`ConvolveSource[R, S, source];
 
