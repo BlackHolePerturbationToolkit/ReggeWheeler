@@ -4,7 +4,7 @@
 (*ReggeWheeler package*)
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Create Package*)
 
 
@@ -36,7 +36,7 @@ ReggeWheelerRadial::usage = "ReggeWheelerRadial[s, l, \[Omega]] computes homogen
 ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], assoc] is an object representing a homogeneous solution to the Regge Wheeler equation."
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Error Messages*)
 
 
@@ -46,6 +46,7 @@ ReggeWheelerRadial::dm = "Option `1` is not valid with BoundaryConditions \[Righ
 ReggeWheelerRadial::sopt = "Option `1` not supported for static (\[Omega]=0) modes.";
 ReggeWheelerRadial::hc = "Method HeunC is only supported with Mathematica version 12.1 and later.";
 ReggeWheelerRadial::hcopt = "Option `1` not supported for HeunC method.";
+ReggeWheelerRadial::szopt = "Potential Zerilli is not supported when |s|\[NotEqual]2.";
 ReggeWheelerRadialFunction::dmval = "Radius `1` lies outside the computational domain. Results may be incorrect.";
 ReggeWheelerRadialFunction::pot = "Invalid potential `1`.";
 ReggeWheelerRadialFunction::potm = "Method `1` does not currently support potential `2`.";
@@ -58,7 +59,7 @@ ReggeWheelerRadialFunction::potm = "Method `1` does not currently support potent
 Begin["`Private`"];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -227,14 +228,14 @@ ReggeWheelerRadialHeunC[s_Integer, l_Integer, \[Omega]_, BCs_, pot_, {wp_, prec_
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Static modes*)
 
 
 ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_, pot_] :=
  Module[{\[Lambda], norms, solFuncs, RWRF, m = 0, a=0},
   (* Compute the eigenvalue *)
-  \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, 0];
+  \[Lambda] =SpinWeightedSpheroidalEigenvalue[s, l, m, 0];
 
   (* Function to construct a ReggeWheelerRadialFunction *)
   RWRF[bc_, ns_, sf_] :=
@@ -268,7 +269,7 @@ ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_, pot_] :=
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -286,7 +287,7 @@ Options[ReggeWheelerRadial] = {
 };
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Static modes*)
 
 
@@ -298,9 +299,15 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] /; \[
     Message[ReggeWheelerRadial::optx, "BoundaryConditions" -> BCs];
     Return[$Failed];
   ];
-
+  
   (* Potential *)
   pot = OptionValue["Potential"];
+  
+  (*Zerilli Potential only valid for Abs[s]=2*)
+   If[MatchQ[pot, "Zerilli"]&&Abs[s]!=2, 
+    Message[ReggeWheelerRadial::szopt];
+    Return[$Failed];
+   ];
 
   (* Options are not supported for static modes *)
   Do[
@@ -313,7 +320,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_, opts:OptionsPattern[]] /; \[
 ]
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Non-static modes*)
 
 
@@ -334,6 +341,12 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 
   (* Potential *)
   pot = OptionValue["Potential"];
+  
+  (*Zerilli Potential only valid for Abs[s]=2*)
+   If[MatchQ[pot, "Zerilli"]&&Abs[s]!=2, 
+    Message[ReggeWheelerRadial::szopt];
+    Return[$Failed];
+   ];
 
   (* Options associated with precision and accuracy *)
   {wp, prec, acc} = OptionValue[{WorkingPrecision, PrecisionGoal, AccuracyGoal}];
@@ -372,7 +385,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerRadialFunction*)
 
 
@@ -402,7 +415,7 @@ icons = <|
 |>;
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Formatting of ReggeWheelerRadialFunction*)
 
 
@@ -471,6 +484,12 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][r:(_?NumericQ|{_?NumericQ.
     ,
     R[r]
     ,
+    "Static"
+    ,
+    \[ScriptL]=assoc["l"];
+    \[Lambda]=1/2 (\[ScriptL]-1)(\[ScriptL]+2);
+    1/(\[Lambda]^2 + \[Lambda]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r])
+    ,
     _
     ,
     Message[ReggeWheelerRadialFunction::potm, assoc["Method"][[1]], assoc["Potential"]]
@@ -507,6 +526,12 @@ Derivative[n_][ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_]][r0:(_?Nume
     "NumericalIntegration"
     ,
     Derivative[n][assoc["RadialFunction"]][r0]
+    ,
+    "Static"
+    ,
+    \[ScriptL]=assoc["l"];
+    \[Lambda]=1/2 (\[ScriptL]-1)(\[ScriptL]+2);
+    Collect[D[1/(\[Lambda]^2 + \[Lambda]) ((\[Lambda]^2+\[Lambda]+(9(r-2))/(r^2 (3+\[Lambda] r)))R[r]+3(1-2/r)R'[r]),{r,n}], {Derivative[_][R][r], R[r]}] /. R -> assoc["RadialFunction"] /. r -> r0
     ],
     _,
     Message[ReggeWheelerRadialFunction::pot, assoc["Potential"]]
