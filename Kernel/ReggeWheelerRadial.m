@@ -4,7 +4,7 @@
 (*ReggeWheeler package*)
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Create Package*)
 
 
@@ -36,7 +36,7 @@ ReggeWheelerRadial::usage = "ReggeWheelerRadial[s, l, \[Omega]] computes homogen
 ReggeWheelerRadialFunction::usage = "ReggeWheelerRadialFunction[s, l, \[Omega], assoc] is an object representing a homogeneous solution to the Regge Wheeler equation."
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Error Messages*)
 
 
@@ -59,7 +59,7 @@ ReggeWheelerRadialFunction::potm = "Method `1` does not currently support potent
 Begin["`Private`"];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -228,14 +228,14 @@ ReggeWheelerRadialHeunC[s_Integer, l_Integer, \[Omega]_, BCs_, pot_, {wp_, prec_
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Static modes*)
 
 
 ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_, pot_] :=
  Module[{\[Lambda], norms, solFuncs, RWRF, m = 0, a=0},
   (* Compute the eigenvalue *)
-  \[Lambda] =SpinWeightedSpheroidalEigenvalue[s, l, m, 0];
+  \[Lambda] = SpinWeightedSpheroidalEigenvalue[s, l, m, 0];
 
   (* Function to construct a ReggeWheelerRadialFunction *)
   RWRF[bc_, ns_, sf_] :=
@@ -269,7 +269,7 @@ ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_, pot_] :=
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -385,7 +385,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*ReggeWheelerRadialFunction*)
 
 
