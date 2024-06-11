@@ -4,11 +4,11 @@
 (*ReggeWheelerMode*)
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Create Package*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*BeginPackage*)
 
 
@@ -17,6 +17,7 @@ BeginPackage["ReggeWheeler`ReggeWheelerMode`",
    "ReggeWheeler`ReggeWheelerRadial`",
    "ReggeWheeler`ConvolveSource`",
    "KerrGeodesics`KerrGeoOrbit`",
+   "KerrGeodesics`FourVelocity`",
    "KerrGeodesics`OrbitalFrequencies`",
    "SpinWeightedSpheroidalHarmonics`"}
 ];
@@ -52,7 +53,7 @@ ReggeWheelerPointParticleMode::nospin = "Regge-Wheeler perturbations are only fo
 Begin["`Private`"];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerPointParticleMode*)
 
 
@@ -63,57 +64,67 @@ SyntaxInformation[ReggeWheelerPointParticleMode] =
 Options[ReggeWheelerPointParticleMode] = {};
 
 
+(*Make sure it uses numerical integration for eccentric case?*)
 ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]] /; AllTrue[orbit["Frequencies"], InexactNumberQ] :=
- Module[{source, assoc, radialopts, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z},
+ Module[{source, assoc, (*radialopts,*) R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z, MasterFunc,rmin,rmax},
   If[orbit["a"] != 0,
     Message[ReggeWheelerPointParticleMode::nospin, orbit["a"]];
     Return[$Failed];
   ];
-
   (*{\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = orbit["Frequencies"];*) (*This gives Mino frequencies, need BL frequencies*)
   {\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = Values[KerrGeoFrequencies[orbit["a"], orbit["p"], orbit["e"], orbit["Inclination"]]];
   \[Omega] = m \[CapitalOmega]\[Phi] + n \[CapitalOmega]r;
+  rmin=orbit["p"]/(1+orbit["e"]);
+  rmax=orbit["p"]/(1-orbit["e"]);
+  
 
-  source = ReggeWheeler`ReggeWheelerSource`Private`ReggeWheelerPointParticleSource[s, l, m, orbit];
+  source = ReggeWheeler`ReggeWheelerSource`Private`ReggeWheelerPointParticleSource[s, l, m, n, orbit];
 
-  radialopts = Sequence@@FilterRules[{opts}, Options[ReggeWheelerRadial]]; (*May need to remove the "Potential" option if it's in this list!*)
+  (*radialopts = Sequence@@FilterRules[{opts}, Options[ReggeWheelerRadial]];*) (*May need to remove the "Potential" option if it's in this list!*)
   If[EvenQ[l+m], (*Switch for parity of the homogeneous solution*)
-      R = ReggeWheelerRadial[s, l, \[Omega], "Potential"->"Zerilli", radialopts];
+      R = ReggeWheelerRadial[s, l, \[Omega], "Potential"->"Zerilli", "BoundaryConditions"->{"Up","In"},"Method"->{"NumericalIntegration","Domain"->{"In"->rmax,"Up"->rmin}}];
+      MasterFunc="Zerilli-Moncrief"
   ,
-      R = ReggeWheelerRadial[s, l, \[Omega], "Potential"->"ReggeWheeler", radialopts];
+      R = ReggeWheelerRadial[s, l, \[Omega], "Potential"->"ReggeWheeler", "BoundaryConditions"->{"Up","In"},"Method"->{"NumericalIntegration","Domain"->{"In"->rmax,"Up"->rmin}}];
+      MasterFunc="Cunningham-Price-Moncrief"
   ];
-  S = SpinWeightedSpheroidalHarmonicS[s, l, m, 0];
+  (*Do we need to return these angular functions and are they correct for CPM-ZM masterfunctions?*)
+  (*S = SpinWeightedSpheroidalHarmonicS[s, l, m, 0];*)
   Z = ReggeWheeler`ConvolveSource`Private`ConvolveSource[R, S, source];
 
   assoc = <| "s" -> s, 
              "l" -> l,
              "m" -> m,
+             "n" -> n,
              "\[Omega]" -> \[Omega],
              "Eigenvalue" -> R["In"]["Eigenvalue"],
-             "Type" -> {"PointParticleCircular", "Radius" -> orbit["p"]},
+             (*"Type" -> {"PointParticleCircular", "Radius" -> orbit["p"]},*)
              "RadialFunctions" -> R,
-             "AngularFunction" -> S,
-             "Amplitudes" -> Z
+             (*"AngularFunction" -> S,*)
+             "Amplitudes" -> Z,
+             "MasterFunction"->MasterFunc
            |>;
 
   ReggeWheelerMode[assoc]
 ]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerMode*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Output format*)
 
 
+(*Refine? Keep or get rid of type?*)
 ReggeWheelerMode /:
  MakeBoxes[rwm:ReggeWheelerMode[assoc_], form:(StandardForm|TraditionalForm)] :=
  Module[{summary, extended},
   summary = {Row[{BoxForm`SummaryItem[{"s: ", assoc["s"]}], "  ",
                   BoxForm`SummaryItem[{"l: ", assoc["l"]}], "  ",
                   BoxForm`SummaryItem[{"m: ", assoc["m"]}], "  ",
+                  BoxForm`SummaryItem[{"n: ", assoc["n"]}], "  ",
                   BoxForm`SummaryItem[{"\[Omega]: ", assoc["\[Omega]"]}]}],
              BoxForm`SummaryItem[{"Type: ", First[assoc["Type"]]}]};
   extended = {BoxForm`SummaryItem[{"Eigenvalue: ", assoc["Eigenvalue"]}],
@@ -131,30 +142,34 @@ ReggeWheelerMode /:
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Accessing attributes*)
 
 
-ReggeWheelerMode[assoc_]["EnergyFlux"] := EnergyFlux[ReggeWheelerMode[assoc]];
+ReggeWheelerMode[assoc_]["EnergyFlux"] := EnergyFluxCPMZM[ReggeWheelerMode[assoc]];
 
 
 ReggeWheelerMode[assoc_]["Fluxes"] := <|"Energy" -> ReggeWheelerMode[assoc]["EnergyFlux"], "AngularMomentum" -> ReggeWheelerMode[assoc]["AngularMomentumFlux"]|>;
 
 
-ReggeWheelerMode[assoc_]["AngularMomentumFlux"] := AngularMomentumFlux[ReggeWheelerMode[assoc]];
+ReggeWheelerMode[assoc_]["AngularMomentumFlux"] := AngularMomentumFluxCPMZM[ReggeWheelerMode[assoc]];
 
 
 ReggeWheelerMode[assoc_][string_] := assoc[string];
 
 
-(* ::Section::Closed:: *)
+Keys[m_ReggeWheelerMode[assoc_]] ^:= Keys[assoc];
+
+
+(* ::Section:: *)
 (*Fluxes*)
 
 
-(* ::Subsection::Closed:: *)
-(*Energy Flux*)
+(* ::Subsection:: *)
+(*Energy Flux Circular*)
 
 
+(*Redundant - using old basis*)
 EnergyFlux[mode_ReggeWheelerMode] :=
  Module[{l, m, \[Omega], Z, FluxInf, FluxH},
   l = mode["l"];
@@ -169,8 +184,22 @@ EnergyFlux[mode_ReggeWheelerMode] :=
 ];
 
 
-(* ::Subsection::Closed:: *)
-(*Angular Momentum Flux*)
+EnergyFluxCPMZM[mode_ReggeWheelerMode] :=
+ Module[{l, m, \[Omega], Z, FluxInf, FluxH},
+  l = mode["l"];
+  m = mode["m"];
+  \[Omega] = mode["\[Omega]"];
+  Z = mode["Amplitudes"];
+
+  FluxInf = (l+2)!/(l-2)!*Abs[\[Omega]*Z["\[ScriptCapitalI]"]]^2/(64*Pi);
+  FluxH   = (l+2)!/(l-2)!*Abs[\[Omega]*Z["\[ScriptCapitalH]"]]^2/(64*Pi);
+  
+  <| "\[ScriptCapitalI]" -> FluxInf, "\[ScriptCapitalH]" -> FluxH |>
+];
+
+
+(* ::Subsection:: *)
+(*Angular Momentum Flux Circular *)
 
 
 AngularMomentumFlux[mode_ReggeWheelerMode] :=
@@ -182,6 +211,20 @@ AngularMomentumFlux[mode_ReggeWheelerMode] :=
 
   FluxInf = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1)) m \[Omega] Abs[Z["\[ScriptCapitalI]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2)) m \[Omega] Abs[Z["\[ScriptCapitalI]"]]^2/(16*Pi)];
   FluxH   = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1)) m \[Omega] Abs[Z["\[ScriptCapitalH]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2)) m \[Omega] Abs[Z["\[ScriptCapitalH]"]]^2/(16*Pi)];
+  
+  <| "\[ScriptCapitalI]" -> FluxInf, "\[ScriptCapitalH]" -> FluxH |>
+];
+
+
+AngularMomentumFluxCPMZM[mode_ReggeWheelerMode] :=
+ Module[{l, m, \[Omega], Z, FluxInf, FluxH},
+  l = mode["l"];
+  m = mode["m"];
+  \[Omega] = mode["\[Omega]"];
+  Z = mode["Amplitudes"];
+
+  FluxInf = (m (l+2)!)/(l-2)!*\[Omega]*Abs[Z["\[ScriptCapitalI]"]]^2/(64*Pi);
+  FluxH   = (m (l+2)!)/(l-2)!*\[Omega]*Abs[Z["\[ScriptCapitalH]"]]^2/(64*Pi);
   
   <| "\[ScriptCapitalI]" -> FluxInf, "\[ScriptCapitalH]" -> FluxH |>
 ];

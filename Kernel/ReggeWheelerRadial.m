@@ -58,7 +58,7 @@ ReggeWheelerRadialFunction::potm = "Method `1` does not currently support potent
 Begin["`Private`"];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -372,7 +372,7 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerRadialFunction*)
 
 
@@ -438,7 +438,7 @@ ReggeWheelerRadialFunction[s_, l_, \[Omega]_, assoc_][y_String] /; !MemberQ[{"Ra
   assoc[y];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Numerical evaluation*)
 
 

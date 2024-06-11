@@ -12,7 +12,7 @@
 (*BeginPackage*)
 
 
-BeginPackage["ReggeWheeler`ReggeWheelerSource`"];
+BeginPackage["ReggeWheeler`ReggeWheelerSource`", {"KerrGeodesics`KerrGeoOrbit`","KerrGeodesics`OrbitalFrequencies`","KerrGeodesics`FourVelocity`"}];
 
 
 (* ::Subsection:: *)
@@ -26,14 +26,13 @@ BeginPackage["ReggeWheeler`ReggeWheelerSource`"];
 Begin["`Private`"];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerPointParticleSource*)
 
 
-ReggeWheelerPointParticleSource[s_,l_,m_, orbit_] :=
- If[orbit["e"] == 0 && Abs[orbit["Inclination"]] == 1,
-         Return[ReggeWheelerPointParticleSourceCircular[s,l,m,orbit]],
-         Print["No point-particle source yet available for those parameters"];]
+(*Change from print to Error message*)
+ReggeWheelerPointParticleSource[s_,l_,m_,n_, orbit_] :=
+ Which[Abs[orbit["e"]] == 0 && orbit["Inclination"] == 1, Return[ReggeWheelerPointParticleSourceCircularCPMZM[s,l,m,orbit]], Abs[orbit["e"]] != 0&& orbit["Inclination"] == 1, Return[ReggeWheelerPointParticleSourceEccentricCPMZM[s,l,m,n,orbit]], True, Print["No point-particle source yet available for those parameters"]];
 
 
 Format[ReggeWheelerSourceObject[assoc_]] := "ReggeWheelerSourceObject[<<>>]";
@@ -41,75 +40,90 @@ Format[ReggeWheelerSourceObject[assoc_]] := "ReggeWheelerSourceObject[<<>>]";
 ReggeWheelerSourceObject[assoc_][string_] := assoc[string];
 
 
-ReggeWheelerPointParticleCircularAKStressEnergy[l_,m_,r0_]:=
-	Module[{E0,L0},
-		L0=Sqrt[r0^2/(r0-3)];
-		E0=Sqrt[(r0-2)(r0^2+L0^2)/r0^3];
-		Association[
-		"EA"->-16*Pi*(r0-2)*E0/r0^3*Conjugate[SphericalHarmonicY[l,m,Pi/2,0]],
-		"EB"->0,
-		"EC"->If[l>=1,-16*Pi*(r0-2)*L0/r0^4/(l(l+1))Conjugate[Derivative[0,0,1,0][SphericalHarmonicY][l,m,Pi/2,0]],0],
-		"ED"->0,
-		"EE"->0,
-		"EF"->If[l>=2,-16*Pi*(r0-2)*L0^2/E0/r0^5/((l-1)*l*(l+1)*(l+2))*(2*Conjugate[Derivative[0,0,0,2][SphericalHarmonicY][l,m,Pi/2,0]]+l*(l+1)*Conjugate[SphericalHarmonicY[l,m,Pi/2,0]]),0],
-		"EG"->0,
-		"EH"->0,
-		"EJ"->0,
-		"EK"->0	
-		]
+(* ::Subsection:: *)
+(*Eccentric Orbits*)
+
+
+(*the jump coditions are in the convolution module; currently developing for |s|=2 eccentric orbits using the CPM and ZM masterfunctions*)
+
+ReggeWheelerPointParticleSourceEccentricCPMZM[s_,l_,m_,n_,orbit_]:=
+	Module[{M=1,p,e,x,\[CapitalOmega]r,\[CapitalOmega]\[Phi],\[Omega],assoc,traj},
+		p=orbit["p"];
+		e=orbit["e"];
+		x=orbit["Inclination"];
+		\[CapitalOmega]r=KerrGeoFrequencies[0,p,e,x]["\!\(\*SubscriptBox[\(\[CapitalOmega]\), \(r\)]\)"];
+		\[CapitalOmega]\[Phi]=KerrGeoFrequencies[0,p,e,x]["\!\(\*SubscriptBox[\(\[CapitalOmega]\), \(\[Phi]\)]\)"];
+		\[Omega]=m*\[CapitalOmega]\[Phi]+n*\[CapitalOmega]r;
+		
+		assoc=Association[
+			"l"->l,
+			"m"->m,
+			"n"->n,
+			"p"->p,
+			"e"->e,
+			"x"->x,
+			"\[Omega]"->\[Omega],
+			"\[CapitalOmega]r"->\[CapitalOmega]r,
+			"\[CapitalOmega]\[Phi]"->\[CapitalOmega]\[Phi],
+			"type"->"PointParticleEccentric"
+		];
+		ReggeWheelerSourceObject[assoc]
 	];
+
+
+
+(* ::Subsection::Closed:: *)
+(*Circular Orbits*)
 
 
 (*the jump coditions used in the convolution to find the particular solution
-currently valid for s=2 circular orbits, but expandable for generic A-K s=2 point-particle stress-energies*)
+currently valid for s=2 circular orbits using the CPM and ZM masterfunctions*)
 
-ReggeWheelerPointParticleSourceCircular[s_,l_,m_,orbit_]:=
+ReggeWheelerPointParticleSourceCircularCPMZM[s_,l_,m_,orbit_]:=
 	If[EvenQ[l+m],
-		ReggeWheelerPointParticleCircularAKEvenJump[l,m,orbit],
-		ReggeWheelerPointParticleCircularAKOddJump[l,m,orbit]
+		ReggeWheelerPointParticleCircularZMEvenJump[l,m,orbit],
+		ReggeWheelerPointParticleCircularCPMOddJump[l,m,orbit]
 	];
 
-ReggeWheelerPointParticleCircularAKOddJump[l_,m_,orbit_]:=
-	Module[{stressenergy,EC,EJ,r0,\[Omega],assoc},
-		r0=orbit["p"];
-		\[Omega]=m*Sqrt[1/r0^3];
-		stressenergy=ReggeWheelerPointParticleCircularAKStressEnergy[l,m,r0];
-		EC=stressenergy["EC"];
-		EJ=stressenergy["EJ"];
+ReggeWheelerPointParticleCircularCPMOddJump[l_,m_,orbit_]:=
+	Module[{M=1,p,r0,\[CapitalOmega],ut,Y,F,G,\[Lambda]=((l+2)(l-1))/2,assoc},
+		p=orbit["p"];
+		r0=p;
+		\[CapitalOmega]=KerrGeoFrequencies[0,p,0,1]["\!\(\*SubscriptBox[\(\[CapitalOmega]\), \(\[Phi]\)]\)"];
+		r0=p;
+		Y=SphericalHarmonicY[l,m+1,\[Pi]/2,0];
+		ut=Sqrt[r0/(r0-3M)];
+		F=(16 Sqrt[(l-m) (1+l+m)] \[Pi] (-2 M+r0)^2 ut \[CapitalOmega] Y)/(l (1+l) r0 \[Lambda]);
+		G=-((16 Sqrt[(l-m) (1+l+m)] \[Pi] (-2 M+r0) ut \[CapitalOmega] Y)/(l (1+l) r0 \[Lambda]));
+		
 		assoc=Association[
 			"l"->l,
 			"m"->m,
 			"r0"->r0,
-			"deltaPsi"->r0^3/(r0-2)*EC,
-			"deltadPsidr"->-2*r0^2/(r0-2)^2*EC+r0^2/(r0-2)*EC-I*\[Omega]*r0^3/(r0-2)*EJ-3r0^2/(r0-2)*EC+r0^3/(r0-2)^2*EC,
+			"deltaPsi"->(F*r0^2)/(r0-2M)^2,
+			"deltadPsidr"->(G*r0^2)/(r0-2M)^2+(F*r0*2M)/(r0-2M)^3,
 			"type"->"PointParticleCircular"
 		];
 		ReggeWheelerSourceObject[assoc]
 	];
 	
-ReggeWheelerPointParticleCircularAKEvenJump[l_,m_,orbit_]:=
-	Module[{n,rm2M,np6M,term1,dterm1,coeff,term2,EA,ED,EF,EH,EK,stressenergy,r0,\[Omega],assoc},
-		r0=orbit["p"];
-		\[Omega]=m*Sqrt[1/r0^3];
-		n=(l-1)(l+2);
-		rm2M=r0-2;
-		np6M=n*r0+6;
-		stressenergy=ReggeWheelerPointParticleCircularAKStressEnergy[l,m,r0];
-		EA=stressenergy["EA"];
-		ED=stressenergy["ED"];
-		EF=stressenergy["EF"];
-		EH=stressenergy["EH"];
-		EK=stressenergy["EK"];
-		term1=-r0^4*EA/2/np6M/rm2M;
-		dterm1=-r0^4*EA/2/np6M/rm2M*(4/r0-1/rm2M-n/np6M);
-		coeff=2/r0/rm2M;
-		term2=r0^3/4*(r0^2*n*(n-2)+r0*(14n-36)+96)*EA/(rm2M*np6M)^2+r0^4*I/2*\[Omega]*ED/np6M/rm2M+(n+2)r0^2/4*EF/rm2M-(n+2)r0^2/4*(2*EH+EK)/np6M;
+ReggeWheelerPointParticleCircularZMEvenJump[l_,m_,orbit_]:=
+	Module[{M=1,p,r0,\[CapitalOmega],ut,Y,F,G,\[Lambda]=((l+2)(l-1))/2,assoc},
+		p=orbit["p"];
+		r0=p;
+		\[CapitalOmega]=KerrGeoFrequencies[0,p,0,1]["\!\(\*SubscriptBox[\(\[CapitalOmega]\), \(\[Phi]\)]\)"];
+		r0=p;
+		Y=SphericalHarmonicY[l,m,\[Pi]/2,0];
+		ut=Sqrt[r0/(r0-3M)];
+		F=(8 \[Pi] (-2 M+r0)^3 ut Y)/(r0^2 (1+\[Lambda]) (3 M+r0 \[Lambda]));
+		G=-(1/(r0^3 \[Lambda] (1+\[Lambda]) (3 M+r0 \[Lambda])^2))8\[Pi] (2 M-r0) ut (-r0^3 \[Lambda]^2 (1+\[Lambda])+M r0^2 \[Lambda]^2 (-4+m^2+\[Lambda])+2 M^2 r0 \[Lambda] (-9+3 m^2+2 \[Lambda])+3 M^3 (-3+3 m^2+5 \[Lambda])) Y;
+		
 		assoc=Association[
 			"l"->l,
 			"m"->m,
 			"r0"->r0,
-			"deltaPsi"->term1,
-			"deltadPsidr"->-coeff*term1-dterm1+term2,
+			"deltaPsi"->(F*r0^2)/(r0-2M)^2,
+			"deltadPsidr"->(G*r0^2)/(r0-2M)^2+(F*r0*2M)/(r0-2M)^3,
 			"type"->"PointParticleCircular"
 		];
 		ReggeWheelerSourceObject[assoc]
