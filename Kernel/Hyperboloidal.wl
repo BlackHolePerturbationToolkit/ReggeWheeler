@@ -316,22 +316,23 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 					"Type" -> {"PointParticleCircular","Orbital Radius"->ToString[r0] <>"M"},
 					"RadialFunction" -> R,
 					"AngularFunction" -> S,
-					"Amplitudes" -> Z
+					"Amplitudes" -> Z,
+					"Method" -> {"Hyperboloidal", "GritPoints"->npts}
 				|>;
 			
-	ReggeWheelerHyperboloidalMode[assoc]
+	ReggeWheeler`ReggeWheelerMode`ReggeWheelerMode[assoc]
 ]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*ReggeWheelerMode*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Output format*)
 
 
-ReggeWheelerHyperboloidalMode /:
+(*ReggeWheelerHyperboloidalMode /:
  MakeBoxes[rwm:ReggeWheelerHyperboloidalMode[assoc_], form:(StandardForm|TraditionalForm)] :=
  Module[{summary, extended},
   summary = {Row[{BoxForm`SummaryItem[{"s: ", assoc["s"]}], "  ",
@@ -350,26 +351,26 @@ ReggeWheelerHyperboloidalMode /:
     extended,
     form
   ]
-];
+];*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Accessing attributes*)
 
 
-ReggeWheelerHyperboloidalMode[assoc_]["EnergyFlux"] := EnergyFlux[ReggeWheelerHyperboloidalMode[assoc]];
+(*ReggeWheelerHyperboloidalMode[assoc_]["EnergyFlux"] := EnergyFlux[ReggeWheelerHyperboloidalMode[assoc]];*)
 
 
-ReggeWheelerHyperboloidalMode[assoc_]["AngularMomentumFlux"] := AngularMomentumFlux[ReggeWheelerHyperboloidalMode[assoc]];
+(*ReggeWheelerHyperboloidalMode[assoc_]["AngularMomentumFlux"] := AngularMomentumFlux[ReggeWheelerHyperboloidalMode[assoc]];*)
 
 
-ReggeWheelerHyperboloidalMode[assoc_]["Fluxes"] := <|"Energy" -> ReggeWheelerHyperboloidalMode[assoc]["EnergyFlux"], "AngularMomentum" -> ReggeWheelerHyperboloidalMode[assoc]["AngularMomentumFlux"]|>;
+(*ReggeWheelerHyperboloidalMode[assoc_]["Fluxes"] := <|"Energy" -> ReggeWheelerHyperboloidalMode[assoc]["EnergyFlux"], "AngularMomentum" -> ReggeWheelerHyperboloidalMode[assoc]["AngularMomentumFlux"]|>;*)
 
 
-ReggeWheelerHyperboloidalMode[assoc_][string_] := assoc[string];
+(*ReggeWheelerHyperboloidalMode[assoc_][string_] := assoc[string];*)
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Fluxes*)
 
 
@@ -377,7 +378,7 @@ ReggeWheelerHyperboloidalMode[assoc_][string_] := assoc[string];
 (*Energy Flux*)
 
 
-EnergyFlux[mode_ReggeWheelerHyperboloidalMode] :=
+(*EnergyFlux[mode_ReggeWheelerHyperboloidalMode] :=
 	Module[{l, m, \[Xi], Z, FluxInf, FluxH, r},
 	l = mode["l"];
 	m = mode["m"];
@@ -389,14 +390,14 @@ EnergyFlux[mode_ReggeWheelerHyperboloidalMode] :=
 	FluxH = ((l+2)!/(l-2)!)1/(256\[Pi]*16)Abs[\[Xi] Z[[2]]]^2;
 	
 	<| "\[ScriptCapitalI]" -> FluxInf, "\[ScriptCapitalH]" -> FluxH |>
-];
+];*)
 
 
 (* ::Subsection:: *)
 (*Angular Momentum Flux*)
 
 
-AngularMomentumFlux[mode_ReggeWheelerHyperboloidalMode] :=
+(*AngularMomentumFlux[mode_ReggeWheelerHyperboloidalMode] :=
 	Module[{l, m, \[Xi], Z, FluxInf, FluxH, r},
 	l = mode["l"];
 	m = mode["m"];
@@ -408,7 +409,7 @@ AngularMomentumFlux[mode_ReggeWheelerHyperboloidalMode] :=
 	FluxH = I*m*\[Xi]((l+2)!/(l-2)!)1/(64\[Pi]*16)Abs[Z[[2]]]^2;
 	
 	<| "\[ScriptCapitalI]" -> FluxInf, "\[ScriptCapitalH]" -> FluxH |>
-];
+];*)
 
 
 (* ::Section:: *)
