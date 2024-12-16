@@ -4,11 +4,11 @@
 (*ReggeWheelerMode*)
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Create Package*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*BeginPackage*)
 
 
@@ -60,15 +60,25 @@ SyntaxInformation[ReggeWheelerPointParticleMode] =
  {"ArgumentsPattern" -> {_, _, _, _, _, OptionsPattern[]}};
 
 
-Options[ReggeWheelerPointParticleMode] = {};
+Options[ReggeWheelerPointParticleMode] = {Method->Automatic};
 
 
 ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]] /; AllTrue[orbit["Frequencies"], InexactNumberQ] :=
- Module[{source, assoc, radialopts, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z},
+ Module[{source, assoc, radialopts, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z,hypopts},
   If[orbit["a"] != 0,
     Message[ReggeWheelerPointParticleMode::nospin, orbit["a"]];
     Return[$Failed];
   ];
+  
+  If[OptionValue["Method"] == "Hyperboloidal", Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit,OptionValue["Method"][[2;;]]]]];
+  
+  Switch[OptionValue["Method"],
+       "Hyperboloidal", Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit]],
+       {"Hyperboloidal",OptionsPattern[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal]}, 
+       hypopts = Sequence@@FilterRules[{OptionValue["Method"][[2;;]]}, Options[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal]];
+       Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit,hypopts]]
+       ];
+       
 
   (*{\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = orbit["Frequencies"];*) (*This gives Mino frequencies, need BL frequencies*)
   {\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = Values[KerrGeoFrequencies[orbit["a"], orbit["p"], orbit["e"], orbit["Inclination"]]];

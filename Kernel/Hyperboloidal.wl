@@ -26,27 +26,27 @@ BeginPackage["ReggeWheeler`Hyperboloidal`",
 (*Unprotect symbols*)
 
 
-ClearAttributes[{ReggeWheelerHyperboloidalMode, ReggeWheelerHyperboloidal}, {Protected}];
+(*ClearAttributes[{ReggeWheelerHyperboloidalMode, ReggeWheelerHyperboloidal}, {Protected}];*)
 
 
 (* ::Subsection:: *)
 (*Usage messages*)
 
 
-ReggeWheelerHyperboloidalMode::usage = "ReggeWheelerHyperboloidalMode[assoc] is an object which represents a Regge Wheeler mode obtained using hyperboloidal compactification.";
+(*ReggeWheelerHyperboloidalMode::usage = "ReggeWheelerHyperboloidalMode[assoc] is an object which represents a Regge Wheeler mode obtained using hyperboloidal compactification.";
 ReggeWheelerHyperboloidal::usage = "ReggeWheelerHyperboloidal[s, l, m, n, orbit] produces a "<>
-	"ReggeWheelerHyperboloidalMode representing an inhomogeneous solution to the Regge-Wheeler equation with a point particle source constructed using hyperboloidal compactification. The formulation is based on arXiv:gr-qc/2202.01794 and arXiv:gr-qc/2411.14976."
+	"ReggeWheelerHyperboloidalMode representing an inhomogeneous solution to the Regge-Wheeler equation with a point particle source constructed using hyperboloidal compactification. The formulation is based on arXiv:gr-qc/2202.01794 and arXiv:gr-qc/2411.14976."*)
 
 
 (* ::Subsection:: *)
 (*Error Messages*)
 
 
-ReggeWheelerHyperboloidal::nospin = "Regge-Wheeler perturbations are only for Schwarzschild black holes but spin `1` is not zero."
+(*ReggeWheelerHyperboloidal::nospin = "Regge-Wheeler perturbations are only for Schwarzschild black holes but spin `1` is not zero."
 ReggeWheelerHyperboloidal::eccentricity = "This package does not currently accept eccentric orbits. Please set eccentricity ('e') to zero."
 ReggeWheelerHyperboloidal::spin2field = "This package currently only works for spin = 2 fields, but the fluxes and radial fns. are correct for spin = -2. Please set field spin ('s') to two."
 ReggeWheelerHyperboloidal::inclination = "This package currently only works for orbits in the equatorial plane. Please set orbital inclination ('x') to one."
-ReggeWheelerHyperboloidal::eccentricitymode = "This package currently only works for circular orbit modes ('m'). Please set the eccentricity mode ('n') to zero."
+ReggeWheelerHyperboloidal::eccentricitymode = "This package currently only works for circular orbit modes ('m'). Please set the eccentricity mode ('n') to zero."*)
 
 
 (* ::Subsection:: *)
@@ -317,7 +317,7 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 					"RadialFunction" -> R,
 					"AngularFunction" -> S,
 					"Amplitudes" -> Z,
-					"Method" -> {"Hyperboloidal", "GritPoints"->npts}
+					"Method" -> {"Hyperboloidal", "GridPoints"->npts}
 				|>;
 			
 	ReggeWheeler`ReggeWheelerMode`ReggeWheelerMode[assoc]
@@ -420,7 +420,7 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 (*Protect symbols*)
 
 
-SetAttributes[{ReggeWheelerHyperboloidalMode, ReggeWheelerHyperboloidal}, {Protected, ReadProtected}];
+(*SetAttributes[{ReggeWheelerHyperboloidalMode, ReggeWheelerHyperboloidal}, {Protected, ReadProtected}];*)
 
 
 (* ::Subsection:: *)
