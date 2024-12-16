@@ -4,11 +4,11 @@
 (*ReggeWheelerMode*)
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Create Package*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*BeginPackage*)
 
 
@@ -52,7 +52,7 @@ ReggeWheelerPointParticleMode::nospin = "Regge-Wheeler perturbations are only fo
 Begin["`Private`"];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerPointParticleMode*)
 
 
@@ -98,6 +98,9 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 
   ReggeWheelerMode[assoc]
 ]
+
+
+Keys[m_ReggeWheelerMode] ^:= Keys[m[[1]]]
 
 
 (* ::Section::Closed:: *)

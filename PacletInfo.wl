@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 Paclet[
   "Name" -> "ReggeWheeler",
   "Version" -> "0.3.0",
