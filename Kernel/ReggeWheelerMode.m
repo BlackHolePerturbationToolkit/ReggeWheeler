@@ -70,8 +70,6 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
     Return[$Failed];
   ];
   
-  If[OptionValue["Method"] == "Hyperboloidal", Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit,OptionValue["Method"][[2;;]]]]];
-  
   Switch[OptionValue["Method"],
        "Hyperboloidal", Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit]],
        {"Hyperboloidal",OptionsPattern[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal]}, 
