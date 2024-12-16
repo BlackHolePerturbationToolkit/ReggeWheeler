@@ -140,7 +140,7 @@ DomainMapping[r0_,x_,X_]:=
 	\[Alpha]0Even[\[Sigma]_,l_,M_,s_]:= -(s^2 (1+\[Sigma])+2s \[Sigma]+(4M^2 VeffEven[2/\[Sigma],l,M])/((1-\[Sigma])\[Sigma]^2));
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Spectral ODE Solver*)
 
 
@@ -213,7 +213,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		dom2 = MapThread[Append,{MapThread[Prepend,{ODEs[[2]],fill}],BCs[[2]]}];
 		
 	(* Constructing overall block diagonal matrix to be inverted *)
-		Mat = BlockDiagonalMatrix[{dom1,dom2}];
+		Mat = If[$VersionNumber >14.0, BlockDiagonalMatrix[{dom1,dom2}], ArrayFlatten[{{dom1,0},{0,dom2}}]];
 		(*Setting junction conditions*)
 		{Mat[[;;,Length[Mat]/2]], Mat[[;;,Length[Mat]/2+1]]} = juncs2;
 
