@@ -1,7 +1,11 @@
 (* ::Package:: *)
 
 (* ::Chapter:: *)
-(*Hyperboloidal*)
+(*ReggeWheelerHyperboloidal*)
+
+
+(* ::Subsubsection:: *)
+(*For details on solving the Regge-Wheeler-Zerilli equations using hyperboloidal compactification, see arXiv : gr - qc/2202.01794 and arXiv : gr - qc/2411.14976 .*)
 
 
 (* ::Section:: *)
@@ -20,33 +24,6 @@ BeginPackage["ReggeWheeler`Hyperboloidal`",
    "KerrGeodesics`OrbitalFrequencies`",
    "SpinWeightedSpheroidalHarmonics`"}
 ];
-
-
-(* ::Subsection:: *)
-(*Unprotect symbols*)
-
-
-(*ClearAttributes[{ReggeWheelerHyperboloidalMode, ReggeWheelerHyperboloidal}, {Protected}];*)
-
-
-(* ::Subsection:: *)
-(*Usage messages*)
-
-
-(*ReggeWheelerHyperboloidalMode::usage = "ReggeWheelerHyperboloidalMode[assoc] is an object which represents a Regge Wheeler mode obtained using hyperboloidal compactification.";
-ReggeWheelerHyperboloidal::usage = "ReggeWheelerHyperboloidal[s, l, m, n, orbit] produces a "<>
-	"ReggeWheelerHyperboloidalMode representing an inhomogeneous solution to the Regge-Wheeler equation with a point particle source constructed using hyperboloidal compactification. The formulation is based on arXiv:gr-qc/2202.01794 and arXiv:gr-qc/2411.14976."*)
-
-
-(* ::Subsection:: *)
-(*Error Messages*)
-
-
-(*ReggeWheelerHyperboloidal::nospin = "Regge-Wheeler perturbations are only for Schwarzschild black holes but spin `1` is not zero."
-ReggeWheelerHyperboloidal::eccentricity = "This package does not currently accept eccentric orbits. Please set eccentricity ('e') to zero."
-ReggeWheelerHyperboloidal::spin2field = "This package currently only works for spin = 2 fields, but the fluxes and radial fns. are correct for spin = -2. Please set field spin ('s') to two."
-ReggeWheelerHyperboloidal::inclination = "This package currently only works for orbits in the equatorial plane. Please set orbital inclination ('x') to one."
-ReggeWheelerHyperboloidal::eccentricitymode = "This package currently only works for circular orbit modes ('m'). Please set the eccentricity mode ('n') to zero."*)
 
 
 (* ::Subsection:: *)
@@ -129,26 +106,29 @@ DomainMapping[r0_,x_,X_]:=
 (* Hyperboloidal height fn. *)
 	H[\[Sigma]_] :=1/2 (Log[1-\[Sigma]]-1/\[Sigma]+Log[\[Sigma]]); 
 	
-(* coefficient of height fn in exponent  *)
-	\[Xi][r_,m_,M_]:= -I \[Omega][\[CapitalOmega][r,M],m] 4M;
+(* Hyperboloidal scaling factor *)
+	Z[\[Sigma]_,\[Xi]_]:= 1/2 E^(\[Xi] H[\[Sigma]]);
+	
+(* Hyperboloidal re-scaling factor *)
+	\[ScriptCapitalF][r_,M_,\[Xi]_]:= f[r,M] 1/(2r^2) E^(\[Xi] H[2/r]);
 	
 (* Coefficients of hyperboloidal master eqn. operator *)
 	\[Alpha]2[\[Sigma]_] := \[Sigma]^2 (1-\[Sigma]);
-	\[Alpha]1[\[Sigma]_,s_]:= \[Sigma](2-3\[Sigma])+s(1-2\[Sigma]^2);
+	\[Alpha]1[\[Sigma]_,\[Xi]_]:= \[Sigma](2-3\[Sigma])+\[Xi](1-2\[Sigma]^2);
 	(* Distinct coefficients for the even/odd parity equations *)
-	\[Alpha]0Odd[\[Sigma]_,l_,M_,s_]:= -(s^2 (1+\[Sigma])+2s \[Sigma]+(4M^2 VeffOdd[2/\[Sigma],l,M])/((1-\[Sigma])\[Sigma]^2)); 
-	\[Alpha]0Even[\[Sigma]_,l_,M_,s_]:= -(s^2 (1+\[Sigma])+2s \[Sigma]+(4M^2 VeffEven[2/\[Sigma],l,M])/((1-\[Sigma])\[Sigma]^2));
+	\[Alpha]0Odd[\[Sigma]_,l_,M_,\[Xi]_]:= -(\[Xi]^2 (1+\[Sigma])+2\[Xi] \[Sigma]+(4M^2 VeffOdd[2/\[Sigma],l,M])/((1-\[Sigma])\[Sigma]^2)); 
+	\[Alpha]0Even[\[Sigma]_,l_,M_,\[Xi]_]:= -(\[Xi]^2 (1+\[Sigma])+2\[Xi] \[Sigma]+(4M^2 VeffEven[2/\[Sigma],l,M])/((1-\[Sigma])\[Sigma]^2));
 
 
 (* ::Section:: *)
 (*Spectral ODE Solver*)
 
 
-Options[HyperboloidalSolver]={"WorkingPrecision"->32, "GridPoints"->32};
+Options[HyperboloidalSolver]={"GridPoints"->32};
 
 
 HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
-	{npts, M, \[Theta], s, \[Sigma]p, prec, map1, map2, InvMap1, InvMap2, x, X, \[Phi], S1, S2, ansatz, Dansatz, D2ansatz, Dmap1, Dmap2, 
+	{npts, M, \[Theta], \[Xi], \[Sigma]p, prec, map1, map2, InvMap1, InvMap2, x, X, \[Phi], S1, S2, ansatz, Dansatz, D2ansatz, Dmap1, Dmap2, 
 	cs1, cs2, cs, DH, A, B, ansatz1D1, ansatz1D2, ansatz2D1, ansatz2D2, \[Alpha]21, 
 	\[Alpha]22, \[Alpha]11, \[Alpha]12, \[Alpha]01, \[Alpha]02, BCs, BCsRHS, D\[Alpha]2, ODEs, juncs, juncs1,
 	juncs2, fill, juncsRHS, dom1, dom2, Mat, LARHS, 
@@ -159,11 +139,11 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 	(* Initial setup *)
 		M = 1;
 		\[Theta] = \[Pi]/2;
-		s = \[Xi][r0,m,M];
+		\[Xi] = -I \[Omega][\[CapitalOmega][r0,M],m] 4M;
 		(* Source radial position in hyp coords *)
 		\[Sigma]p = 2/r0;
 		(* Setting working precision *)
-		prec = OptionValue["WorkingPrecision"];
+		prec = Precision[r0];
 		
 	(* Coordinate mappings based off source position *)
 		{map1, map2, InvMap1, InvMap2} = DomainMapping[r0,x,X];
@@ -187,15 +167,15 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		DH =(D[H[x],x])/.x->\[Sigma]p;
 		
 	(* Hyperboloidal junction condition coefficients *)
-		{A,B} = { (2E^(-s H[\[Sigma]p]))/(1-\[Sigma]p) (2 S1+\[Sigma]p^2/(1-\[Sigma]p) (1-s(1-\[Sigma]p)(DH))S2),-((2 \[Sigma]p^2 E^(-s H[\[Sigma]p]))/(1-\[Sigma]p))S2};
+		{A,B} = { (2E^(-\[Xi] H[\[Sigma]p]))/(1-\[Sigma]p) (2 S1+\[Sigma]p^2/(1-\[Sigma]p) (1-\[Xi](1-\[Sigma]p)(DH))S2),-((2 \[Sigma]p^2 E^(-\[Xi] H[\[Sigma]p]))/(1-\[Sigma]p))S2};
 		
 	(* Transforming ansatz derivatives  *)	
 		{ansatz1D1, ansatz2D1, ansatz1D2, ansatz2D2} = {Dmap1*Dansatz, Dmap2*Dansatz, Dmap1^2*D2ansatz, Dmap2^2*D2ansatz};
 		
 	(* Obtaining master fn operator coefficients on Chebyshev-Gauss-Lobatto grid *)	
 		{\[Alpha]21, \[Alpha]22, \[Alpha]11, \[Alpha]12, \[Alpha]01, \[Alpha]02} = If[EvenQ[l+m],
-										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2], \[Alpha]1[InvMap1,s], \[Alpha]1[InvMap2,s], \[Alpha]0Even[InvMap1,l,M,s], \[Alpha]0Even[InvMap2,l,M,s]},
-										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2], \[Alpha]1[InvMap1,s], \[Alpha]1[InvMap2,s], \[Alpha]0Odd[InvMap1,l,M,s], \[Alpha]0Odd[InvMap2,l,M,s]}];
+										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2], \[Alpha]1[InvMap1,\[Xi]], \[Alpha]1[InvMap2,\[Xi]], \[Alpha]0Even[InvMap1,l,M,\[Xi]], \[Alpha]0Even[InvMap2,l,M,\[Xi]]},
+										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2], \[Alpha]1[InvMap1,\[Xi]], \[Alpha]1[InvMap2,\[Xi]], \[Alpha]0Odd[InvMap1,l,M,\[Xi]], \[Alpha]0Odd[InvMap2,l,M,\[Xi]]}];
 		
 	(* Defining boundary conditions, junction conditions and the ODE at every other grid point *)
 		{BCs, ODEs, juncs1} = {{((\[Alpha]11 ansatz1D1 + \[Alpha]01 ansatz)/.X -> -1),((\[Alpha]12 ansatz2D1 + \[Alpha]02 ansatz)/.X -> 1)},
@@ -220,7 +200,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 	(*Initialising values for RHS of OVERALL equation Mx = b.*);
 		BCsRHS = {0,0};
 		D\[Alpha]2 = (D[\[Alpha]2[x],x])/.x->\[Sigma]p;
-		juncsRHS = {B/\[Alpha]2[\[Sigma]p ],A/\[Alpha]2[\[Sigma]p ]+B (D\[Alpha]2 -\[Alpha]1[\[Sigma]p,s ])/\[Alpha]2[\[Sigma]p ]^2};
+		juncsRHS = {B/\[Alpha]2[\[Sigma]p ],(A/\[Alpha]2[\[Sigma]p ]+B (D\[Alpha]2 -\[Alpha]1[\[Sigma]p,\[Xi] ])/\[Alpha]2[\[Sigma]p ]^2)};
 		
 	(* Constructing RHS vector *);
 		LARHS = Join[{BCsRHS[[1]]},ConstantArray[0,Length[Xgrid]],juncsRHS,ConstantArray[0,Length[Xgrid]],{BCsRHS[[2]]}];
@@ -240,7 +220,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		sol1New[x_]:= sol1[map1New[x]];
 		sol2New[x_]:= sol2[map2New[x]];
 		poly1 = Function[\[Sigma],Which[\[Sigma]<\[Sigma]p,sol1New[\[Sigma]],\[Sigma]>\[Sigma]p,sol2New[\[Sigma]]]]; 
-		poly2 = Function[r,Which[2/r<\[Sigma]p,sol1New[2/r],2/r>\[Sigma]p,sol2New[2/r]]];
+		poly2 = Function[r, Which[r<r0,Z[2/r,\[Xi]]poly1[2/r],r>r0,Z[2/r,\[Xi]]poly1[2/r]]];
 		Return[{poly1,poly2}]
 ]
 
@@ -249,59 +229,31 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 (*Overall Module*)
 
 
-Options[ReggeWheelerHyperboloidal]={"WorkingPrecision" -> 32, "GridPoints" -> 32};
+Options[ReggeWheelerHyperboloidal]={"GridPoints" -> 32};
 
 
 ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]]:=
  Module[{r0, M, w, grid,Xgrid,prec,npts, S, R, R\[Sigma], Z},
-	  
-	  (* Error messages *)
-	  If[orbit["a"] != 0,
-	    Message[ReggeWheelerHyperboloidal::nospin, orbit["a"]];
-	    Return[$Failed];
-		];
-		
-	  If[orbit["e"] != 0,
-	    Message[ReggeWheelerHyperboloidal::eccentricity];
-	    Return[$Failed];
-		];
-		
-	  If[s != 2,
-	    Message[ReggeWheelerHyperboloidal::spin2field];
-	    Return[$Failed];
-		];
-		
-	  If[orbit["Inclination"] != 1,
-	    Message[ReggeWheelerHyperboloidal::inclination];
-	    Return[$Failed];
-		];
-		
-	  If[n != 0,
-	    Message[ReggeWheelerHyperboloidal::eccentricitymode];
-	    Return[$Failed];
-		];
 			
 		(* Initial setup *)
 		M = 1;
 		r0 = orbit["p"];
 		
-		(* Defining working precision *)
-		prec = OptionValue["WorkingPrecision"];
-		
 		(* Initialising number of grid points *)
 		npts = OptionValue["GridPoints"];
+		
+		(* Setting working precision *)
+		prec = Precision[r0];
 		
 		(* Initialising Chebyshev-Gauss-Lobatto grid *)
 		Xgrid = SetPrecision[Cos[(Range[0,npts]\[Pi])/npts][[2;;-2]],prec];
 		
 		(* Output *)
 		R = HyperboloidalSolver[r0, l, m, Xgrid,
-				"WorkingPrecision"->prec,
 				"GridPoints" -> npts
 			][[2]];
 			
 		R\[Sigma] = HyperboloidalSolver[r0, l, m, Xgrid,
-				"WorkingPrecision"->prec,
 				"GridPoints" -> npts
 			][[1]];
 		
@@ -324,103 +276,8 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 ]
 
 
-(* ::Section::Closed:: *)
-(*ReggeWheelerMode*)
-
-
-(* ::Subsection::Closed:: *)
-(*Output format*)
-
-
-(*ReggeWheelerHyperboloidalMode /:
- MakeBoxes[rwm:ReggeWheelerHyperboloidalMode[assoc_], form:(StandardForm|TraditionalForm)] :=
- Module[{summary, extended},
-  summary = {Row[{BoxForm`SummaryItem[{"s: ", assoc["s"]}], "  ",
-                  BoxForm`SummaryItem[{"l: ", assoc["l"]}], "  ",
-                  BoxForm`SummaryItem[{"m: ", assoc["m"]}], "  ",
-                  BoxForm`SummaryItem[{"\[Omega]: ", assoc["\[Omega]"]}]}],
-             BoxForm`SummaryItem[{"Type: ", First[assoc["Type"]]}]};
-  extended = {BoxForm`SummaryItem[{"Amplitude at \[ScriptCapitalI]: ", assoc["Amplitudes"][[1]]}],
-              BoxForm`SummaryItem[{"Amplitude at \[ScriptCapitalH]: ", assoc["Amplitudes"][[2]]}],
-              BoxForm`SummaryItem[{"Type details: ", Column[Rest[assoc["Type"]]]}]};
-  BoxForm`ArrangeSummaryBox[
-    ReggeWheelerHyperboloidalMode,
-    rwm,
-    None,
-    summary,
-    extended,
-    form
-  ]
-];*)
-
-
-(* ::Subsection::Closed:: *)
-(*Accessing attributes*)
-
-
-(*ReggeWheelerHyperboloidalMode[assoc_]["EnergyFlux"] := EnergyFlux[ReggeWheelerHyperboloidalMode[assoc]];*)
-
-
-(*ReggeWheelerHyperboloidalMode[assoc_]["AngularMomentumFlux"] := AngularMomentumFlux[ReggeWheelerHyperboloidalMode[assoc]];*)
-
-
-(*ReggeWheelerHyperboloidalMode[assoc_]["Fluxes"] := <|"Energy" -> ReggeWheelerHyperboloidalMode[assoc]["EnergyFlux"], "AngularMomentum" -> ReggeWheelerHyperboloidalMode[assoc]["AngularMomentumFlux"]|>;*)
-
-
-(*ReggeWheelerHyperboloidalMode[assoc_][string_] := assoc[string];*)
-
-
-(* ::Section::Closed:: *)
-(*Fluxes*)
-
-
-(* ::Subsection:: *)
-(*Energy Flux*)
-
-
-(*EnergyFlux[mode_ReggeWheelerHyperboloidalMode] :=
-	Module[{l, m, \[Xi], Z, FluxInf, FluxH, r},
-	l = mode["l"];
-	m = mode["m"];
-	Z = mode["Amplitudes"];
-	\[Xi] = -I mode["\[Omega]"] 4;
-	
-	
-	FluxInf = ((l+2)!/(l-2)!)1/(256\[Pi]*16)Abs[\[Xi] Z[[1]]]^2;
-	FluxH = ((l+2)!/(l-2)!)1/(256\[Pi]*16)Abs[\[Xi] Z[[2]]]^2;
-	
-	<| "\[ScriptCapitalI]" -> FluxInf, "\[ScriptCapitalH]" -> FluxH |>
-];*)
-
-
-(* ::Subsection:: *)
-(*Angular Momentum Flux*)
-
-
-(*AngularMomentumFlux[mode_ReggeWheelerHyperboloidalMode] :=
-	Module[{l, m, \[Xi], Z, FluxInf, FluxH, r},
-	l = mode["l"];
-	m = mode["m"];
-	Z = mode["Amplitudes"];
-	\[Xi] = -I mode["\[Omega]"] 4;
-	
-	
-	FluxInf = I*m*\[Xi]((l+2)!/(l-2)!)1/(64\[Pi]*16)Abs[Z[[1]]]^2;
-	FluxH = I*m*\[Xi]((l+2)!/(l-2)!)1/(64\[Pi]*16)Abs[Z[[2]]]^2;
-	
-	<| "\[ScriptCapitalI]" -> FluxInf, "\[ScriptCapitalH]" -> FluxH |>
-];*)
-
-
 (* ::Section:: *)
 (*End Package*)
-
-
-(* ::Subsection:: *)
-(*Protect symbols*)
-
-
-(*SetAttributes[{ReggeWheelerHyperboloidalMode, ReggeWheelerHyperboloidal}, {Protected, ReadProtected}];*)
 
 
 (* ::Subsection:: *)

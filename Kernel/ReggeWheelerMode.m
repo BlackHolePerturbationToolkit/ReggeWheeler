@@ -38,11 +38,15 @@ ReggeWheelerPointParticleMode::usage = "ReggeWheelerPointParticleMode[s, l, m, n
  "ReggeWheelerMode representing a solution to the Regge-Wheeler equation with a point particle source.";
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Error Messages*)
 
 
 ReggeWheelerPointParticleMode::nospin = "Regge-Wheeler perturbations are only for Schwarzschild black holes but spin `1` is not zero."
+ReggeWheelerPointParticleMode::eccentricity = "The hyperboloidal package does not currently accept eccentric orbits. Please set eccentricity ('e') to zero."
+ReggeWheelerPointParticleMode::spin2field = "The hyperboloidal package currently only works for spin = 2 fields, but the fluxes and radial fns. are correct for spin = -2. Please set field spin ('s') to two."
+ReggeWheelerPointParticleMode::inclination = "The hyperboloidal package currently only works for orbits in the equatorial plane. Please set orbital inclination ('x') to one."
+ReggeWheelerPointParticleMode::eccentricitymode = "The hyperboloidal package currently only works for circular orbit modes ('m'). Please set the eccentricity mode ('n') to zero."
 
 
 (* ::Subsection::Closed:: *)
@@ -70,9 +74,48 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
     Return[$Failed];
   ];
   
+  
   Switch[OptionValue["Method"],
+	   If[orbit["e"] != 0,
+		    Message[ReggeWheelerPointParticleMode::eccentricity];
+		    Return[$Failed];
+	   ];
+			
+	   If[s != 2,
+		    Message[ReggeWheelerPointParticleMode::spin2field];
+		    Return[$Failed];
+	   ];
+			
+	   If[orbit["Inclination"] != 1,
+		    Message[ReggeWheelerPointParticleMode::inclination];
+		    Return[$Failed];
+	   ];
+			
+	   If[n != 0,
+		    Message[ReggeWheelerPointParticleMode::eccentricitymode];
+		    Return[$Failed];
+	   ];
        "Hyperboloidal", Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit]],
-       {"Hyperboloidal",OptionsPattern[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal]}, 
+       {"Hyperboloidal",OptionsPattern[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal]},
+       If[orbit["e"] != 0,
+		    Message[ReggeWheelerPointParticleMode::eccentricity];
+		    Return[$Failed];
+	   ];
+			
+	   If[s != 2,
+		    Message[ReggeWheelerPointParticleMode::spin2field];
+		    Return[$Failed];
+	   ];
+			
+	   If[orbit["Inclination"] != 1,
+		    Message[ReggeWheelerPointParticleMode::inclination];
+		    Return[$Failed];
+	   ];
+			
+	   If[n != 0,
+		    Message[ReggeWheelerPointParticleMode::eccentricitymode];
+		    Return[$Failed];
+	   ];
        hypopts = Sequence@@FilterRules[{OptionValue["Method"][[2;;]]}, Options[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal]];
        Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit,hypopts]]
        ];
@@ -159,7 +202,7 @@ ReggeWheelerMode[assoc_][string_] := assoc[string];
 Keys[m_ReggeWheelerMode] ^:= Keys[m[[1]]]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Fluxes*)
 
 
@@ -175,9 +218,8 @@ EnergyFlux[mode_ReggeWheelerMode] :=
   Z = mode["Amplitudes"];
   
   If[mode["Method"][[1]] == "Hyperboloidal",
-      \[Xi] = -I \[Omega] 4;
-  	FluxInf = ((l+2)!/(l-2)!)1/(256\[Pi]*16)Abs[\[Xi] Z[[1]]]^2;
-	  FluxH = ((l+2)!/(l-2)!)1/(256\[Pi]*16)Abs[\[Xi] Z[[2]]]^2;
+  	FluxInf = ((l+2)!/(l-2)!)1/(256\[Pi]*16)Abs[-I \[Omega] 4 Z[[1]]]^2;
+	  FluxH = ((l+2)!/(l-2)!)1/(256\[Pi]*16)Abs[-I \[Omega] 4 Z[[2]]]^2;
       ,
       FluxInf = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[\[Omega]*Z["\[ScriptCapitalI]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[\[Omega]*Z["\[ScriptCapitalI]"]]^2/(16*Pi)];
       FluxH   = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[\[Omega]*Z["\[ScriptCapitalH]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[\[Omega]*Z["\[ScriptCapitalH]"]]^2/(16*Pi)];
@@ -199,9 +241,8 @@ AngularMomentumFlux[mode_ReggeWheelerMode] :=
   Z = mode["Amplitudes"];
 
  If[mode["Method"][[1]] == "Hyperboloidal",
- 	\[Xi] = -I \[Omega] 4;
-	 FluxInf = I*m*\[Xi]((l+2)!/(l-2)!)1/(64\[Pi]*16)Abs[Z[[1]]]^2;
-	 FluxH = I*m*\[Xi]((l+2)!/(l-2)!)1/(64\[Pi]*16)Abs[Z[[2]]]^2;
+	 FluxInf = I*m*(-I \[Omega] 4)((l+2)!/(l-2)!)1/(64\[Pi]*16)Abs[Z[[1]]]^2;
+	 FluxH = I*m*(-I \[Omega] 4)((l+2)!/(l-2)!)1/(64\[Pi]*16)Abs[Z[[2]]]^2;
 	 ,
      FluxInf = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1)) m \[Omega] Abs[Z["\[ScriptCapitalI]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2)) m \[Omega] Abs[Z["\[ScriptCapitalI]"]]^2/(16*Pi)];
      FluxH   = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1)) m \[Omega] Abs[Z["\[ScriptCapitalH]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2)) m \[Omega] Abs[Z["\[ScriptCapitalH]"]]^2/(16*Pi)];
