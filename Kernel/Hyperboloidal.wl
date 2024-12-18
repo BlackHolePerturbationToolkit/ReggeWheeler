@@ -34,36 +34,6 @@ Begin["`Private`"];
 
 
 (* ::Section:: *)
-(*Coordinate Transformation*)
-
-
-DomainMapping[r0_,x_,X_]:= 
-		Module[{M, r, \[Sigma]p, \[Sigma]grid1, \[Sigma]grid2, AB1, AB2, map1, map2, InvMap1, InvMap2, a, b},
-			
-			(* Initial setup *)
-			M =1;
-			\[Sigma]p=(2M)/r0;
-			
-			\[Sigma]grid1 = {0,\[Sigma]p};
-			\[Sigma]grid2 = {\[Sigma]p,1};
-			
-			(* Solving for the transform coefficients *);
-			AB1 =Solve[{a*\[Sigma]grid1[[1]]+b==-1,a*\[Sigma]grid1[[2]]+b==1}][[1]];
-			AB2 = Solve[{a*\[Sigma]grid2[[1]]+b==-1,a*\[Sigma]grid2[[2]]+b==1}][[1]];
-			
-			(* Map to hyp. coords. *);
-			map1= a*x+b/.AB1;
-			map2=a*x+b/.AB2;
-			
-			(* Map to Sch. coords *);
-			InvMap1 = (X-b)/a/.AB1;
-			InvMap2=(X-b)/a/.AB2;
-			
-		Return[{map1,map2,InvMap1,InvMap2}]
-];
-
-
-(* ::Section:: *)
 (*Utility functions*)
 
 
@@ -118,6 +88,44 @@ DomainMapping[r0_,x_,X_]:=
 	(* Distinct coefficients for the even/odd parity equations *)
 	\[Alpha]0Odd[\[Sigma]_,l_,M_,\[Xi]_]:= -(\[Xi]^2 (1+\[Sigma])+2\[Xi] \[Sigma]+(4M^2 VeffOdd[2/\[Sigma],l,M])/((1-\[Sigma])\[Sigma]^2)); 
 	\[Alpha]0Even[\[Sigma]_,l_,M_,\[Xi]_]:= -(\[Xi]^2 (1+\[Sigma])+2\[Xi] \[Sigma]+(4M^2 VeffEven[2/\[Sigma],l,M])/((1-\[Sigma])\[Sigma]^2));
+	
+(* Analytic mesh refinement (AnMR) \[Kappa] and coordinate transformation *)
+	\[Kappa][r0_]:=1/2 Log[r0];
+	AnMRTransform[\[Chi]_,r0_]=-1(1-(2Sinh[\[Kappa][r0](1+ \[Chi])])/Sinh[2\[Kappa][r0]]);
+
+
+(* ::Section:: *)
+(*Coordinate Transformation*)
+
+
+DomainMapping[r0_,x_,X_]:= 
+		Module[{\[Sigma]p, \[Sigma]grid1, \[Sigma]grid2, M, AB1, AB2, map1, map2, InvMap1, InvMap2, \[Chi]ofX, \[Chi]of\[Sigma], \[Sigma]of\[Chi], a, b},
+			
+			(* Initial setup *)
+			M = 1;
+			\[Sigma]p =(2M)/r0;
+			
+			\[Sigma]grid1 = {0,\[Sigma]p};
+			\[Sigma]grid2 = {\[Sigma]p,1};
+			
+			(* Solving for the transform coefficients *);
+			AB1 = Solve[{a*\[Sigma]grid1[[1]]+b==-1,a*\[Sigma]grid1[[2]]+b==1}][[1]];
+			AB2 = Solve[{a*\[Sigma]grid2[[1]]+b==-1,a*\[Sigma]grid2[[2]]+b==1}][[1]];
+			
+			(* Map to hyp. coords. *);
+			map1 = a*x+b/.AB1;
+			map2 = a*x+b/.AB2;
+			
+			(* Map to Sch. coords *);
+			InvMap1 = (X-b)/a/.AB1;
+			InvMap2 = (X-b)/a/.AB2;
+			
+			\[Chi]ofX = \[Chi]/.Solve[AnMRTransform[\[Chi],r0]==X,\[Chi]][[1]]/.C[1]->0//Quiet;
+			\[Chi]of\[Sigma] = \[Chi]ofX/.X->map2;
+			\[Sigma]of\[Chi] = InvMap2/.X->AnMRTransform[X,r0];
+			
+			Return[{map1, map2, InvMap1, InvMap2, \[Chi]ofX, \[Chi]of\[Sigma], \[Sigma]of\[Chi]}]
+];
 
 
 (* ::Section:: *)
@@ -128,7 +136,7 @@ Options[HyperboloidalSolver]={"GridPoints"->32};
 
 
 HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
-	{npts, M, \[Theta], \[Xi], \[Sigma]p, prec, map1, map2, InvMap1, InvMap2, x, X, \[Phi], S1, S2, ansatz, Dansatz, D2ansatz, Dmap1, Dmap2, 
+	{npts, M, \[Theta], \[Xi], \[Sigma]p, prec, map1, map2, InvMap1, InvMap2, AnMRMap\[Chi]X, AnMRMap\[Chi]\[Sigma], AnMRMap\[Sigma]\[Chi], d\[Chi]dX, d2\[Chi]dX2, x, X, \[Phi], S1, S2, ansatz, Dansatz, D2ansatz, Dmap1, Dmap2, 
 	cs1, cs2, cs, DH, A, B, ansatz1D1, ansatz1D2, ansatz2D1, ansatz2D2, \[Alpha]21, 
 	\[Alpha]22, \[Alpha]11, \[Alpha]12, \[Alpha]01, \[Alpha]02, BCs, BCsRHS, D\[Alpha]2, ODEs, juncs, juncs1,
 	juncs2, fill, juncsRHS, dom1, dom2, Mat, LARHS, 
@@ -146,7 +154,8 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		prec = Precision[r0];
 		
 	(* Coordinate mappings based off source position *)
-		{map1, map2, InvMap1, InvMap2} = DomainMapping[r0,x,X];
+		{map1, map2, InvMap1} = DomainMapping[r0,x,X][[1;;3]];
+		{InvMap2[X_],AnMRMap\[Chi]X[X_], AnMRMap\[Chi]\[Sigma][x_], AnMRMap\[Sigma]\[Chi][X_]} = DomainMapping[r0,x,X][[4;;-1]];
 		
 	(* Source terms *)
 		{S1,S2} = If[EvenQ[l+m],
@@ -156,8 +165,9 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 	(* Chebyshev polynomial as ansatz, using number of points on grid to determine length *)
 		ansatz = Table[ChebyshevT[i,X],{i,0,Length[Xgrid]+1}];
 		
-	(* Derivatives of ansatz *)
-		{Dansatz,D2ansatz,Dmap1,Dmap2} = {D[ansatz,X],D[ansatz,{X,2}],D[map1,x],D[map2,x]};
+	(* Derivatives of ansatz and mappings *)
+		{Dansatz, D2ansatz, Dmap1, Dmap2} = {D[ansatz,X], D[ansatz,{X,2}], D[map1,x], D[map2,x]};
+		{d\[Chi]dX[X_], d2\[Chi]dX2[X_]} = {D[AnMRMap\[Chi]X[X],X], D[AnMRMap\[Chi]X[X],{X,2}]};
 		
 	(* Initialising table of weight coefficients *)
 		{cs1,cs2} = {Table[Subscript[c, i, 1],{i,0,Length[Xgrid]+1}],Table[Subscript[c, i, 2],{i,0,Length[Xgrid]+1}]};
@@ -170,12 +180,12 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		{A,B} = { (2E^(-\[Xi] H[\[Sigma]p]))/(1-\[Sigma]p) (2 S1+\[Sigma]p^2/(1-\[Sigma]p) (1-\[Xi](1-\[Sigma]p)(DH))S2),-((2 \[Sigma]p^2 E^(-\[Xi] H[\[Sigma]p]))/(1-\[Sigma]p))S2};
 		
 	(* Transforming ansatz derivatives  *)	
-		{ansatz1D1, ansatz2D1, ansatz1D2, ansatz2D2} = {Dmap1*Dansatz, Dmap2*Dansatz, Dmap1^2*D2ansatz, Dmap2^2*D2ansatz};
+		{ansatz1D1, ansatz2D1, ansatz1D2, ansatz2D2} = {Dmap1*Dansatz, Dmap2*(d\[Chi]dX[AnMRTransform[X,r0]])*Dansatz, Dmap1^2*D2ansatz, Dmap2^2*((d2\[Chi]dX2[AnMRTransform[X,r0]])*Dansatz+(d\[Chi]dX[AnMRTransform[X,r0]]^2)*D2ansatz)};
 		
 	(* Obtaining master fn operator coefficients on Chebyshev-Gauss-Lobatto grid *)	
 		{\[Alpha]21, \[Alpha]22, \[Alpha]11, \[Alpha]12, \[Alpha]01, \[Alpha]02} = If[EvenQ[l+m],
-										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2], \[Alpha]1[InvMap1,\[Xi]], \[Alpha]1[InvMap2,\[Xi]], \[Alpha]0Even[InvMap1,l,M,\[Xi]], \[Alpha]0Even[InvMap2,l,M,\[Xi]]},
-										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2], \[Alpha]1[InvMap1,\[Xi]], \[Alpha]1[InvMap2,\[Xi]], \[Alpha]0Odd[InvMap1,l,M,\[Xi]], \[Alpha]0Odd[InvMap2,l,M,\[Xi]]}];
+										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2[AnMRTransform[X,r0]]], \[Alpha]1[InvMap1,\[Xi]], \[Alpha]1[InvMap2[AnMRTransform[X,r0]],\[Xi]], \[Alpha]0Even[InvMap1,l,M,\[Xi]], \[Alpha]0Even[InvMap2[AnMRTransform[X,r0]],l,M,\[Xi]]},
+										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2[AnMRTransform[X,r0]]], \[Alpha]1[InvMap1,\[Xi]], \[Alpha]1[InvMap2[AnMRTransform[X,r0]],\[Xi]], \[Alpha]0Odd[InvMap1,l,M,\[Xi]], \[Alpha]0Odd[InvMap2[AnMRTransform[X,r0]],l,M,\[Xi]]}];
 		
 	(* Defining boundary conditions, junction conditions and the ODE at every other grid point *)
 		{BCs, ODEs, juncs1} = {{((\[Alpha]11 ansatz1D1 + \[Alpha]01 ansatz)/.X -> -1),((\[Alpha]12 ansatz2D1 + \[Alpha]02 ansatz)/.X -> 1)},
@@ -216,7 +226,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		sol1[x_]:= (cs1 . ansatz/.csNew)/.X->x;
 		sol2[x_] := (cs2 . ansatz/.csNew)/.X->x;
 		map1New[y_]:= map1/.x->y;
-		map2New[y_]:= map2/.x->y;
+		map2New[y_]:= AnMRMap\[Chi]\[Sigma][y];
 		sol1New[x_]:= sol1[map1New[x]];
 		sol2New[x_]:= sol2[map2New[x]];
 		poly1 = Function[\[Sigma],Which[\[Sigma]<\[Sigma]p,sol1New[\[Sigma]],\[Sigma]>\[Sigma]p,sol2New[\[Sigma]]]]; 
