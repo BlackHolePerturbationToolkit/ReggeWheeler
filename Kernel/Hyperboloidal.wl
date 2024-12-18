@@ -203,7 +203,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		dom2 = MapThread[Append,{MapThread[Prepend,{ODEs[[2]],fill}],BCs[[2]]}];
 		
 	(* Constructing overall block diagonal matrix to be inverted *)
-		Mat = If[$VersionNumber >14.0, BlockDiagonalMatrix[{dom1,dom2}], ArrayFlatten[{{dom1,0},{0,dom2}}]];
+		Mat =  ArrayFlatten[{{dom1,0},{0,dom2}}];
 		(*Setting junction conditions*)
 		{Mat[[;;,Length[Mat]/2]], Mat[[;;,Length[Mat]/2+1]]} = juncs2;
 
@@ -216,7 +216,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		LARHS = Join[{BCsRHS[[1]]},ConstantArray[0,Length[Xgrid]],juncsRHS,ConstantArray[0,Length[Xgrid]],{BCsRHS[[2]]}];
 		
 	(*Inverting matrix to obtain weight coefficients *);
-		sols = LARHS . SetPrecision[Inverse[Mat],prec];
+		sols = LARHS . Inverse[Mat];
 	
 	
 	(* Creating table of replacement rules for weight coefficients *);
@@ -256,7 +256,7 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 		prec = Precision[r0];
 		
 		(* Initialising Chebyshev-Gauss-Lobatto grid *)
-		Xgrid = SetPrecision[Cos[(Range[0,npts]\[Pi])/npts][[2;;-2]],prec];
+		Xgrid = N[Cos[(Range[0,npts]\[Pi])/npts][[2;;-2]],prec];
 		
 		(* Output *)
 		R = HyperboloidalSolver[r0, l, m, Xgrid,
