@@ -76,7 +76,8 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
   
   
   Switch[OptionValue["Method"],
-	   If[orbit["e"] != 0,
+       "Hyperboloidal",	   
+       If[orbit["e"] != 0,
 		    Message[ReggeWheelerPointParticleMode::eccentricity];
 		    Return[$Failed];
 	   ];
@@ -95,7 +96,8 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 		    Message[ReggeWheelerPointParticleMode::eccentricitymode];
 		    Return[$Failed];
 	   ];
-       "Hyperboloidal", Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit]],
+	    Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit]],
+       
        {"Hyperboloidal",OptionsPattern[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal]},
        If[orbit["e"] != 0,
 		    Message[ReggeWheelerPointParticleMode::eccentricity];
