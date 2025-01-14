@@ -47,6 +47,7 @@ ReggeWheelerPointParticleMode::eccentricity = "The hyperboloidal package does no
 ReggeWheelerPointParticleMode::spin2field = "The hyperboloidal package currently only works for spin = 2 fields, but the fluxes and radial fns. are correct for spin = -2. Please set field spin ('s') to two."
 ReggeWheelerPointParticleMode::inclination = "The hyperboloidal package currently only works for orbits in the equatorial plane. Please set orbital inclination ('x') to one."
 ReggeWheelerPointParticleMode::eccentricitymode = "The hyperboloidal package currently only works for circular orbit modes ('m'). Please set the eccentricity mode ('n') to zero."
+ReggeWheelerPointParticleMode::precision = "Specified working precision is insufficient for accurate results. Automatically setting working precision to minimum required precision."
 
 
 (* ::Subsection::Closed:: *)
@@ -113,7 +114,11 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 		    Message[ReggeWheelerPointParticleMode::inclination];
 		    Return[$Failed];
 	   ];
-			
+	   
+	   If[Precision[orbit["p"]] < ReggeWheeler`Hyperboloidal`Private`necessaryMinPrecision[orbit["p"],l,m],
+	        Message[ReggeWheelerPointParticleMode::precision];
+	   ];
+	   
 	   If[n != 0,
 		    Message[ReggeWheelerPointParticleMode::eccentricitymode];
 		    Return[$Failed];
