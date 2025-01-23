@@ -91,7 +91,7 @@ Begin["`Private`"];
 	
 (* Analytic mesh refinement (AnMR) \[Kappa] and coordinate transformation *)
 	\[Kappa][r0_]:=1/2 Log[r0];
-	AnMRTransform[\[Chi]_,r0_]=-1(1-(2Sinh[\[Kappa][r0](1+ \[Chi])])/Sinh[2\[Kappa][r0]]);
+	AnMRTransform[\[Chi]_,r0_,prec_]:=N[-1(1-(2Sinh[\[Kappa][r0](1+ \[Chi])])/Sinh[2\[Kappa][r0]]),prec];
 
 
 (* ::Section:: *)
@@ -136,7 +136,7 @@ Begin["`Private`"];
 (*Coordinate Transformation*)
 
 
-DomainMapping[r0_,x_,X_]:= 
+DomainMapping[r0_,x_,X_,prec_]:= 
 		Module[{\[Sigma]p, \[Sigma]grid1, \[Sigma]grid2, M, AB1, AB2, map1, map2, InvMap1, InvMap2, \[Chi]ofX, \[Chi]of\[Sigma], \[Sigma]of\[Chi], a, b},
 			
 			(* Initial setup *)
@@ -158,9 +158,9 @@ DomainMapping[r0_,x_,X_]:=
 			InvMap1 = (X-b)/a/.AB1;
 			InvMap2 = (X-b)/a/.AB2;
 			
-			\[Chi]ofX = \[Chi]/.Solve[AnMRTransform[\[Chi],r0]==X,\[Chi]][[1]]/.C[1]->0//Quiet;
+			\[Chi]ofX = \[Chi]/.Solve[AnMRTransform[\[Chi],r0,prec]==X,\[Chi]][[1]]/.C[1]->0//Quiet;
 			\[Chi]of\[Sigma] = \[Chi]ofX/.X->map2;
-			\[Sigma]of\[Chi] = InvMap2/.X->AnMRTransform[X,r0];
+			\[Sigma]of\[Chi] = InvMap2/.X->AnMRTransform[X,r0,prec];
 			
 			Return[{map1, map2, InvMap1, InvMap2, \[Chi]ofX, \[Chi]of\[Sigma], \[Sigma]of\[Chi]}]
 ];
@@ -174,11 +174,11 @@ Options[HyperboloidalSolver]={"GridPoints"->32};
 
 
 HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
-	{npts, M, \[Theta], \[Xi], \[Sigma]p, prec, map1, map2, InvMap1, InvMap2, AnMRMap\[Chi]X, AnMRMap\[Chi]\[Sigma], AnMRMap\[Sigma]\[Chi], d\[Chi]dX, d2\[Chi]dX2, x, X, \[Phi], S1, S2, ansatz, Dansatz, D2ansatz, Dmap1, Dmap2, 
+	{npts, M, \[Theta], \[Xi], \[Sigma]p, prec, DM, DM2,map1, map2, InvMap1, InvMap2, AnMRMap\[Chi]X, AnMRMap\[Chi]\[Sigma], AnMRMap\[Sigma]\[Chi], d\[Chi]dX, d2\[Chi]dX2, x, X, \[Phi], S1, S2, ansatz, Dansatz, D2ansatz, Dmap1, Dmap2, 
 	cs1, cs2, cs, DH, A, B, ansatz1D1, ansatz1D2, ansatz2D1, ansatz2D2, \[Alpha]21, 
 	\[Alpha]22, \[Alpha]11, \[Alpha]12, \[Alpha]01, \[Alpha]02, BCs, BCsRHS, D\[Alpha]2, ODEs, juncs, juncs1,
 	juncs2, fill, juncsRHS, dom1, dom2, Mat, LARHS, 
-	sols, sols2, csNew, sol1, sol2, map1New, map2New, y, sol1New, sol2New, poly1, poly2},
+	sols, sols2, csNew, ansatzUneval, sol1, sol2, map1New, map2New, y, sol1New, sol2New, poly1, poly2},
 	(*Module internal number of points on grid (maybe unnecessary)*)
 		npts = OptionValue["GridPoints"];
 		
@@ -193,10 +193,11 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		If[prec < necessaryMinPrecision[r0,l,m], 
 			prec = necessaryMinPrecision[r0,l,m];
 		];
+		DM =-NDSolve`FiniteDifferenceDerivative[Derivative[1],N[Reverse[Xgrid],prec],DifferenceOrder->"Pseudospectral",PeriodicInterpolation->False]["DifferentiationMatrix"];
+		DM2 =NDSolve`FiniteDifferenceDerivative[Derivative[2],N[Reverse[Xgrid],prec],DifferenceOrder->"Pseudospectral",PeriodicInterpolation->False]["DifferentiationMatrix"];
 		
 	(* Coordinate mappings based off source position *)
-		{map1, map2, InvMap1} = DomainMapping[r0,x,X][[1;;3]];
-		{InvMap2[X_],AnMRMap\[Chi]X[X_], AnMRMap\[Chi]\[Sigma][x_], AnMRMap\[Sigma]\[Chi][X_]} = DomainMapping[r0,x,X][[4;;-1]];
+	   {map1[x_],map2[x_],InvMap1[X_],InvMap2[X_],AnMRMap\[Chi]X[X_], AnMRMap\[Chi]\[Sigma][x_], AnMRMap\[Sigma]\[Chi][X_]} = DomainMapping[r0,x,X,prec];
 		
 	(* Source terms *)
 		{S1,S2} = If[EvenQ[l+m],
@@ -204,14 +205,15 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 						{SourceTerm1Odd[r0,M,l,m,\[Theta]],SourceTerm2Odd[r0,M,l,m,\[Theta]]}];
 		
 	(* Chebyshev polynomial as ansatz, using number of points on grid to determine length *)
-		ansatz = Table[ChebyshevT[i,X],{i,0,Length[Xgrid]+1}];
+		ansatz = Table[N[ChebyshevT[i,xx],prec],{i,0,Length[Xgrid]-1},{xx,Xgrid}]//Quiet;
 		
 	(* Derivatives of ansatz and mappings *)
-		{Dansatz, D2ansatz, Dmap1, Dmap2} = {D[ansatz,X], D[ansatz,{X,2}], D[map1,x], D[map2,x]};
+		{Dansatz,D2ansatz}={Transpose[DM . ansatz],Transpose[DM2 . ansatz]} ;
+		{Dmap1,Dmap2}={D[map1[x],x],D[map2[x],x]};
 		{d\[Chi]dX[X_], d2\[Chi]dX2[X_]} = {D[AnMRMap\[Chi]X[X],X], D[AnMRMap\[Chi]X[X],{X,2}]};
 		
 	(* Initialising table of weight coefficients *)
-		{cs1,cs2} = {Table[Subscript[c, i, 1],{i,0,Length[Xgrid]+1}],Table[Subscript[c, i, 2],{i,0,Length[Xgrid]+1}]};
+		{cs1,cs2} = {Table[Subscript[c, i, 1],{i,0,Length[Xgrid]-1}],Table[Subscript[c, i, 2],{i,0,Length[Xgrid]-1}]};
 		cs = Join[cs1,cs2];
 	
 	(*Derivative of height fn for convenience*)
@@ -221,17 +223,18 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		{A,B} = { (2E^(-\[Xi] H[\[Sigma]p]))/(1-\[Sigma]p) (2 S1+\[Sigma]p^2/(1-\[Sigma]p) (1-\[Xi](1-\[Sigma]p)(DH))S2),-((2 \[Sigma]p^2 E^(-\[Xi] H[\[Sigma]p]))/(1-\[Sigma]p))S2};
 		
 	(* Transforming ansatz derivatives  *)	
-		{ansatz1D1, ansatz2D1, ansatz1D2, ansatz2D2} = {Dmap1*Dansatz, Dmap2*(d\[Chi]dX[AnMRTransform[X,r0]])*Dansatz, Dmap1^2*D2ansatz, Dmap2^2*((d2\[Chi]dX2[AnMRTransform[X,r0]])*Dansatz+(d\[Chi]dX[AnMRTransform[X,r0]]^2)*D2ansatz)};
+		{ansatz1D1, ansatz2D1, ansatz1D2, ansatz2D2} = {Dmap1*Dansatz, Dmap2*Table[(d\[Chi]dX[AnMRTransform[Xgrid,r0,prec]])*Dansatz[[i]],{i,Length[Xgrid]}], Dmap1^2*D2ansatz, Dmap2^2*(Table[(d2\[Chi]dX2[AnMRTransform[Xgrid,r0,prec]])*Dansatz[[i]],{i,Length[Xgrid]}]+Table[(d\[Chi]dX[AnMRTransform[Xgrid,r0,prec]]^2)*D2ansatz[[i]],{i,Length[Xgrid]}])};
 		
 	(* Obtaining master fn operator coefficients on Chebyshev-Gauss-Lobatto grid *)	
-		{\[Alpha]21, \[Alpha]22, \[Alpha]11, \[Alpha]12, \[Alpha]01, \[Alpha]02} = If[EvenQ[l+m],
-										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2[AnMRTransform[X,r0]]], \[Alpha]1[InvMap1,\[Xi]], \[Alpha]1[InvMap2[AnMRTransform[X,r0]],\[Xi]], \[Alpha]0Even[InvMap1,l,M,\[Xi]], \[Alpha]0Even[InvMap2[AnMRTransform[X,r0]],l,M,\[Xi]]},
-										{\[Alpha]2[InvMap1], \[Alpha]2[InvMap2[AnMRTransform[X,r0]]], \[Alpha]1[InvMap1,\[Xi]], \[Alpha]1[InvMap2[AnMRTransform[X,r0]],\[Xi]], \[Alpha]0Odd[InvMap1,l,M,\[Xi]], \[Alpha]0Odd[InvMap2[AnMRTransform[X,r0]],l,M,\[Xi]]}];
+		{\[Alpha]21[X_],\[Alpha]22[X_],\[Alpha]11[X_],\[Alpha]12[X_],\[Alpha]01[X_],\[Alpha]02[X_]} = If[EvenQ[l+m],
+										{\[Alpha]2[InvMap1[X]],\[Alpha]2[InvMap2[AnMRTransform[X,r0,prec]]],\[Alpha]1[InvMap1[X],\[Xi]],\[Alpha]1[InvMap2[AnMRTransform[X,r0,prec]],\[Xi]],\[Alpha]0Even[InvMap1[X],l,M,\[Xi]],\[Alpha]0Even[InvMap2[AnMRTransform[X,r0,prec]],l,M,\[Xi]]},
+										{\[Alpha]2[InvMap1[X]],\[Alpha]2[InvMap2[AnMRTransform[X,r0,prec]]],\[Alpha]1[InvMap1[X],\[Xi]],\[Alpha]1[InvMap2[AnMRTransform[X,r0,prec]],\[Xi]],\[Alpha]0Odd[InvMap1[X],l,M,\[Xi]],\[Alpha]0Odd[InvMap2[AnMRTransform[X,r0,prec]],l,M,\[Xi]]}];
 		
 	(* Defining boundary conditions, junction conditions and the ODE at every other grid point *)
-		{BCs, ODEs, juncs1} = {{((\[Alpha]11 ansatz1D1 + \[Alpha]01 ansatz)/.X -> -1),((\[Alpha]12 ansatz2D1 + \[Alpha]02 ansatz)/.X -> 1)},
-								{((\[Alpha]21 ansatz1D2 + \[Alpha]11 ansatz1D1 + \[Alpha]01 ansatz)/.X -> Xgrid),((\[Alpha]22 ansatz2D2 + \[Alpha]12 ansatz2D1 + \[Alpha]02 ansatz)/.X -> Xgrid)},
-								{((cs2 . ansatz/.X -> -1) - (cs1 . ansatz/.X -> 1)),((cs2 . ansatz2D1/.X -> -1) - (cs1 . ansatz1D1/.X -> 1))}};
+		BCs={\[Alpha]11[-1]ansatz1D1[[;;,-1]]+\[Alpha]01[-1]ansatz[[;;,-1]],\[Alpha]12[1]ansatz2D1[[;;,1]]+\[Alpha]02[1] ansatz[[;;,1]]};
+		ODEs={Table[\[Alpha]21[Xgrid][[2;;-2]] ansatz1D2[[i,2;;-2]]+\[Alpha]11[Xgrid][[2;;-2]] ansatz1D1[[i,2;;-2]]+\[Alpha]01[Xgrid][[2;;-2]] ansatz[[i,2;;-2]],{i,Length[ansatz1D2]}],
+				Table[\[Alpha]22[Xgrid][[2;;-2]] ansatz2D2[[i,2;;-2]]+\[Alpha]12[Xgrid][[2;;-2]] ansatz2D1[[i,2;;-2]]+\[Alpha]02[Xgrid][[2;;-2]] ansatz[[i,2;;-2]],{i,Length[Xgrid]}]};
+		{BCs, ODEs, juncs1} = {BCs, ODEs, {((cs2 . ansatz[[;;,-1]])-(cs1 . ansatz[[;;,1]])),((cs2 . ansatz2D1[[;;,-1]])-(cs1 . ansatz1D1[[;;,1]]))}};
 								
 	 (* Obtaining values for junction conditions *)
 		juncs2 = Table[Coefficient[juncs1[[j]],cs[[i]]], {j, Length[juncs1]}, {i, Length[cs]}];
@@ -246,7 +249,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 	(* Constructing overall block diagonal matrix to be inverted *)
 		Mat =  ArrayFlatten[{{dom1,0},{0,dom2}}];
 		(*Setting junction conditions*)
-		{Mat[[;;,Length[Mat]/2]], Mat[[;;,Length[Mat]/2+1]]} = juncs2;
+		{Mat[[;;,Length[dom1]]], Mat[[;;,Length[dom1]+1]]} = juncs2;
 
 	(*Initialising values for RHS of OVERALL equation Mx = b.*);
 		BCsRHS = {0,0};
@@ -254,7 +257,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		juncsRHS = {B/\[Alpha]2[\[Sigma]p ],(A/\[Alpha]2[\[Sigma]p ]+B (D\[Alpha]2 -\[Alpha]1[\[Sigma]p,\[Xi] ])/\[Alpha]2[\[Sigma]p ]^2)};
 		
 	(* Constructing RHS vector *);
-		LARHS = Join[{BCsRHS[[1]]},ConstantArray[0,Length[Xgrid]],juncsRHS,ConstantArray[0,Length[Xgrid]],{BCsRHS[[2]]}];
+		LARHS = Join[{BCsRHS[[1]]},ConstantArray[0,Length[Xgrid]-2],juncsRHS,ConstantArray[0,Length[Xgrid]-2],{BCsRHS[[2]]}];
 		
 	(*Inverting matrix to obtain weight coefficients *);
 		sols = LARHS . Inverse[Mat];
@@ -264,13 +267,15 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		csNew = Table[cs[[i]]->sols[[i]],{i,1,Length[cs]}];
 		
 	(* Creating final polynomial *);
-		sol1[x_]:= (cs1 . ansatz/.csNew)/.X->x;
-		sol2[x_] := (cs2 . ansatz/.csNew)/.X->x;
-		map1New[y_]:= map1/.x->y;
+		ansatzUneval[x_]=Table[ChebyshevT[i,x],{i,0,Length[Xgrid]-1}];
+		sol1[x_]:= cs1 . ansatzUneval[x]/.csNew;
+		sol2[x_] := cs2 . ansatzUneval[x]/.csNew;
+		map1New[y_]:= map1[y];
 		map2New[y_]:= AnMRMap\[Chi]\[Sigma][y];
 		sol1New[x_]:= sol1[map1New[x]];
 		sol2New[x_]:= sol2[map2New[x]];
-		poly1 = Function[\[Sigma],Which[\[Sigma]<\[Sigma]p,sol1New[\[Sigma]],\[Sigma]>\[Sigma]p,sol2New[\[Sigma]]]]; 
+		
+		poly1 =  Function[\[Sigma],Which[\[Sigma]<\[Sigma]p,sol1New[\[Sigma]],\[Sigma]>\[Sigma]p,sol2New[\[Sigma]]]];
 		poly2 = Function[r, Which[r<r0,Z[2/r,\[Xi]]poly1[2/r],r>r0,Z[2/r,\[Xi]]poly1[2/r]]];
 		Return[{poly1,poly2}]
 ]
@@ -297,7 +302,7 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 		prec = Precision[r0];
 		
 		(* Initialising Chebyshev-Gauss-Lobatto grid *)
-		Xgrid = N[Cos[(Range[0,npts]\[Pi])/npts][[2;;-2]],prec];
+		Xgrid = Cos[(Range[0,npts]\[Pi])/npts];
 		
 		(* Output *)
 		R = HyperboloidalSolver[r0, l, m, Xgrid,
