@@ -182,6 +182,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 	(*Module internal number of points on grid (maybe unnecessary)*)
 		npts = OptionValue["GridPoints"];
 		
+		
 	(* Initial setup *)
 		M = 1;
 		\[Theta] = \[Pi]/2;
@@ -193,6 +194,8 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		If[prec < necessaryMinPrecision[r0,l,m], 
 			prec = necessaryMinPrecision[r0,l,m];
 		];
+		
+	(* Obtaining differentiation matrices *)
 		DM =-NDSolve`FiniteDifferenceDerivative[Derivative[1],N[Reverse[Xgrid],prec],DifferenceOrder->"Pseudospectral",PeriodicInterpolation->False]["DifferentiationMatrix"];
 		DM2 =NDSolve`FiniteDifferenceDerivative[Derivative[2],N[Reverse[Xgrid],prec],DifferenceOrder->"Pseudospectral",PeriodicInterpolation->False]["DifferentiationMatrix"];
 		
@@ -289,7 +292,7 @@ Options[ReggeWheelerHyperboloidal]={"GridPoints" -> 32};
 
 
 ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]]:=
- Module[{r0, M, w, grid,Xgrid,prec,npts, S, R, R\[Sigma], Z},
+ Module[{r0, M, w, grid,Xgrid,prec,npts, S, solution, R, R\[Sigma], Z},
 			
 		(* Initial setup *)
 		M = 1;
@@ -305,13 +308,14 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 		Xgrid = Cos[(Range[0,npts]\[Pi])/npts];
 		
 		(* Output *)
-		R = HyperboloidalSolver[r0, l, m, Xgrid,
+		
+		solution = HyperboloidalSolver[r0, l, m, Xgrid,
 				"GridPoints" -> npts
-			][[2]];
+			];
+		
+		R = solution[[2]];
 			
-		R\[Sigma] = HyperboloidalSolver[r0, l, m, Xgrid,
-				"GridPoints" -> npts
-			][[1]];
+		R\[Sigma] = solution[[1]];
 		
 		S = SpinWeightedSpheroidalHarmonicS[s, l, m, 0];
 		Z = <| "\[ScriptCapitalI]" -> R\[Sigma][0], "\[ScriptCapitalH]" -> R\[Sigma][1] |>;

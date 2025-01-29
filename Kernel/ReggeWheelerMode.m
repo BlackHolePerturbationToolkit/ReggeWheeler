@@ -65,7 +65,7 @@ SyntaxInformation[ReggeWheelerPointParticleMode] =
  {"ArgumentsPattern" -> {_, _, _, _, _, OptionsPattern[]}};
 
 
-Options[ReggeWheelerPointParticleMode] = {Method->Automatic};
+Options[ReggeWheelerPointParticleMode] = {Method->Automatic,"DisablePrecisionMessage"->False};
 
 
 ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]] /; AllTrue[orbit["Frequencies"], InexactNumberQ] :=
@@ -116,7 +116,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 	   ];
 	   
 	   If[Precision[orbit["p"]] < ReggeWheeler`Hyperboloidal`Private`necessaryMinPrecision[orbit["p"],l,m],
-	        Message[ReggeWheelerPointParticleMode::precision];
+	           Message[ReggeWheelerPointParticleMode::precision];
 	   ];
 	   
 	   If[n != 0,
