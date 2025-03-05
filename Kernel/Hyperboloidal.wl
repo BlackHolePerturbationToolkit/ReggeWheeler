@@ -236,7 +236,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		(* Obtaining master fn operator coefficients on Chebyshev-Gauss-Lobatto grid *)	
 		{\[Alpha]21[X_],\[Alpha]22[X_],\[Alpha]23[X_],\[Alpha]11[X_],\[Alpha]12[X_],\[Alpha]13[X_],\[Alpha]01[X_],\[Alpha]02[X_],\[Alpha]03[X_]} = If[EvenQ[l+m],
 						{\[Alpha]2[InvMap1[X]],\[Alpha]2[InvMap2[AnMRTransform[X,r0,prec]]],\[Alpha]2[InvMap3[X]],\[Alpha]1[InvMap1[X],\[Xi]],\[Alpha]1[InvMap2[AnMRTransform[X,r0,prec]],\[Xi]],\[Alpha]1[InvMap3[X],\[Xi]],\[Alpha]0Even[InvMap1[X],l,M,\[Xi]],\[Alpha]0Even[InvMap2[AnMRTransform[X,r0,prec]],l,M,\[Xi]],\[Alpha]0Even[InvMap3[X],l,M,\[Xi]]},
-						{\[Alpha]2[InvMap1[X]],\[Alpha]2[InvMap2[X]],\[Alpha]2[InvMap3[AnMRTransform[X,r0,prec]]],\[Alpha]1[InvMap1[X],\[Xi]],\[Alpha]1[InvMap2[X],\[Xi]],\[Alpha]1[InvMap3[AnMRTransform[X,r0,prec]],\[Xi]],\[Alpha]0Odd[InvMap1[X],l,M,\[Xi]],\[Alpha]0Odd[InvMap2[X],l,M,\[Xi]],\[Alpha]0Odd[InvMap3[AnMRTransform[X,r0,prec]],l,M,\[Xi]]}];
+						{\[Alpha]2[InvMap1[X]],\[Alpha]2[InvMap2[AnMRTransform[X,r0,prec]]],\[Alpha]2[InvMap3[X]],\[Alpha]1[InvMap1[X],\[Xi]],\[Alpha]1[InvMap2[AnMRTransform[X,r0,prec]],\[Xi]],\[Alpha]1[InvMap3[X],\[Xi]],\[Alpha]0Odd[InvMap1[X],l,M,\[Xi]],\[Alpha]0Odd[InvMap2[AnMRTransform[X,r0,prec]],l,M,\[Xi]],\[Alpha]0Odd[InvMap3[X],l,M,\[Xi]]}];
 		
 		(* Defining boundary conditions, junction conditions and the ODE at every other grid point *)
 		BCs={\[Alpha]11[-1]ansatz1D1[[;;,-1]]+\[Alpha]01[-1]ansatz[[;;,-1]],\[Alpha]13[1]ansatz3D1[[;;,1]]+\[Alpha]03[1] ansatz[[;;,1]]};
