@@ -311,7 +311,7 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 		r0 = orbit["p"];
 		
 		(* Initialising number of grid points *)
-		npts = OptionValue["GridPoints"];
+		npts = SetPrecision[Round[(Log[10, r0]+((l+Abs[l-m])/2)^(1/2))]*32,Precision[r0]];
 		
 		(* Checking working precision *)
 		prec = Precision[r0];
@@ -346,6 +346,8 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 			
 	ReggeWheeler`ReggeWheelerMode`ReggeWheelerMode[assoc]
 ]
+
+
 
 
 (* ::Section:: *)
