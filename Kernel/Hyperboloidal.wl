@@ -337,6 +337,7 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 					"l" -> l,
 					"m" -> m,
 					"\[Omega]" -> w,
+					"Eigenvalue" -> S["Eigenvalue"],
 					"Type" -> {"PointParticleCircular","Orbital Radius"->ToString[r0] <>"M"},
 					"RadialFunctions" -> R,
 					"AngularFunction" -> S,
