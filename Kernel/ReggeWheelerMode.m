@@ -231,7 +231,7 @@ EnergyFlux[mode_ReggeWheelerMode] :=
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Angular Momentum Flux*)
 
 
@@ -242,13 +242,8 @@ AngularMomentumFlux[mode_ReggeWheelerMode] :=
   \[Omega] = mode["\[Omega]"];
   Z = mode["Amplitudes"];
 
- If[mode["Method"][[1]] == "Hyperboloidal",
-	 FluxInf = I*m*(-I \[Omega] 4)((l+2)!/(l-2)!)1/(64\[Pi]*16)Abs[Z[[1]]]^2;
-	 FluxH = I*m*(-I \[Omega] 4)((l+2)!/(l-2)!)1/(64\[Pi]*16)Abs[Z[[2]]]^2;
-	 ,
-     FluxInf = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1)) m \[Omega] Abs[Z["\[ScriptCapitalI]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2)) m \[Omega] Abs[Z["\[ScriptCapitalI]"]]^2/(16*Pi)];
-     FluxH   = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1)) m \[Omega] Abs[Z["\[ScriptCapitalH]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2)) m \[Omega] Abs[Z["\[ScriptCapitalH]"]]^2/(16*Pi)];
-  ];
+  FluxInf = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1)) m \[Omega] Abs[Z["\[ScriptCapitalI]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2)) m \[Omega] Abs[Z["\[ScriptCapitalI]"]]^2/(16*Pi)];
+  FluxH   = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1)) m \[Omega] Abs[Z["\[ScriptCapitalH]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2)) m \[Omega] Abs[Z["\[ScriptCapitalH]"]]^2/(16*Pi)];
   
   <| "\[ScriptCapitalI]" -> FluxInf, "\[ScriptCapitalH]" -> FluxH |>
 ];

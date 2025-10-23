@@ -66,12 +66,12 @@ Begin["`Private`"];
 	VeffEven[r_,l_,M_]:=f[r,M]/(r^2 \[CapitalLambda][r,l,M]^2) (2\[Lambda][l]^2 (\[Lambda][l]+1+(3M)/r)+18 M^2/r^2 (\[Lambda][l]+M/r));
 	VeffOdd[r_,l_,M_]:= f[r,M]/r^2 (L[l] - 6 M/r); 
 
-(* RWZ gauge source terms *)
-	SourceTerm1Even[r_,M_,l_,m_,\[Theta]_]:=Sqrt[(l^2 (1+l)^2)/64](( p[r]q[r,l,M] \[ScriptCapitalE][r,M])/(r f[r,M]\[CapitalLambda][r,l,M]) (L0[r,M]^2/\[ScriptCapitalE][r,M]^2 f[r,M]^2 \[CapitalLambda][r,l,M]-(\[Lambda][l](\[Lambda][l]+1)r^2+6\[Lambda][l]M r +15M^2))
+(* RWZ gauge source terms. These differ slightly from the papers cited above to ensure results agree with the conventions used in the overall ReggeWheeler package *)
+	SourceTerm1Even[r_,M_,l_,m_,\[Theta]_]:=(l(l+1))/8 (( p[r]q[r,l,M] \[ScriptCapitalE][r,M])/(r f[r,M]\[CapitalLambda][r,l,M]) (L0[r,M]^2/\[ScriptCapitalE][r,M]^2 f[r,M]^2 \[CapitalLambda][r,l,M]-(\[Lambda][l](\[Lambda][l]+1)r^2+6\[Lambda][l]M r +15M^2))
 									Conjugate[SphericalHarmonicY[l,m,\[Theta],0]]-(4p[r]L0[r,M]^2 f[r,M]^2)/(r \[ScriptCapitalE][r,M]) (l-2)!/(l+2)! Y\[Phi][l,m,\[Theta]]);
-	SourceTerm2Even[r_,M_,l_,m_,\[Theta]_]:=Sqrt[(l^2 (1+l)^2)/64](p[r] q[r,l,M]r^2 \[ScriptCapitalE][r,M])Conjugate[SphericalHarmonicY[l,m,\[Theta],0]];
-	SourceTerm1Odd[r_,M_,l_,m_,\[Theta]_]:= -((2 p[r]f[r,M]L0[r,M])/(\[Lambda][l]*L[l]))X\[Theta][l,m,\[Theta]];
-	SourceTerm2Odd[r_,M_,l_,m_,\[Theta]_]:= (2 p[r] r f[r,M]^2 L0[r,M])/(\[Lambda][l]*L[l])X\[Theta][l,m,\[Theta]];
+	SourceTerm2Even[r_,M_,l_,m_,\[Theta]_]:=(l(l+1))/8 (p[r] q[r,l,M]r^2 \[ScriptCapitalE][r,M])Conjugate[SphericalHarmonicY[l,m,\[Theta],0]];
+	SourceTerm1Odd[r_,M_,l_,m_,\[Theta]_]:= ((l-1)(l+2))/4 ((2 p[r]f[r,M]L0[r,M])/(\[Lambda][l]*L[l]))X\[Theta][l,m,\[Theta]];
+	SourceTerm2Odd[r_,M_,l_,m_,\[Theta]_]:= -(((l-1)(l+2))/4)(2 p[r] r f[r,M]^2 L0[r,M])/(\[Lambda][l]*L[l])X\[Theta][l,m,\[Theta]];
 
 (* Hyperboloidal height fn. *)
 	H[\[Sigma]_] :=1/2 (Log[1-\[Sigma]]-1/\[Sigma]+Log[\[Sigma]]); 
@@ -330,7 +330,8 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 		R\[Sigma] = solution[[1]];
 		
 		S = SpinWeightedSpheroidalHarmonicS[s, l, m, 0];
-		Z = <| "\[ScriptCapitalI]" -> R\[Sigma][0], "\[ScriptCapitalH]" -> R\[Sigma][1] |>;
+		(* \[ExponentialE]^(\[ImaginaryI]*4*M*w) factor is to ensure agreement with the overall ReggeWheeler package.*)
+		Z = <| "\[ScriptCapitalI]" -> R\[Sigma][0], "\[ScriptCapitalH]" -> E^(I*4*M*w)*R\[Sigma][1] |>;
 		w = \[Omega][\[CapitalOmega][r0,M],m];
 	
 		assoc = <|  "s" -> 2,
