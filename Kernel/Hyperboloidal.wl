@@ -33,7 +33,7 @@ BeginPackage["ReggeWheeler`Hyperboloidal`",
 Begin["`Private`"];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Utility functions*)
 
 
@@ -94,7 +94,7 @@ Begin["`Private`"];
 	AnMRTransform[\[Chi]_,r0_,prec_]:=N[-1(1-(2Sinh[\[Kappa][r0](1+ \[Chi])])/Sinh[2\[Kappa][r0]]),prec];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Creating Working Precision Interpolator*)
 
 
@@ -132,7 +132,7 @@ Begin["`Private`"];
 	necessaryMinPrecision[r_,l_,m_]:=If[Log10[rISCO]<= Log10[r]<= 4 && 2<=l<= 15 && 1<=m<= 15, precFit[Log10[r],l,m], extrapolator[r,l,m]]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Coordinate Transformation*)
 
 
@@ -171,7 +171,7 @@ DomainMapping[r0_,x_,X_,prec_]:=
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Spectral ODE Solver*)
 
 
@@ -296,7 +296,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 ]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Overall Module*)
 
 
@@ -331,8 +331,9 @@ ReggeWheelerHyperboloidal[s_Integer, l_Integer, m_Integer, n_Integer, orbit_Kerr
 		
 		S = SpinWeightedSpheroidalHarmonicS[s, l, m, 0];
 		(* \[ExponentialE]^(\[ImaginaryI]*4*M*w) factor is to ensure agreement with the overall ReggeWheeler package.*)
-		Z = <| "\[ScriptCapitalI]" -> R\[Sigma][0], "\[ScriptCapitalH]" -> E^(I*4*M*w)*R\[Sigma][1] |>;
 		w = \[Omega][\[CapitalOmega][r0,M],m];
+		Z = <| "\[ScriptCapitalI]" -> R\[Sigma][0], "\[ScriptCapitalH]" -> E^(I*4*M*w)*R\[Sigma][1] |>;
+
 	
 		assoc = <|  "s" -> 2,
 					"l" -> l,
