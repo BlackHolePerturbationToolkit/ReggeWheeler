@@ -142,7 +142,7 @@ DomainMapping[r0_,x_,X_,prec_]:=
 			(* Initial setup *)
 			M = 1;
 			\[Sigma]p =(2M)/r0;
-			\[CapitalSigma] = 1/MantissaExponent[r0][[2]];
+			\[CapitalSigma] = If[r0< 10, 1/2, 1/MantissaExponent[r0][[2]]];
 			
 			\[Sigma]grid1 = {0,\[Sigma]p};
 			\[Sigma]grid2 = {\[Sigma]p,\[CapitalSigma]};
