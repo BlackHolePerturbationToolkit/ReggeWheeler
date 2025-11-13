@@ -8,7 +8,7 @@
 (*For details on solving the Regge-Wheeler-Zerilli equations using hyperboloidal compactification, see arXiv : gr - qc/2202.01794 and arXiv : gr - qc/2411.14976 .*)
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Create Package*)
 
 
@@ -129,7 +129,17 @@ Begin["`Private`"];
 	];
 	
 	(* Defining final function to determine minimum necessary working precision *)
-	necessaryMinPrecision[r_,l_,m_]:=If[Log10[rISCO]<= Log10[r]<= 4 && 2<=l<= 15 && 1<=m<= 15, precFit[Log10[r],l,m], extrapolator[r,l,m]]
+	necessaryMinPrecision[r_,l_,m_]:=Module[
+		{rMin},
+		rMin = 10;
+		If[rMin > r && 2<=l<= 15 && 1<=m<= 15,
+		precFit[Log10[rMin],l,m],
+		If[Log10[rISCO]<= Log10[r]<= 4 && 2<=l<= 15 && 1<=m<= 15, 
+			precFit[Log10[r],l,m], 
+			extrapolator[r,l,m]
+			]
+		]
+];
 
 
 (* ::Section::Closed:: *)
@@ -192,13 +202,13 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		M = 1;
 		\[Theta] = \[Pi]/2;
 		\[Xi] = -I \[Omega][\[CapitalOmega][r0,M],m] 4M;
-		(* Source radial position in hyp coords *)
-		\[Sigma]p = 2/r0;
 		(* Setting working precision *)
 		prec = Precision[r0];
 		If[prec < necessaryMinPrecision[r0,l,m], 
 			prec = necessaryMinPrecision[r0,l,m];
 		];
+		(* Source radial position in hyp coords *)
+		\[Sigma]p = 2/r0;
 		
 		(* Obtaining differentiation matrices *)
 		 DM =-NDSolve`FiniteDifferenceDerivative[Derivative[1],N[Reverse[Xgrid],prec],DifferenceOrder->"Pseudospectral",PeriodicInterpolation->False]["DifferentiationMatrix"];
@@ -282,12 +292,12 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 		ansatzUneval[x_]=Table[ChebyshevT[i,x],{i,0,Length[Xgrid]-1}];
 		sol1[x_]:= cs1 . ansatzUneval[x]/.csNew;
 		sol2[x_] := cs2 . ansatzUneval[x]/.csNew;
-		    sol3[x_] := cs3 . ansatzUneval[x]/.csNew;
+		sol3[x_] := cs3 . ansatzUneval[x]/.csNew;
 		map1New[y_]:= map1[y];
-		    map2New[y_]:= AnMRMap\[Chi]\[Sigma][y];
+		map2New[y_]:= AnMRMap\[Chi]\[Sigma][y];
 		map3New[y_]:= map3[y];
 		sol1New[x_]:= sol1[map1New[x]];
-		    sol2New[x_]:= sol2[map2New[x]];
+		sol2New[x_]:= sol2[map2New[x]];
 		sol3New[x_]:= sol3[map3New[x]];
 		
 		poly1 =  Function[\[Sigma],Which[\[Sigma]<\[Sigma]p,sol1New[\[Sigma]],\[Sigma]p<=\[Sigma]<=\[CapitalSigma],sol2New[\[Sigma]],\[Sigma]>\[CapitalSigma],sol3New[\[Sigma]]]];
@@ -296,7 +306,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 ]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Overall Module*)
 
 
