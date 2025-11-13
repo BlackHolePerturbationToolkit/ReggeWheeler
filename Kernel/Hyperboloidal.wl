@@ -132,7 +132,7 @@ Begin["`Private`"];
 	necessaryMinPrecision[r_,l_,m_]:=If[Log10[rISCO]<= Log10[r]<= 4 && 2<=l<= 15 && 1<=m<= 15, precFit[Log10[r],l,m], extrapolator[r,l,m]]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Coordinate Transformation*)
 
 
@@ -296,7 +296,7 @@ HyperboloidalSolver[r0_, l_, m_, Xgrid_, opts:OptionsPattern[]]:=Module[
 ]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Overall Module*)
 
 

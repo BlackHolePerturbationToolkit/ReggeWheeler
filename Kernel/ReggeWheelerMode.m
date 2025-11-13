@@ -163,7 +163,7 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
 (*ReggeWheelerMode*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Output format*)
 
 
