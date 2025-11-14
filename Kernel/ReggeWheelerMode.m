@@ -4,11 +4,11 @@
 (*ReggeWheelerMode*)
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Create Package*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*BeginPackage*)
 
 
@@ -38,11 +38,16 @@ ReggeWheelerPointParticleMode::usage = "ReggeWheelerPointParticleMode[s, l, m, n
  "ReggeWheelerMode representing a solution to the Regge-Wheeler equation with a point particle source.";
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Error Messages*)
 
 
 ReggeWheelerPointParticleMode::nospin = "Regge-Wheeler perturbations are only for Schwarzschild black holes but spin `1` is not zero."
+ReggeWheelerPointParticleMode::eccentricity = "The hyperboloidal package does not currently accept eccentric orbits. Please set eccentricity ('e') to zero."
+ReggeWheelerPointParticleMode::spin2field = "The hyperboloidal package currently only works for spin = 2 fields, but the fluxes and radial fns. are correct for spin = -2. Please set field spin ('s') to two."
+ReggeWheelerPointParticleMode::inclination = "The hyperboloidal package currently only works for orbits in the equatorial plane. Please set orbital inclination ('x') to one."
+ReggeWheelerPointParticleMode::eccentricitymode = "The hyperboloidal package currently only works for circular orbit modes ('m'). Please set the eccentricity mode ('n') to zero."
+ReggeWheelerPointParticleMode::precision = "Specified working precision is insufficient for accurate results. Automatically setting working precision to minimum required precision."
 
 
 (* ::Subsection::Closed:: *)
@@ -52,7 +57,7 @@ ReggeWheelerPointParticleMode::nospin = "Regge-Wheeler perturbations are only fo
 Begin["`Private`"];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerPointParticleMode*)
 
 
@@ -60,15 +65,68 @@ SyntaxInformation[ReggeWheelerPointParticleMode] =
  {"ArgumentsPattern" -> {_, _, _, _, _, OptionsPattern[]}};
 
 
-Options[ReggeWheelerPointParticleMode] = {};
+Options[ReggeWheelerPointParticleMode] = {Method->Automatic,"DisablePrecisionMessage"->False};
 
 
 ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_KerrGeoOrbitFunction, opts:OptionsPattern[]] /; AllTrue[orbit["Frequencies"], InexactNumberQ] :=
- Module[{source, assoc, radialopts, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z},
+ Module[{source, assoc, radialopts, R, S, \[Omega], \[CapitalOmega]r, \[CapitalOmega]\[Phi], \[CapitalOmega]\[Theta], Z,hypopts},
   If[orbit["a"] != 0,
     Message[ReggeWheelerPointParticleMode::nospin, orbit["a"]];
     Return[$Failed];
   ];
+  
+  
+  Switch[OptionValue["Method"],
+       "Hyperboloidal",	   
+       If[orbit["e"] != 0,
+		    Message[ReggeWheelerPointParticleMode::eccentricity];
+		    Return[$Failed];
+	   ];
+			
+	   If[s != 2,
+		    Message[ReggeWheelerPointParticleMode::spin2field];
+		    Return[$Failed];
+	   ];
+			
+	   If[orbit["Inclination"] != 1,
+		    Message[ReggeWheelerPointParticleMode::inclination];
+		    Return[$Failed];
+	   ];
+			
+	   If[n != 0,
+		    Message[ReggeWheelerPointParticleMode::eccentricitymode];
+		    Return[$Failed];
+	   ];
+	    Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit]],
+       
+       {"Hyperboloidal",OptionsPattern[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal]},
+       If[orbit["e"] != 0,
+		    Message[ReggeWheelerPointParticleMode::eccentricity];
+		    Return[$Failed];
+	   ];
+			
+	   If[s != 2,
+		    Message[ReggeWheelerPointParticleMode::spin2field];
+		    Return[$Failed];
+	   ];
+			
+	   If[orbit["Inclination"] != 1,
+		    Message[ReggeWheelerPointParticleMode::inclination];
+		    Return[$Failed];
+	   ];
+	   
+	   If[Precision[orbit["p"]] < ReggeWheeler`Hyperboloidal`Private`necessaryMinPrecision[orbit["p"],l,m],
+	           Message[ReggeWheelerPointParticleMode::precision];
+	   ];
+	   
+	   If[n != 0,
+		    Message[ReggeWheelerPointParticleMode::eccentricitymode];
+		    Return[$Failed];
+	   ];
+       hypopts = Sequence@@FilterRules[{OptionValue["Method"][[2;;]]}, Options[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal]];
+       Return[ReggeWheeler`Hyperboloidal`Private`ReggeWheelerHyperboloidal[s,l,m,n,orbit,hypopts]]
+       ];
+       
 
   (*{\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = orbit["Frequencies"];*) (*This gives Mino frequencies, need BL frequencies*)
   {\[CapitalOmega]r, \[CapitalOmega]\[Theta], \[CapitalOmega]\[Phi]} = Values[KerrGeoFrequencies[orbit["a"], orbit["p"], orbit["e"], orbit["Inclination"]]];
@@ -93,18 +151,19 @@ ReggeWheelerPointParticleMode[s_Integer, l_Integer, m_Integer, n_Integer, orbit_
              "Type" -> {"PointParticleCircular", "Radius" -> orbit["p"]},
              "RadialFunctions" -> R,
              "AngularFunction" -> S,
-             "Amplitudes" -> Z
+             "Amplitudes" -> Z,
+             "Method" -> R["In"]["Method"]
            |>;
 
   ReggeWheelerMode[assoc]
 ]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerMode*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Output format*)
 
 
@@ -147,21 +206,24 @@ ReggeWheelerMode[assoc_]["AngularMomentumFlux"] := AngularMomentumFlux[ReggeWhee
 ReggeWheelerMode[assoc_][string_] := assoc[string];
 
 
-(* ::Section::Closed:: *)
+Keys[m_ReggeWheelerMode] ^:= Keys[m[[1]]]
+
+
+(* ::Section:: *)
 (*Fluxes*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Energy Flux*)
 
 
 EnergyFlux[mode_ReggeWheelerMode] :=
- Module[{l, m, \[Omega], Z, FluxInf, FluxH},
+ Module[{l, m, \[Omega], Z, FluxInf, FluxH,\[Xi]},
   l = mode["l"];
   m = mode["m"];
   \[Omega] = mode["\[Omega]"];
   Z = mode["Amplitudes"];
-
+  
   FluxInf = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[\[Omega]*Z["\[ScriptCapitalI]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[\[Omega]*Z["\[ScriptCapitalI]"]]^2/(16*Pi)];
   FluxH   = If[EvenQ[l+m], (l-1)*(l+2)/(l*(l+1))*Abs[\[Omega]*Z["\[ScriptCapitalH]"]]^2/(4*Pi), (l*(l+1))/((l-1)*(l+2))*Abs[\[Omega]*Z["\[ScriptCapitalH]"]]^2/(16*Pi)];
   
@@ -169,12 +231,12 @@ EnergyFlux[mode_ReggeWheelerMode] :=
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Angular Momentum Flux*)
 
 
 AngularMomentumFlux[mode_ReggeWheelerMode] :=
- Module[{l, m, \[Omega], Z, FluxInf, FluxH},
+ Module[{l, m, \[Omega], Z, FluxInf, FluxH,\[Xi]},
   l = mode["l"];
   m = mode["m"];
   \[Omega] = mode["\[Omega]"];

@@ -10,6 +10,7 @@ Block[{MST`$MasterFunction = "ReggeWheeler"},
 ];
 
 Get["ReggeWheeler`NumericalIntegration`"];
+Get["ReggeWheeler`Hyperboloidal`"];
 Get["ReggeWheeler`ReggeWheelerRadial`"];
 Get["ReggeWheeler`ReggeWheelerSource`"];
 Get["ReggeWheeler`ReggeWheelerMode`"];

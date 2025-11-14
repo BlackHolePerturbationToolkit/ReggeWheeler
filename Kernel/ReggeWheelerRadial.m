@@ -59,7 +59,7 @@ ReggeWheelerRadialFunction::potm = "Method `1` does not currently support potent
 Begin["`Private`"];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -269,7 +269,7 @@ ReggeWheelerRadialStatic[s_Integer, l_Integer, \[Omega]_, BCs_, pot_] :=
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*ReggeWheelerRadial*)
 
 
@@ -287,7 +287,7 @@ Options[ReggeWheelerRadial] = {
 };
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Static modes*)
 
 
@@ -341,6 +341,11 @@ ReggeWheelerRadial[s_Integer, l_Integer, \[Omega]_?InexactNumberQ, opts:OptionsP
 
   (* Potential *)
   pot = OptionValue["Potential"];
+  
+  (* Don't use ReggeWheelerRadial if Method = Hyperboloidal *)
+  If[OptionValue["Method"] == "Hyperboloidal",
+     Return[Null];
+  ];
   
   (*Zerilli Potential only valid for Abs[s]=2*)
    If[MatchQ[pot, "Zerilli"]&&Abs[s]!=2, 
